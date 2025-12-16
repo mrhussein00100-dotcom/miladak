@@ -71,10 +71,15 @@ export async function generateArticle(
   request: GeminiGenerationRequest
 ): Promise<GeminiGenerationResponse> {
   const startTime = Date.now();
-  const apiKey = process.env.GEMINI_API_KEY;
 
-  if (!apiKey) {
-    throw new Error('GEMINI_API_KEY غير موجود في متغيرات البيئة');
+  let apiKey: string;
+  try {
+    apiKey = await import('@/lib/config/api-keys').then((module) =>
+      module.getApiKey('gemini')
+    );
+  } catch (error: any) {
+    console.error('❌ Gemini: خطأ في الحصول على مفتاح API:', error.message);
+    throw new Error(error.message);
   }
 
   const wordCount = getWordCount(request.length);
@@ -237,10 +242,14 @@ ${keywordsText}
 export async function rewriteContent(
   request: GeminiRewriteRequest
 ): Promise<GeminiRewriteResponse> {
-  const apiKey = process.env.GEMINI_API_KEY;
-
-  if (!apiKey) {
-    throw new Error('GEMINI_API_KEY غير موجود في متغيرات البيئة');
+  let apiKey: string;
+  try {
+    apiKey = await import('@/lib/config/api-keys').then((module) =>
+      module.getApiKey('gemini')
+    );
+  } catch (error: any) {
+    console.error('❌ Gemini: خطأ في الحصول على مفتاح API:', error.message);
+    throw new Error(error.message);
   }
 
   const styleDesc = getStyleDescription(request.style);
@@ -337,10 +346,14 @@ export async function generateTitles(
   topic: string,
   count: number = 10
 ): Promise<string[]> {
-  const apiKey = process.env.GEMINI_API_KEY;
-
-  if (!apiKey) {
-    throw new Error('GEMINI_API_KEY غير موجود في متغيرات البيئة');
+  let apiKey: string;
+  try {
+    apiKey = await import('@/lib/config/api-keys').then((module) =>
+      module.getApiKey('gemini')
+    );
+  } catch (error: any) {
+    console.error('❌ Gemini: خطأ في الحصول على مفتاح API:', error.message);
+    throw new Error(error.message);
   }
 
   const prompt = `اقترح ${count} عناوين جذابة ومحسنة للسيو باللغة العربية لمقال عن: "${topic}"
@@ -399,10 +412,14 @@ export async function generateMeta(content: string): Promise<{
   metaDescription: string;
   keywords: string[];
 }> {
-  const apiKey = process.env.GEMINI_API_KEY;
-
-  if (!apiKey) {
-    throw new Error('GEMINI_API_KEY غير موجود في متغيرات البيئة');
+  let apiKey: string;
+  try {
+    apiKey = await import('@/lib/config/api-keys').then((module) =>
+      module.getApiKey('gemini')
+    );
+  } catch (error: any) {
+    console.error('❌ Gemini: خطأ في الحصول على مفتاح API:', error.message);
+    throw new Error(error.message);
   }
 
   const prompt = `حلل المحتوى التالي واستخرج منه:
@@ -463,11 +480,14 @@ ${content.substring(0, 2000)}
 
 // إعادة صياغة عنوان فقط (قصير ومباشر)
 export async function rewriteTitle(title: string): Promise<string> {
-  const apiKey = process.env.GEMINI_API_KEY;
-
-  if (!apiKey) {
-    console.error('❌ GEMINI_API_KEY غير موجود');
-    throw new Error('GEMINI_API_KEY غير موجود في متغيرات البيئة');
+  let apiKey: string;
+  try {
+    apiKey = await import('@/lib/config/api-keys').then((module) =>
+      module.getApiKey('gemini')
+    );
+  } catch (error: any) {
+    console.error('❌ Gemini: خطأ في الحصول على مفتاح API:', error.message);
+    throw new Error(error.message);
   }
 
   console.log('🔄 محاولة إعادة صياغة العنوان باستخدام Gemini...');

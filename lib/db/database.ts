@@ -1,144 +1,139 @@
-import Database from 'better-sqlite3';
-import path from 'path';
-
-// Database singleton
-let db: Database.Database | null = null;
-
 /**
- * Get raw database connection with optimized settings
+ * Database Interface - Updated to use Unified Connection System
+ * واجهة قاعدة البيانات - محدثة لاستخدام النظام الموحد
  */
-export function getRawDatabase(): Database.Database {
-  if (db) return db;
 
-  const dbPath =
-    process.env.DATABASE_URL || path.join(process.cwd(), 'database.sqlite');
+import unifiedDb from './unified-connection';
 
-  db = new Database(dbPath);
+// تهيئة قاعدة البيانات عند أول استخدام
+let isInitialized = false;
 
-  // Enable WAL mode for better performance
-  db.pragma('journal_mode = WAL');
-
-  // Set cache size (negative = KB, positive = pages)
-  db.pragma('cache_size = -64000'); // 64MB cache
-
-  // Enable foreign keys
-  db.pragma('foreign_keys = ON');
-
-  // Synchronous mode for better performance with WAL
-  db.pragma('synchronous = NORMAL');
-
-  // Memory-mapped I/O
-  db.pragma('mmap_size = 268435456'); // 256MB
-
-  // Temp store in memory
-  db.pragma('temp_store = MEMORY');
-
-  return db;
+async function ensureInitialized() {
+  if (!isInitialized) {
+    await unifiedDb.initialize();
+    isInitialized = true;
+  }
 }
 
 /**
- * Wrapper that provides async-like interface for better-sqlite3
+ * Wrapper that provides async interface
  */
 interface DatabaseWrapper {
   get: <T = unknown>(sql: string, params?: unknown[]) => Promise<T | undefined>;
   all: <T = unknown>(sql: string, params?: unknown[]) => Promise<T[]>;
-  run: (sql: string, params?: unknown[]) => Promise<Database.RunResult>;
+  run: (
+    sql: string,
+    params?: unknown[]
+  ) => Promise<{ changes: number; lastInsertRowid: number }>;
 }
 
 /**
- * Get database connection with async-like wrapper
+ * Get database connection with async wrapper
  */
 export async function getDatabase(): Promise<DatabaseWrapper> {
-  const rawDb = getRawDatabase();
+  await ensureInitialized();
 
   return {
     get: async <T = unknown>(
       sql: string,
       params: unknown[] = []
     ): Promise<T | undefined> => {
-      const stmt = rawDb.prepare(sql);
-      return stmt.get(...params) as T | undefined;
+      const result = await unifiedDb.queryOne<T>(sql, params);
+      return result || undefined;
     },
     all: async <T = unknown>(
       sql: string,
       params: unknown[] = []
     ): Promise<T[]> => {
-      const stmt = rawDb.prepare(sql);
-      return stmt.all(...params) as T[];
+      return await unifiedDb.query<T>(sql, params);
     },
     run: async (
       sql: string,
       params: unknown[] = []
-    ): Promise<Database.RunResult> => {
-      const stmt = rawDb.prepare(sql);
-      return stmt.run(...params);
+    ): Promise<{ changes: number; lastInsertRowid: number }> => {
+      const result = await unifiedDb.execute(sql, params);
+      return {
+        changes: result.changes || result.rowCount || 0,
+        lastInsertRowid: result.lastInsertRowid || 0,
+      };
     },
   };
 }
 
 /**
+ * Get raw database connection
+ * @deprecated Use the new unified system instead
+ */
+export function getRawDatabase(): any {
+  console.warn(
+    'getRawDatabase() is deprecated. Use the new async functions instead.'
+  );
+  throw new Error(
+    'getRawDatabase is no longer supported. Use async database functions.'
+  );
+}
+
+/**
  * Close database connection
  */
-export function closeDatabase(): void {
-  if (db) {
-    db.close();
-    db = null;
-  }
+export async function closeDatabase(): Promise<void> {
+  await unifiedDb.close();
+  isInitialized = false;
 }
 
 /**
  * Execute a query with parameters
  */
-export function query<T>(sql: string, params: unknown[] = []): T[] {
-  const database = getRawDatabase();
-  const stmt = database.prepare(sql);
-  return stmt.all(...params) as T[];
+export async function query<T>(
+  sql: string,
+  params: unknown[] = []
+): Promise<T[]> {
+  await ensureInitialized();
+  return await unifiedDb.query<T>(sql, params);
 }
 
 /**
  * Execute a single row query
  */
-export function queryOne<T>(
+export async function queryOne<T>(
   sql: string,
   params: unknown[] = []
-): T | undefined {
-  const database = getRawDatabase();
-  const stmt = database.prepare(sql);
-  return stmt.get(...params) as T | undefined;
+): Promise<T | undefined> {
+  await ensureInitialized();
+  const result = await unifiedDb.queryOne<T>(sql, params);
+  return result || undefined;
 }
 
 /**
  * Execute an insert/update/delete
  */
-export function execute(
+export async function execute(
   sql: string,
   params: unknown[] = []
-): Database.RunResult {
-  const database = getRawDatabase();
-  const stmt = database.prepare(sql);
-  return stmt.run(...params);
+): Promise<{ changes: number; lastInsertRowid: number }> {
+  await ensureInitialized();
+  const result = await unifiedDb.execute(sql, params);
+  return {
+    changes: result.changes || result.rowCount || 0,
+    lastInsertRowid: result.lastInsertRowid || 0,
+  };
 }
 
 /**
  * Execute multiple statements in a transaction
  */
-export function transaction<T>(fn: () => T): T {
-  const database = getRawDatabase();
-  return database.transaction(fn)();
+export async function transaction<T>(fn: () => Promise<T>): Promise<T> {
+  await ensureInitialized();
+  return await unifiedDb.transaction(fn);
 }
 
 /**
  * Check if database is initialized
  */
-export function isDatabaseInitialized(): boolean {
+export async function isDatabaseInitialized(): Promise<boolean> {
   try {
-    const database = getRawDatabase();
-    const result = database
-      .prepare(
-        "SELECT name FROM sqlite_master WHERE type='table' AND name='tools'"
-      )
-      .get();
-    return !!result;
+    await ensureInitialized();
+    return await unifiedDb.isConnected();
   } catch {
     return false;
   }

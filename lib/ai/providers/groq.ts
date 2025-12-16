@@ -50,7 +50,16 @@ export async function generateArticle(
   request: GroqGenerationRequest
 ): Promise<GroqGenerationResponse> {
   const startTime = Date.now();
-  const apiKey = process.env.GROQ_API_KEY;
+  let apiKey: string;
+
+  try {
+    apiKey = await import('@/lib/config/api-keys').then((module) =>
+      module.getApiKey('groq')
+    );
+  } catch (error: any) {
+    console.error('❌ Groq: خطأ في الحصول على مفتاح API:', error.message);
+    throw new Error(error.message);
+  }
 
   console.log('🚀 Groq: بدء التوليد...');
   console.log('📝 Groq: الموضوع:', request.topic);
@@ -59,11 +68,6 @@ export async function generateArticle(
     '🔑 Groq: API Key:',
     apiKey ? `موجود (${apiKey.substring(0, 10)}...)` : '❌ غير موجود'
   );
-
-  if (!apiKey) {
-    console.error('❌ Groq: مفتاح API غير موجود!');
-    throw new Error('GROQ_API_KEY غير موجود في متغيرات البيئة');
-  }
 
   const wordCount = getWordCount(request.length);
   const styleDesc = getStyleDescription(request.style || 'formal');
@@ -221,10 +225,15 @@ export async function rewriteContent(
   wordCount: number;
   provider: 'groq';
 }> {
-  const apiKey = process.env.GROQ_API_KEY;
+  let apiKey: string;
 
-  if (!apiKey) {
-    throw new Error('GROQ_API_KEY غير موجود');
+  try {
+    apiKey = await import('@/lib/config/api-keys').then((module) =>
+      module.getApiKey('groq')
+    );
+  } catch (error: any) {
+    console.error('❌ Groq: خطأ في الحصول على مفتاح API:', error.message);
+    throw new Error(error.message);
   }
 
   const styleDesc = getStyleDescription(style);

@@ -1,235 +1,265 @@
--- Miladak V2 PostgreSQL Schema
--- للاستخدام مع Vercel Postgres
+-- Miladak V2 PostgreSQL Database Schema
+-- تاريخ الإنشاء: ديسمبر 2024
 
--- Years and Historical Data
-CREATE TABLE IF NOT EXISTS years (
-  id SERIAL PRIMARY KEY,
-  year INTEGER UNIQUE NOT NULL,
-  facts TEXT, -- JSON array
-  world_stats TEXT, -- JSON object
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+-- إنشاء قاعدة البيانات (إذا لم تكن موجودة)
+-- CREATE DATABASE miladak_v2;
 
--- Daily Events
-CREATE TABLE IF NOT EXISTS daily_events (
-  id SERIAL PRIMARY KEY,
-  day INTEGER NOT NULL,
-  month INTEGER NOT NULL,
-  year INTEGER,
-  title TEXT NOT NULL,
-  description TEXT,
-  category TEXT DEFAULT 'general',
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+-- تفعيل الامتدادات المطلوبة
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- Famous Birthdays
-CREATE TABLE IF NOT EXISTS daily_birthdays (
-  id SERIAL PRIMARY KEY,
-  day INTEGER NOT NULL,
-  month INTEGER NOT NULL,
-  birth_year INTEGER NOT NULL,
-  name TEXT NOT NULL,
-  profession TEXT NOT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+-- ===========================================
+-- جداول الأدوات (Tools)
+-- ===========================================
 
--- Chinese Zodiac
-CREATE TABLE IF NOT EXISTS chinese_zodiac (
-  id SERIAL PRIMARY KEY,
-  year INTEGER UNIQUE NOT NULL,
-  name TEXT NOT NULL,
-  name_ar TEXT NOT NULL,
-  description TEXT
-);
-
--- Birthstones
-CREATE TABLE IF NOT EXISTS birthstones (
-  id SERIAL PRIMARY KEY,
-  month INTEGER UNIQUE NOT NULL,
-  stone_name TEXT NOT NULL,
-  stone_name_ar TEXT NOT NULL,
-  description TEXT
-);
-
--- Birth Flowers
-CREATE TABLE IF NOT EXISTS birth_flowers (
-  id SERIAL PRIMARY KEY,
-  month INTEGER UNIQUE NOT NULL,
-  flower_name TEXT NOT NULL,
-  flower_name_ar TEXT NOT NULL,
-  description TEXT
-);
-
--- Article Categories
-CREATE TABLE IF NOT EXISTS categories (
-  id SERIAL PRIMARY KEY,
-  name TEXT NOT NULL,
-  slug TEXT UNIQUE NOT NULL,
-  description TEXT,
-  color TEXT DEFAULT '#8B5CF6',
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- Articles
-CREATE TABLE IF NOT EXISTS articles (
-  id SERIAL PRIMARY KEY,
-  title TEXT NOT NULL,
-  slug TEXT UNIQUE NOT NULL,
-  excerpt TEXT,
-  content TEXT NOT NULL,
-  category_id INTEGER REFERENCES categories(id),
-  image TEXT,
-  featured_image TEXT,
-  author TEXT DEFAULT 'فريق ميلادك',
-  read_time INTEGER DEFAULT 5,
-  views INTEGER DEFAULT 0,
-  published INTEGER DEFAULT 1,
-  featured INTEGER DEFAULT 0,
-  meta_description TEXT,
-  meta_keywords TEXT,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- Tool Categories
+-- جدول فئات الأدوات
 CREATE TABLE IF NOT EXISTS tool_categories (
-  id SERIAL PRIMARY KEY,
-  name TEXT NOT NULL,
-  slug TEXT UNIQUE NOT NULL,
-  title TEXT NOT NULL,
-  icon TEXT,
-  sort_order INTEGER DEFAULT 0
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    slug VARCHAR(255) UNIQUE NOT NULL,
+    title VARCHAR(255),
+    description TEXT,
+    icon VARCHAR(100),
+    sort_order INTEGER DEFAULT 0,
+    active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Tools
+-- جدول الأدوات
 CREATE TABLE IF NOT EXISTS tools (
-  id SERIAL PRIMARY KEY,
-  slug TEXT UNIQUE NOT NULL,
-  title TEXT NOT NULL,
-  description TEXT,
-  icon TEXT,
-  category_id INTEGER REFERENCES tool_categories(id),
-  href TEXT NOT NULL,
-  featured INTEGER DEFAULT 0,
-  active INTEGER DEFAULT 1,
-  sort_order INTEGER DEFAULT 0,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    id SERIAL PRIMARY KEY,
+    slug VARCHAR(255) UNIQUE NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    icon VARCHAR(100),
+    category_id INTEGER REFERENCES tool_categories(id) ON DELETE SET NULL,
+    href VARCHAR(500) NOT NULL,
+    featured BOOLEAN DEFAULT false,
+    active BOOLEAN DEFAULT true,
+    sort_order INTEGER DEFAULT 0,
+    views INTEGER DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Tool Keywords
-CREATE TABLE IF NOT EXISTS tool_keywords (
-  id SERIAL PRIMARY KEY,
-  tool_slug TEXT NOT NULL,
-  keyword TEXT NOT NULL,
-  search_volume INTEGER DEFAULT 0,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+-- ===========================================
+-- جداول المقالات (Articles)
+-- ===========================================
+
+-- جدول فئات المقالات
+CREATE TABLE IF NOT EXISTS article_categories (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    slug VARCHAR(255) UNIQUE NOT NULL,
+    description TEXT,
+    color VARCHAR(7), -- HEX color code
+    icon VARCHAR(100),
+    sort_order INTEGER DEFAULT 0,
+    active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Admin Users
+-- جدول المقالات
+CREATE TABLE IF NOT EXISTS articles (
+    id SERIAL PRIMARY KEY,
+    slug VARCHAR(255) UNIQUE NOT NULL,
+    title VARCHAR(500) NOT NULL,
+    excerpt TEXT,
+    content TEXT,
+    category_id INTEGER REFERENCES article_categories(id) ON DELETE SET NULL,
+    image VARCHAR(500),
+    featured_image VARCHAR(500),
+    author VARCHAR(255),
+    read_time INTEGER DEFAULT 5,
+    views INTEGER DEFAULT 0,
+    tags TEXT, -- JSON array as text
+    published BOOLEAN DEFAULT false,
+    featured BOOLEAN DEFAULT false,
+    meta_description TEXT,
+    meta_keywords TEXT,
+    focus_keyword VARCHAR(255),
+    og_image VARCHAR(500),
+    ai_provider VARCHAR(100),
+    publish_date TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ===========================================
+-- جداول المستخدمين والإدارة
+-- ===========================================
+
+-- جدول المستخدمين الإداريين
 CREATE TABLE IF NOT EXISTS admin_users (
-  id SERIAL PRIMARY KEY,
-  username TEXT UNIQUE NOT NULL,
-  password_hash TEXT NOT NULL,
-  password_salt TEXT NOT NULL,
-  role TEXT DEFAULT 'admin',
-  active INTEGER DEFAULT 1,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(100) UNIQUE NOT NULL,
+    email VARCHAR(255) UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    password_salt VARCHAR(255) NOT NULL,
+    role VARCHAR(50) DEFAULT 'editor',
+    active BOOLEAN DEFAULT true,
+    last_login TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Site Settings (JSON storage)
-CREATE TABLE IF NOT EXISTS settings (
-  id SERIAL PRIMARY KEY,
-  key TEXT UNIQUE NOT NULL,
-  value TEXT NOT NULL, -- JSON
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+-- ===========================================
+-- جداول البيانات الإضافية
+-- ===========================================
+
+-- جدول أحجار الميلاد
+CREATE TABLE IF NOT EXISTS birthstones (
+    id SERIAL PRIMARY KEY,
+    month INTEGER NOT NULL CHECK (month >= 1 AND month <= 12),
+    stone_name VARCHAR(255) NOT NULL,
+    stone_name_ar VARCHAR(255),
+    description TEXT,
+    properties TEXT,
+    color VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Lucky Colors
-CREATE TABLE IF NOT EXISTS lucky_colors (
-  id SERIAL PRIMARY KEY,
-  month INTEGER UNIQUE NOT NULL,
-  color TEXT NOT NULL,
-  hex_code TEXT,
-  meaning TEXT,
-  tips TEXT
+-- جدول زهور الميلاد
+CREATE TABLE IF NOT EXISTS birth_flowers (
+    id SERIAL PRIMARY KEY,
+    month INTEGER NOT NULL CHECK (month >= 1 AND month <= 12),
+    flower_name VARCHAR(255) NOT NULL,
+    flower_name_ar VARCHAR(255),
+    description TEXT,
+    meaning TEXT,
+    color VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Lucky Numbers
-CREATE TABLE IF NOT EXISTS lucky_numbers (
-  id SERIAL PRIMARY KEY,
-  zodiac_animal TEXT NOT NULL,
-  numbers TEXT NOT NULL, -- JSON array
-  colors TEXT, -- JSON array
-  description TEXT
-);
-
--- Historical Events
-CREATE TABLE IF NOT EXISTS historical_events (
-  id SERIAL PRIMARY KEY,
-  day INTEGER NOT NULL,
-  month INTEGER NOT NULL,
-  year INTEGER NOT NULL,
-  title TEXT NOT NULL,
-  description TEXT,
-  category TEXT DEFAULT 'general',
-  importance INTEGER DEFAULT 1
-);
-
--- Celebrities
+-- جدول المشاهير
 CREATE TABLE IF NOT EXISTS celebrities (
-  id SERIAL PRIMARY KEY,
-  name TEXT NOT NULL,
-  birth_day INTEGER NOT NULL,
-  birth_month INTEGER NOT NULL,
-  birth_year INTEGER,
-  profession TEXT,
-  nationality TEXT,
-  image_url TEXT,
-  bio TEXT
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    name_ar VARCHAR(255),
+    profession VARCHAR(255),
+    profession_ar VARCHAR(255),
+    birth_date DATE NOT NULL,
+    birth_year INTEGER,
+    description TEXT,
+    image VARCHAR(500),
+    nationality VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Rewrite History
+-- جدول الأحداث التاريخية
+CREATE TABLE IF NOT EXISTS historical_events (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(500) NOT NULL,
+    title_ar VARCHAR(500),
+    description TEXT,
+    event_date DATE NOT NULL,
+    event_year INTEGER,
+    category VARCHAR(100),
+    importance_level INTEGER DEFAULT 1 CHECK (importance_level >= 1 AND importance_level <= 5),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ===========================================
+-- جداول الكلمات المفتاحية وSEO
+-- ===========================================
+
+-- جدول الكلمات المفتاحية للصفحات
+CREATE TABLE IF NOT EXISTS page_keywords (
+    id SERIAL PRIMARY KEY,
+    page_type VARCHAR(100) NOT NULL, -- 'tool', 'article', 'category', etc.
+    page_slug VARCHAR(255) NOT NULL,
+    page_title VARCHAR(500),
+    keywords TEXT, -- comma-separated keywords
+    meta_description TEXT,
+    focus_keyword VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(page_type, page_slug)
+);
+
+-- ===========================================
+-- جداول الذكاء الاصطناعي
+-- ===========================================
+
+-- جدول سجل إعادة الصياغة
 CREATE TABLE IF NOT EXISTS rewrite_history (
-  id SERIAL PRIMARY KEY,
-  original_url TEXT,
-  original_content TEXT,
-  rewritten_content TEXT,
-  model_used TEXT,
-  quality_score REAL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    id SERIAL PRIMARY KEY,
+    original_url VARCHAR(1000),
+    original_title VARCHAR(500),
+    original_content TEXT,
+    rewritten_title VARCHAR(500),
+    rewritten_content TEXT,
+    ai_provider VARCHAR(100),
+    quality_score DECIMAL(3,2),
+    processing_time INTEGER, -- milliseconds
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Auto Publish Settings
-CREATE TABLE IF NOT EXISTS auto_publish_settings (
-  id SERIAL PRIMARY KEY,
-  enabled INTEGER DEFAULT 0,
-  interval_hours INTEGER DEFAULT 24,
-  max_articles_per_day INTEGER DEFAULT 5,
-  last_run TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+-- جدول قوالب المحتوى
+CREATE TABLE IF NOT EXISTS content_templates (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    category VARCHAR(100),
+    template_content TEXT NOT NULL,
+    variables JSONB, -- template variables
+    active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Auto Publish Logs
-CREATE TABLE IF NOT EXISTS auto_publish_logs (
-  id SERIAL PRIMARY KEY,
-  article_id INTEGER,
-  status TEXT,
-  message TEXT,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+-- ===========================================
+-- الفهارس (Indexes)
+-- ===========================================
 
--- Indexes for performance
-CREATE INDEX IF NOT EXISTS idx_daily_events_date ON daily_events(month, day);
-CREATE INDEX IF NOT EXISTS idx_daily_birthdays_date ON daily_birthdays(month, day);
+-- فهارس الأدوات
+CREATE INDEX IF NOT EXISTS idx_tools_slug ON tools(slug);
+CREATE INDEX IF NOT EXISTS idx_tools_category ON tools(category_id);
+CREATE INDEX IF NOT EXISTS idx_tools_featured ON tools(featured);
+CREATE INDEX IF NOT EXISTS idx_tools_active ON tools(active);
+
+-- فهارس المقالات
 CREATE INDEX IF NOT EXISTS idx_articles_slug ON articles(slug);
 CREATE INDEX IF NOT EXISTS idx_articles_category ON articles(category_id);
 CREATE INDEX IF NOT EXISTS idx_articles_published ON articles(published);
 CREATE INDEX IF NOT EXISTS idx_articles_featured ON articles(featured);
-CREATE INDEX IF NOT EXISTS idx_tools_slug ON tools(slug);
-CREATE INDEX IF NOT EXISTS idx_tools_category ON tools(category_id);
-CREATE INDEX IF NOT EXISTS idx_tools_active ON tools(active);
-CREATE INDEX IF NOT EXISTS idx_tools_featured ON tools(featured);
-CREATE INDEX IF NOT EXISTS idx_chinese_zodiac_year ON chinese_zodiac(year);
-CREATE INDEX IF NOT EXISTS idx_tool_keywords_slug ON tool_keywords(tool_slug);
-CREATE INDEX IF NOT EXISTS idx_historical_events_date ON historical_events(month, day);
-CREATE INDEX IF NOT EXISTS idx_celebrities_birth ON celebrities(birth_month, birth_day);
+CREATE INDEX IF NOT EXISTS idx_articles_publish_date ON articles(publish_date);
+
+-- فهارس البيانات الإضافية
+CREATE INDEX IF NOT EXISTS idx_celebrities_birth_date ON celebrities(birth_date);
+CREATE INDEX IF NOT EXISTS idx_historical_events_date ON historical_events(event_date);
+CREATE INDEX IF NOT EXISTS idx_birthstones_month ON birthstones(month);
+CREATE INDEX IF NOT EXISTS idx_birth_flowers_month ON birth_flowers(month);
+
+-- فهارس الكلمات المفتاحية
+CREATE INDEX IF NOT EXISTS idx_page_keywords_type_slug ON page_keywords(page_type, page_slug);
+
+-- ===========================================
+-- المشغلات (Triggers) لتحديث updated_at
+-- ===========================================
+
+-- دالة تحديث updated_at
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+-- مشغلات التحديث
+CREATE TRIGGER update_tools_updated_at BEFORE UPDATE ON tools FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_tool_categories_updated_at BEFORE UPDATE ON tool_categories FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_articles_updated_at BEFORE UPDATE ON articles FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_article_categories_updated_at BEFORE UPDATE ON article_categories FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_admin_users_updated_at BEFORE UPDATE ON admin_users FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_birthstones_updated_at BEFORE UPDATE ON birthstones FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_birth_flowers_updated_at BEFORE UPDATE ON birth_flowers FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_celebrities_updated_at BEFORE UPDATE ON celebrities FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_historical_events_updated_at BEFORE UPDATE ON historical_events FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_page_keywords_updated_at BEFORE UPDATE ON page_keywords FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_content_templates_updated_at BEFORE UPDATE ON content_templates FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();

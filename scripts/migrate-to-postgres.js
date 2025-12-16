@@ -1,168 +1,288 @@
+#!/usr/bin/env node
+
 /**
- * سكريبت ترحيل البيانات من SQLite إلى Vercel Postgres
- *
- * الاستخدام:
- * 1. أنشئ قاعدة بيانات Postgres في Vercel Dashboard
- * 2. انسخ متغيرات البيئة إلى .env.local
- * 3. شغل: node scripts/migrate-to-postgres.js
+ * نقل البيانات من SQLite إلى PostgreSQL
+ * يقوم بقراءة البيانات من قاعدة البيانات المحلية ونقلها إلى PostgreSQL
  */
 
 const Database = require('better-sqlite3');
-const { sql } = require('@vercel/postgres');
+const { Pool } = require('pg');
 const path = require('path');
 const fs = require('fs');
 
-// مسار قاعدة البيانات المحلية
-const SQLITE_PATH = path.join(process.cwd(), 'database.sqlite');
+console.log('🚀 بدء نقل البيانات من SQLite إلى PostgreSQL...\n');
 
-// الجداول المراد ترحيلها
-const TABLES_TO_MIGRATE = [
-  'categories',
-  'articles',
-  'tool_categories',
-  'tools',
-  'tool_keywords',
-  'admin_users',
-  'settings',
-  'lucky_colors',
-  'lucky_numbers',
-  'historical_events',
-  'celebrities',
-  'chinese_zodiac',
-  'birthstones',
-  'birth_flowers',
-  'daily_events',
-  'daily_birthdays',
-  'years',
-  'rewrite_history',
-  'auto_publish_settings',
-  'auto_publish_logs',
-];
+// إعدادات قاعدة البيانات
+const sqlitePath = path.join(process.cwd(), 'database.sqlite');
+const postgresUrl = process.env.POSTGRES_URL || process.env.DATABASE_URL;
 
-async function createTables() {
-  console.log('📊 إنشاء الجداول في Postgres...');
-
-  const schemaPath = path.join(process.cwd(), 'lib/db/postgres-schema.sql');
-  const schema = fs.readFileSync(schemaPath, 'utf-8');
-
-  // تقسيم الـ schema إلى أوامر منفصلة
-  const commands = schema
-    .split(';')
-    .map((cmd) => cmd.trim())
-    .filter((cmd) => cmd.length > 0);
-
-  for (const command of commands) {
-    try {
-      await sql.query(command);
-    } catch (error) {
-      // تجاهل أخطاء "already exists"
-      if (!error.message.includes('already exists')) {
-        console.error('خطأ في إنشاء الجدول:', error.message);
-      }
-    }
-  }
-
-  console.log('✅ تم إنشاء الجداول');
+if (!postgresUrl) {
+  console.error('❌ متغير POSTGRES_URL غير موجود في البيئة');
+  process.exit(1);
 }
 
-async function migrateTable(tableName, sqliteDb) {
-  console.log(`📦 ترحيل جدول: ${tableName}...`);
+if (!fs.existsSync(sqlitePath)) {
+  console.error('❌ ملف SQLite غير موجود:', sqlitePath);
+  process.exit(1);
+}
+
+// إنشاء الاتصالات
+const sqlite = new Database(sqlitePath, { readonly: true });
+const postgres = new Pool({
+  connectionString: postgresUrl,
+  ssl:
+    process.env.NODE_ENV === 'production'
+      ? { rejectUnauthorized: false }
+      : false,
+});
+
+// خريطة تحويل الجداول
+const tableMapping = {
+  tool_categories: {
+    columns: [
+      'id',
+      'name',
+      'slug',
+      'title',
+      'icon',
+      'sort_order',
+      'created_at',
+      'updated_at',
+    ],
+    sequence: 'tool_categories_id_seq',
+  },
+  tools: {
+    columns: [
+      'id',
+      'slug',
+      'title',
+      'description',
+      'icon',
+      'category_id',
+      'href',
+      'featured',
+      'active',
+      'sort_order',
+      'views',
+      'created_at',
+      'updated_at',
+    ],
+    sequence: 'tools_id_seq',
+  },
+  article_categories: {
+    columns: [
+      'id',
+      'name',
+      'slug',
+      'description',
+      'color',
+      'icon',
+      'sort_order',
+      'created_at',
+      'updated_at',
+    ],
+    sequence: 'article_categories_id_seq',
+  },
+  articles: {
+    columns: [
+      'id',
+      'slug',
+      'title',
+      'excerpt',
+      'content',
+      'category_id',
+      'image',
+      'featured_image',
+      'author',
+      'read_time',
+      'views',
+      'tags',
+      'published',
+      'featured',
+      'meta_description',
+      'meta_keywords',
+      'focus_keyword',
+      'og_image',
+      'ai_provider',
+      'publish_date',
+      'created_at',
+      'updated_at',
+    ],
+    sequence: 'articles_id_seq',
+  },
+  admin_users: {
+    columns: [
+      'id',
+      'username',
+      'password_hash',
+      'password_salt',
+      'role',
+      'active',
+      'created_at',
+      'updated_at',
+    ],
+    sequence: 'admin_users_id_seq',
+  },
+  birthstones: {
+    columns: [
+      'id',
+      'month',
+      'stone_name',
+      'stone_name_ar',
+      'description',
+      'created_at',
+      'updated_at',
+    ],
+    sequence: 'birthstones_id_seq',
+  },
+  birth_flowers: {
+    columns: [
+      'id',
+      'month',
+      'flower_name',
+      'flower_name_ar',
+      'description',
+      'created_at',
+      'updated_at',
+    ],
+    sequence: 'birth_flowers_id_seq',
+  },
+  celebrities: {
+    columns: [
+      'id',
+      'name',
+      'profession',
+      'birth_date',
+      'birth_year',
+      'description',
+      'created_at',
+      'updated_at',
+    ],
+    sequence: 'celebrities_id_seq',
+  },
+  historical_events: {
+    columns: [
+      'id',
+      'title',
+      'description',
+      'event_date',
+      'category',
+      'created_at',
+      'updated_at',
+    ],
+    sequence: 'historical_events_id_seq',
+  },
+  page_keywords: {
+    columns: [
+      'id',
+      'page_type',
+      'page_slug',
+      'page_title',
+      'keywords',
+      'meta_description',
+      'created_at',
+      'updated_at',
+    ],
+    sequence: 'page_keywords_id_seq',
+  },
+};
+
+async function migrateData() {
+  const client = await postgres.connect();
 
   try {
-    // جلب البيانات من SQLite
-    const rows = sqliteDb.prepare(`SELECT * FROM ${tableName}`).all();
+    console.log('✅ اتصال PostgreSQL نجح\n');
 
-    if (rows.length === 0) {
-      console.log(`   ⏭️ الجدول فارغ: ${tableName}`);
-      return 0;
+    // إنشاء الجداول أولاً
+    console.log('📋 إنشاء الجداول...');
+    const schemaPath = path.join(__dirname, '../lib/db/postgres-schema.sql');
+    if (fs.existsSync(schemaPath)) {
+      const schema = fs.readFileSync(schemaPath, 'utf8');
+      await client.query(schema);
+      console.log('✅ تم إنشاء الجداول\n');
     }
 
-    // جلب أسماء الأعمدة
-    const columns = Object.keys(rows[0]);
+    // نقل البيانات لكل جدول
+    for (const [tableName, config] of Object.entries(tableMapping)) {
+      await migrateTable(client, tableName, config);
+    }
 
-    // إدراج البيانات في Postgres
+    console.log('\n🎉 تم نقل جميع البيانات بنجاح!');
+  } catch (error) {
+    console.error('❌ خطأ في نقل البيانات:', error);
+    throw error;
+  } finally {
+    client.release();
+    await postgres.end();
+    sqlite.close();
+  }
+}
+
+async function migrateTable(client, tableName, config) {
+  try {
+    console.log(`📊 نقل جدول ${tableName}...`);
+
+    // التحقق من وجود الجدول في SQLite
+    const tableExists = sqlite
+      .prepare(
+        `
+      SELECT name FROM sqlite_master 
+      WHERE type='table' AND name=?
+    `
+      )
+      .get(tableName);
+
+    if (!tableExists) {
+      console.log(`   ⚠️ الجدول ${tableName} غير موجود في SQLite`);
+      return;
+    }
+
+    // الحصول على البيانات من SQLite
+    const rows = sqlite.prepare(`SELECT * FROM ${tableName}`).all();
+
+    if (rows.length === 0) {
+      console.log(`   📝 الجدول ${tableName} فارغ`);
+      return;
+    }
+
+    // حذف البيانات الموجودة في PostgreSQL
+    await client.query(`DELETE FROM ${tableName}`);
+
+    // إدراج البيانات
     let insertedCount = 0;
 
     for (const row of rows) {
+      const columns = config.columns.filter((col) => row.hasOwnProperty(col));
       const values = columns.map((col) => row[col]);
       const placeholders = columns.map((_, i) => `$${i + 1}`).join(', ');
-      const columnsStr = columns.join(', ');
+
+      const insertQuery = `
+        INSERT INTO ${tableName} (${columns.join(', ')}) 
+        VALUES (${placeholders})
+      `;
 
       try {
-        await sql.query(
-          `INSERT INTO ${tableName} (${columnsStr}) VALUES (${placeholders}) ON CONFLICT DO NOTHING`,
-          values
-        );
+        await client.query(insertQuery, values);
         insertedCount++;
       } catch (error) {
-        // تجاهل أخطاء التكرار
-        if (
-          !error.message.includes('duplicate') &&
-          !error.message.includes('unique')
-        ) {
-          console.error(`   ❌ خطأ في إدراج صف: ${error.message}`);
-        }
+        console.error(`   ❌ خطأ في إدراج سجل في ${tableName}:`, error.message);
       }
     }
 
-    console.log(`   ✅ تم ترحيل ${insertedCount}/${rows.length} صف`);
-    return insertedCount;
-  } catch (error) {
-    console.error(`   ❌ خطأ في ترحيل ${tableName}: ${error.message}`);
-    return 0;
-  }
-}
-
-async function migrate() {
-  console.log('🚀 بدء ترحيل البيانات من SQLite إلى Postgres...\n');
-
-  // التحقق من وجود قاعدة البيانات المحلية
-  if (!fs.existsSync(SQLITE_PATH)) {
-    console.error('❌ قاعدة البيانات المحلية غير موجودة:', SQLITE_PATH);
-    process.exit(1);
-  }
-
-  // التحقق من متغيرات البيئة
-  if (!process.env.POSTGRES_URL) {
-    console.error('❌ متغير POSTGRES_URL غير موجود');
-    console.log('   تأكد من إضافة متغيرات Vercel Postgres إلى .env.local');
-    process.exit(1);
-  }
-
-  // فتح قاعدة البيانات المحلية
-  const sqliteDb = new Database(SQLITE_PATH, { readonly: true });
-
-  try {
-    // إنشاء الجداول
-    await createTables();
-
-    console.log('\n📊 ترحيل البيانات...\n');
-
-    // ترحيل كل جدول
-    let totalMigrated = 0;
-
-    for (const table of TABLES_TO_MIGRATE) {
-      // التحقق من وجود الجدول في SQLite
-      const tableExists = sqliteDb
-        .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name=?")
-        .get(table);
-
-      if (tableExists) {
-        const count = await migrateTable(table, sqliteDb);
-        totalMigrated += count;
-      } else {
-        console.log(`   ⏭️ الجدول غير موجود في SQLite: ${table}`);
-      }
+    // تحديث sequence إذا كان موجوداً
+    if (config.sequence && insertedCount > 0) {
+      const maxId = Math.max(...rows.map((row) => row.id || 0));
+      await client.query(`SELECT setval('${config.sequence}', ${maxId})`);
     }
 
-    console.log(`\n✅ اكتمل الترحيل! تم ترحيل ${totalMigrated} صف إجمالاً`);
+    console.log(`   ✅ تم نقل ${insertedCount} سجل من ${tableName}`);
   } catch (error) {
-    console.error('❌ خطأ في الترحيل:', error);
-    process.exit(1);
-  } finally {
-    sqliteDb.close();
+    console.error(`   ❌ خطأ في نقل جدول ${tableName}:`, error.message);
   }
 }
 
-// تشغيل الترحيل
-migrate().catch(console.error);
+// تشغيل النقل
+migrateData().catch((error) => {
+  console.error('💥 فشل النقل:', error);
+  process.exit(1);
+});

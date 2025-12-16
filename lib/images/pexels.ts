@@ -99,11 +99,14 @@ export async function searchImages(
   count: number = 5,
   page: number = 1
 ): Promise<PexelsImage[]> {
-  const apiKey =
-    process.env.NEXT_PUBLIC_PEXELS_API_KEY || process.env.PEXELS_API_KEY;
+  let apiKey: string;
 
-  if (!apiKey) {
-    console.warn('PEXELS_API_KEY غير موجود');
+  try {
+    apiKey = await import('@/lib/config/api-keys').then((module) =>
+      module.getApiKey('pexels')
+    );
+  } catch (error: any) {
+    console.warn('❌ Pexels: مفتاح API غير موجود أو غير صحيح:', error.message);
     return [];
   }
 

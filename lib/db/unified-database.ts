@@ -1,10 +1,17 @@
 /**
  * Unified Database Configuration
  * يوحد جميع إعدادات قواعد البيانات في مكان واحد
+ * يدعم SQLite و PostgreSQL
  */
 
 import Database from 'better-sqlite3';
 import path from 'path';
+import { getDatabaseType } from './connection';
+import {
+  executePostgresQuery,
+  executePostgresQueryOne,
+  executePostgresCommand,
+} from './postgres';
 
 // مسار قاعدة البيانات الموحدة
 export const UNIFIED_DB_PATH =
@@ -45,10 +52,17 @@ export function closeUnifiedDatabase(): void {
 /**
  * تنفيذ استعلام بسيط
  */
-export function queryOne<T = any>(
+export async function queryOne<T = any>(
   sql: string,
   params: any[] = []
-): T | undefined {
+): Promise<T | undefined> {
+  const dbType = getDatabaseType();
+
+  if (dbType === 'postgres') {
+    return await executePostgresQueryOne<T>(sql, params);
+  }
+
+  // SQLite fallback
   const database = getUnifiedDatabase();
   return database.prepare(sql).get(...params) as T | undefined;
 }
@@ -56,7 +70,17 @@ export function queryOne<T = any>(
 /**
  * تنفيذ استعلام متعدد النتائج
  */
-export function queryAll<T = any>(sql: string, params: any[] = []): T[] {
+export async function queryAll<T = any>(
+  sql: string,
+  params: any[] = []
+): Promise<T[]> {
+  const dbType = getDatabaseType();
+
+  if (dbType === 'postgres') {
+    return await executePostgresQuery<T>(sql, params);
+  }
+
+  // SQLite fallback
   const database = getUnifiedDatabase();
   return database.prepare(sql).all(...params) as T[];
 }
@@ -64,7 +88,21 @@ export function queryAll<T = any>(sql: string, params: any[] = []): T[] {
 /**
  * تنفيذ استعلام تحديث/إدراج/حذف
  */
-export function execute(sql: string, params: any[] = []): Database.RunResult {
+export async function execute(
+  sql: string,
+  params: any[] = []
+): Promise<Database.RunResult | { changes: number; lastInsertRowid: number }> {
+  const dbType = getDatabaseType();
+
+  if (dbType === 'postgres') {
+    const result = await executePostgresCommand(sql, params);
+    return {
+      changes: result.rowCount,
+      lastInsertRowid: result.insertId || 0,
+    };
+  }
+
+  // SQLite fallback
   const database = getUnifiedDatabase();
   return database.prepare(sql).run(...params);
 }
