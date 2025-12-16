@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+.next/
+out/
+build/
+dist/
+
+# Database
+*.db
+*.sqlite
+
+# Logs
+*.log
+
+# Environment files
+.env*
+
+# Cache
+.cache/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Generated files
+*.tsbuildinfo

@@ -1,0 +1,148 @@
+/* Enhanced Button Styles for All Themes */
+
+/* Celebration Button Enhancements */
+.celebration-button {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #ff6b9d, #c44569, #6c5ce7, #74b9ff);
+  background-size: 300% 300%;
+  animation: gradientShift 3s ease infinite;
+  box-shadow: 0 8px 32px rgba(255, 107, 157, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.celebration-button:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 12px 40px rgba(255, 107, 157, 0.4);
+}
+
+.celebration-button:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* Gradient Animation */
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Outline Button Enhancements */
+.outline-button {
+  position: relative;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.outline-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(116, 185, 255, 0.5);
+  box-shadow: 0 8px 32px rgba(116, 185, 255, 0.2);
+}
+
+/* Dark theme adjustments */
+@media (prefers-color-scheme: dark) {
+  .outline-button {
+    background: rgba(0, 0, 0, 0.2);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .outline-button:hover {
+    background: rgba(0, 0, 0, 0.4);
+    border-color: rgba(116, 185, 255, 0.4);
+  }
+}
+
+/* Button Ripple Effect */
+.button-ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.button-ripple::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.button-ripple:active::before {
+  width: 300px;
+  height: 300px;
+}
+
+/* Pulse Animation for Important Buttons */
+.pulse-button {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 107, 157, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(255, 107, 157, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 107, 157, 0);
+  }
+}
+
+/* Glow Effect */
+.glow-button {
+  box-shadow: 0 0 20px rgba(255, 107, 157, 0.3);
+  transition: box-shadow 0.3s ease;
+}
+
+.glow-button:hover {
+  box-shadow: 0 0 30px rgba(255, 107, 157, 0.5);
+}
+
+/* Responsive Button Adjustments */
+@media (max-width: 640px) {
+  .celebration-button,
+  .outline-button {
+    font-size: 0.9rem;
+    padding: 0.75rem 1.5rem;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .celebration-button {
+    background: #000;
+    color: #fff;
+    border: 2px solid #fff;
+  }
+
+  .outline-button {
+    background: transparent;
+    color: currentColor;
+    border: 2px solid currentColor;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .celebration-button,
+  .outline-button,
+  .button-ripple,
+  .pulse-button {
+    animation: none;
+    transition: none;
+  }
+}
