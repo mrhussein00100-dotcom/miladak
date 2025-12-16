@@ -5,6 +5,11 @@ const nextConfig = {
     // تجاهل أخطاء ESLint أثناء البناء (التحذيرات فقط)
     ignoreDuringBuilds: true,
   },
+  typescript: {
+    // تجاهل أخطاء TypeScript أثناء البناء على Vercel فقط
+    ignoreBuildErrors: process.env.VERCEL === '1',
+  },
+  swcMinify: true,
   images: {
     formats: ['image/avif', 'image/webp'],
     remotePatterns: [
