@@ -4,28 +4,27 @@
  */
 
 import { MetadataRoute } from 'next';
-import { queryAll } from '@/lib/db/unified-database';
 import {
   SEO_CONFIG,
   SITEMAP_PRIORITY,
   SITEMAP_CHANGE_FREQ,
   STATIC_PAGES,
 } from '@/lib/seo/config';
-import type { ArticleSitemapData, ToolSitemapData } from '@/lib/seo/types';
 
 const BASE_URL = SEO_CONFIG.baseUrl;
 
 /**
  * جلب المقالات المنشورة من قاعدة البيانات
  */
-function getPublishedArticles(): ArticleSitemapData[] {
+async function getPublishedArticles() {
   try {
-    return queryAll<ArticleSitemapData>(
-      `SELECT slug, updated_at, published 
-       FROM articles 
-       WHERE published = 1 
-       ORDER BY updated_at DESC`
-    );
+    // في بيئة الإنتاج، سنجلب من PostgreSQL عبر API
+    const response = await fetch(`${BASE_URL}/api/articles?published=true`, {
+      cache: 'no-store',
+    });
+    if (!response.ok) return [];
+    const data = await response.json();
+    return data.articles || [];
   } catch (error) {
     console.error('Error fetching articles for sitemap:', error);
     return [];
@@ -35,14 +34,15 @@ function getPublishedArticles(): ArticleSitemapData[] {
 /**
  * جلب الأدوات النشطة من قاعدة البيانات
  */
-function getActiveTools(): ToolSitemapData[] {
+async function getActiveTools() {
   try {
-    return queryAll<ToolSitemapData>(
-      `SELECT name, href, is_active 
-       FROM tools 
-       WHERE is_active = 1 
-       ORDER BY sort_order ASC`
-    );
+    // في بيئة الإنتاج، سنجلب من PostgreSQL عبر API
+    const response = await fetch(`${BASE_URL}/api/tools?active=true`, {
+      cache: 'no-store',
+    });
+    if (!response.ok) return [];
+    const data = await response.json();
+    return data.tools || [];
   } catch (error) {
     console.error('Error fetching tools for sitemap:', error);
     return [];
@@ -52,18 +52,22 @@ function getActiveTools(): ToolSitemapData[] {
 /**
  * جلب التصنيفات من قاعدة البيانات
  */
-function getCategories(): { slug: string }[] {
+async function getCategories() {
   try {
-    return queryAll<{ slug: string }>(
-      `SELECT slug FROM categories WHERE slug IS NOT NULL`
-    );
+    // في بيئة الإنتاج، سنجلب من PostgreSQL عبر API
+    const response = await fetch(`${BASE_URL}/api/categories`, {
+      cache: 'no-store',
+    });
+    if (!response.ok) return [];
+    const data = await response.json();
+    return data.categories || [];
   } catch (error) {
     console.error('Error fetching categories for sitemap:', error);
     return [];
   }
 }
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
 
   // 1. الصفحات الثابتة
@@ -74,33 +78,45 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: page.priority,
   }));
 
-  // 2. صفحات المقالات من قاعدة البيانات
-  const articles = getPublishedArticles();
-  const articlePages: MetadataRoute.Sitemap = articles.map((article) => ({
-    url: `${BASE_URL}/articles/${article.slug}`,
-    lastModified: article.updated_at ? new Date(article.updated_at) : now,
-    changeFrequency: SITEMAP_CHANGE_FREQ.articlePage,
-    priority: SITEMAP_PRIORITY.articlePage,
-  }));
+  try {
+    // 2. صفحات المقالات من قاعدة البيانات
+    const articles = await getPublishedArticles();
+    const articlePages: MetadataRoute.Sitemap = Array.isArray(articles)
+      ? articles.map((article: any) => ({
+          url: `${BASE_URL}/articles/${article.slug}`,
+          lastModified: article.updated_at ? new Date(article.updated_at) : now,
+          changeFrequency: SITEMAP_CHANGE_FREQ.articlePage,
+          priority: SITEMAP_PRIORITY.articlePage,
+        }))
+      : [];
 
-  // 3. صفحات الأدوات من قاعدة البيانات
-  const tools = getActiveTools();
-  const toolPages: MetadataRoute.Sitemap = tools.map((tool) => ({
-    url: `${BASE_URL}${tool.href}`,
-    lastModified: now,
-    changeFrequency: SITEMAP_CHANGE_FREQ.toolPage,
-    priority: SITEMAP_PRIORITY.toolPage,
-  }));
+    // 3. صفحات الأدوات من قاعدة البيانات
+    const tools = await getActiveTools();
+    const toolPages: MetadataRoute.Sitemap = Array.isArray(tools)
+      ? tools.map((tool: any) => ({
+          url: `${BASE_URL}${tool.href}`,
+          lastModified: now,
+          changeFrequency: SITEMAP_CHANGE_FREQ.toolPage,
+          priority: SITEMAP_PRIORITY.toolPage,
+        }))
+      : [];
 
-  // 4. صفحات التصنيفات
-  const categories = getCategories();
-  const categoryPages: MetadataRoute.Sitemap = categories.map((category) => ({
-    url: `${BASE_URL}/categories/${category.slug}`,
-    lastModified: now,
-    changeFrequency: SITEMAP_CHANGE_FREQ.categoryPage,
-    priority: SITEMAP_PRIORITY.categoryPage,
-  }));
+    // 4. صفحات التصنيفات
+    const categories = await getCategories();
+    const categoryPages: MetadataRoute.Sitemap = Array.isArray(categories)
+      ? categories.map((category: any) => ({
+          url: `${BASE_URL}/categories/${category.slug}`,
+          lastModified: now,
+          changeFrequency: SITEMAP_CHANGE_FREQ.categoryPage,
+          priority: SITEMAP_PRIORITY.categoryPage,
+        }))
+      : [];
 
-  // دمج جميع الصفحات
-  return [...staticPages, ...articlePages, ...toolPages, ...categoryPages];
+    // دمج جميع الصفحات
+    return [...staticPages, ...articlePages, ...toolPages, ...categoryPages];
+  } catch (error) {
+    console.error('Error generating sitemap:', error);
+    // في حالة الخطأ، أرجع الصفحات الثابتة فقط
+    return staticPages;
+  }
 }

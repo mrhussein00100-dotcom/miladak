@@ -48,10 +48,13 @@ export async function GET(request: NextRequest) {
 
     const params: unknown[] = [];
 
+    let paramIndex = 1;
+
     // Filter by category name
     if (category) {
-      sql += ' AND tc.name = ?';
+      sql += ` AND tc.name = $${paramIndex}`;
       params.push(category);
+      paramIndex++;
     }
 
     // Filter featured only
@@ -61,15 +64,18 @@ export async function GET(request: NextRequest) {
 
     // Search in title and description
     if (search) {
-      sql += ' AND (t.title LIKE ? OR t.description LIKE ?)';
+      sql += ` AND (t.title ILIKE $${paramIndex} OR t.description ILIKE $${
+        paramIndex + 1
+      })`;
       params.push(`%${search}%`, `%${search}%`);
+      paramIndex += 2;
     }
 
     sql += ' ORDER BY tc.sort_order ASC, t.sort_order ASC, t.title ASC';
 
     // Limit results
     if (limit) {
-      sql += ' LIMIT ?';
+      sql += ` LIMIT $${paramIndex}`;
       params.push(parseInt(limit, 10));
     }
 

@@ -26,11 +26,13 @@ export async function GET(request: NextRequest) {
 
     let whereClause = 'WHERE a.published = 1';
     const params: unknown[] = [];
+    let paramIndex = 1;
 
     // Filter by category slug
     if (category) {
-      whereClause += ' AND ac.slug = ?';
+      whereClause += ` AND ac.slug = $${paramIndex}`;
       params.push(category);
+      paramIndex++;
     }
 
     // Filter featured only
@@ -40,9 +42,11 @@ export async function GET(request: NextRequest) {
 
     // Search in title, excerpt, and content
     if (search) {
-      whereClause +=
-        ' AND (a.title LIKE ? OR a.excerpt LIKE ? OR a.content LIKE ?)';
+      whereClause += ` AND (a.title ILIKE $${paramIndex} OR a.excerpt ILIKE $${
+        paramIndex + 1
+      } OR a.content ILIKE $${paramIndex + 2})`;
       params.push(`%${search}%`, `%${search}%`, `%${search}%`);
+      paramIndex += 3;
     }
 
     // Get total count
@@ -99,9 +103,18 @@ export async function GET(request: NextRequest) {
     `;
 
     const finalLimit = limit ? parseInt(limit) : pageSize;
-    const articles =
-      (await queryArticleWithCategory) >
-      (articlesSql, [...params, finalLimit, offset]);
+    const articlesParams = [...params, finalLimit, offset];
+
+    // Update SQL to use PostgreSQL parameter syntax
+    const finalArticlesSql = articlesSql.replace(
+      /LIMIT \? OFFSET \?/,
+      `LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`
+    );
+
+    const articles = await query<ArticleWithCategory>(
+      finalArticlesSql,
+      articlesParams
+    );
 
     const totalPages = Math.ceil(total / pageSize);
 
@@ -141,10 +154,9 @@ export async function GET(request: NextRequest) {
 // Get article categories with counts
 export async function OPTIONS() {
   try {
-    const categories =
-      (await queryArticleCategory) &
-      ({ articles_count: number } >
-        `
+    const categories = await query<
+      ArticleCategory & { articles_count: number }
+    >(`
       SELECT 
         ac.id,
         ac.name,
@@ -152,7 +164,7 @@ export async function OPTIONS() {
         ac.description,
         ac.color,
         COUNT(a.id) as articles_count
-      FROM categories ac
+      FROM article_categories ac
       LEFT JOIN articles a ON ac.id = a.category_id AND a.published = 1
       GROUP BY ac.id, ac.name, ac.slug, ac.description, ac.color
       ORDER BY ac.name ASC

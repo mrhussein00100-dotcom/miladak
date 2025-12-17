@@ -30,16 +30,20 @@ class UnifiedDatabaseManager {
     // إذا كان هناك POSTGRES_URL، استخدم PostgreSQL
     if (
       process.env.POSTGRES_URL ||
-      process.env.DATABASE_URL?.startsWith('postgres')
+      process.env.DATABASE_URL?.startsWith('postgres') ||
+      process.env.DATABASE_TYPE === 'postgresql'
     ) {
+      console.log('🐘 استخدام PostgreSQL');
       return 'postgres';
     }
 
     // إذا كان في بيئة الإنتاج على Vercel، استخدم PostgreSQL
-    if (process.env.VERCEL && process.env.NODE_ENV === 'production') {
+    if (process.env.VERCEL || process.env.NODE_ENV === 'production') {
+      console.log('🐘 استخدام PostgreSQL (بيئة الإنتاج)');
       return 'postgres';
     }
 
+    console.log('📁 استخدام SQLite (بيئة التطوير)');
     return 'sqlite';
   }
 
