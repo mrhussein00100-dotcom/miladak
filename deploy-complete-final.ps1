@@ -25,7 +25,7 @@ $envProduction = @"
 DATABASE_TYPE=postgresql
 
 # مفاتيح AI
-GROQ_API_KEY=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
+GROQ_API_KEY=[GROQ_API_KEY_HIDDEN]
 GEMINI_API_KEY=AIzaSyC87MwuwuIAlWheWfKSZlsGgpKxMZxoTQM
 
 # خدمات الصور
@@ -90,7 +90,7 @@ Write-Host "   • انسخ POSTGRES_URL" -ForegroundColor Gray
 Write-Host "`n2️⃣ إضافة متغيرات البيئة في Vercel:" -ForegroundColor White
 Write-Host "   POSTGRES_URL=postgres://default:xxxxx@xxxxx.us-east-1.postgres.vercel-storage.com:5432/verceldb" -ForegroundColor Gray
 Write-Host "   DATABASE_TYPE=postgresql" -ForegroundColor Gray
-Write-Host "   GROQ_API_KEY=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" -ForegroundColor Gray
+Write-Host "   GROQ_API_KEY=[GROQ_API_KEY_HIDDEN]" -ForegroundColor Gray
 Write-Host "   GEMINI_API_KEY=AIzaSyC87MwuwuIAlWheWfKSZlsGgpKxMZxoTQM" -ForegroundColor Gray
 Write-Host "   PEXELS_API_KEY=Xekb8sWhFAzaori3koEkloite3lQxCyk8fmGWCDoUtMSMUjs7ZCt5Dyx" -ForegroundColor Gray
 Write-Host "   NEXT_PUBLIC_PEXELS_API_KEY=Xekb8sWhFAzaori3koEkloite3lQxCyk8fmGWCDoUtMSMUjs7ZCt5Dyx" -ForegroundColor Gray
@@ -139,7 +139,7 @@ $quickInstructions = @"
 ```
 POSTGRES_URL=postgres://default:xxxxx@xxxxx.us-east-1.postgres.vercel-storage.com:5432/verceldb
 DATABASE_TYPE=postgresql
-GROQ_API_KEY=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
+GROQ_API_KEY=[GROQ_API_KEY_HIDDEN]
 GEMINI_API_KEY=AIzaSyC87MwuwuIAlWheWfKSZlsGgpKxMZxoTQM
 PEXELS_API_KEY=Xekb8sWhFAzaori3koEkloite3lQxCyk8fmGWCDoUtMSMUjs7ZCt5Dyx
 NEXT_PUBLIC_PEXELS_API_KEY=Xekb8sWhFAzaori3koEkloite3lQxCyk8fmGWCDoUtMSMUjs7ZCt5Dyx

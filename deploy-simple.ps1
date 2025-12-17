@@ -17,7 +17,7 @@ Write-Host "Creating production environment file..." -ForegroundColor Yellow
 
 $envContent = @"
 DATABASE_TYPE=postgresql
-GROQ_API_KEY=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
+GROQ_API_KEY=[GROQ_API_KEY_HIDDEN]
 GEMINI_API_KEY=AIzaSyC87MwuwuIAlWheWfKSZlsGgpKxMZxoTQM
 PEXELS_API_KEY=Xekb8sWhFAzaori3koEkloite3lQxCyk8fmGWCDoUtMSMUjs7ZCt5Dyx
 NEXT_PUBLIC_PEXELS_API_KEY=Xekb8sWhFAzaori3koEkloite3lQxCyk8fmGWCDoUtMSMUjs7ZCt5Dyx

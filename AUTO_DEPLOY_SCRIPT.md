@@ -43,8 +43,8 @@ POSTGRES_URL=postgres://default:xxxxx@xxxxx.us-east-1.postgres.vercel-storage.co
 DATABASE_TYPE=postgresql
 
 # مفاتيح AI
-GROQ_API_KEY=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
-GEMINI_API_KEY=AIzaSyC87MwuwuIAlWheWfKSZlsGgpKxMZxoTQM
+GROQ_API_KEY=[GROQ_API_KEY_HIDDEN]
+GEMINI_API_KEY=[GEMINI_API_KEY_HIDDEN]
 
 # خدمات الصور
 PEXELS_API_KEY=Xekb8sWhFAzaori3koEkloite3lQxCyk8fmGWCDoUtMSMUjs7ZCt5Dyx

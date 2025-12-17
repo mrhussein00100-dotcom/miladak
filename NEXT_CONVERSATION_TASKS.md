@@ -136,8 +136,8 @@ node scripts/migrate-to-postgres-complete.js
 
 ```bash
 # استبدال API keys بـ placeholders
-sed -i 's/gsk_[A-Za-z0-9]*/[GROQ_API_KEY]/g' API_KEYS_REFERENCE.txt
-sed -i 's/AIzaSy[A-Za-z0-9_-]*/[GEMINI_API_KEY]/g' API_KEYS_REFERENCE.txt
+sed -i 's/[GROQ_API_KEY_HIDDEN][A-Za-z0-9]*/[GROQ_API_KEY]/g' API_KEYS_REFERENCE.txt
+sed -i 's/[GEMINI_API_KEY_HIDDEN][A-Za-z0-9_-]*/[GEMINI_API_KEY]/g' API_KEYS_REFERENCE.txt
 git add .
 git commit -m "Secure API keys for deployment"
 git push origin main

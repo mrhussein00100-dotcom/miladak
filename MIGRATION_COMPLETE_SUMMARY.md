@@ -103,8 +103,8 @@
 ```bash
 # متغيرات البيئة المطلوبة
 POSTGRES_URL="postgres://..."
-GROQ_API_KEY="gsk_..."
-GEMINI_API_KEY="AIzaSy..."
+GROQ_API_KEY="[GROQ_API_KEY_HIDDEN]..."
+GEMINI_API_KEY="[GEMINI_API_KEY_HIDDEN]..."
 NEXTAUTH_SECRET="your-secret"
 ```
 

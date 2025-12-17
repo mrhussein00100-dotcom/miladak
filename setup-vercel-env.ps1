@@ -12,7 +12,7 @@ Write-Host "🚀 إعداد متغيرات البيئة في Vercel..." -Foregro
 $envVars = @{
     "DATABASE_TYPE" = "postgresql"
     "POSTGRES_URL" = $PostgresUrl
-    "GROQ_API_KEY" = "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"
+    "GROQ_API_KEY" = "[GROQ_API_KEY_HIDDEN]"
     "GEMINI_API_KEY" = "AIzaSyC87MwuwuIAlWheWfKSZlsGgpKxMZxoTQM"
     "PEXELS_API_KEY" = "Xekb8sWhFAzaori3koEkloite3lQxCyk8fmGWCDoUtMSMUjs7ZCt5Dyx"
     "NEXT_PUBLIC_PEXELS_API_KEY" = "Xekb8sWhFAzaori3koEkloite3lQxCyk8fmGWCDoUtMSMUjs7ZCt5Dyx"

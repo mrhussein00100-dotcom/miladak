@@ -53,8 +53,8 @@ DATABASE_URL="postgres://default:xxx@xxx-pooler.us-east-1.postgres.vercel-storag
 
 ```bash
 # مفاتيح مطلوبة
-GROQ_API_KEY="gsk_xxx"
-GEMINI_API_KEY="AIzaSyxxx"
+GROQ_API_KEY="[GROQ_API_KEY_HIDDEN]"
+GEMINI_API_KEY="[GEMINI_API_KEY_HIDDEN]"
 
 # مفاتيح اختيارية (لتحسين الأداء)
 COHERE_API_KEY="xxx"
