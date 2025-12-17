@@ -31,14 +31,18 @@ export async function GET(request: NextRequest) {
     const results = await query<PageKeywords[]>(sql, params);
 
     // تحويل الكلمات المفتاحية إلى مصفوفات
-    const formattedResults = results.map((row) => ({
+    const formattedResults = results.map((row: any) => ({
       ...row,
       keywords_array: row.keywords
-        .split(',')
-        .map((k) => k.trim())
-        .filter((k) => k.length > 0),
-      keywords_count: row.keywords.split(',').filter((k) => k.trim().length > 0)
-        .length,
+        ? row.keywords
+            .split(',')
+            .map((k: string) => k.trim())
+            .filter((k: string) => k.length > 0)
+        : [],
+      keywords_count: row.keywords
+        ? row.keywords.split(',').filter((k: string) => k.trim().length > 0)
+            .length
+        : 0,
     }));
 
     return NextResponse.json({
