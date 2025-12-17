@@ -8,7 +8,7 @@ interface CategoryWithCount extends ToolCategory {
 
 export async function GET() {
   try {
-    const categories = query<CategoryWithCount>(`
+    const categories = await queryCategoryWithCount>(`
       SELECT 
         tc.id,
         tc.name,

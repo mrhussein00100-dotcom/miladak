@@ -8,7 +8,7 @@ interface CategoryWithCount extends ArticleCategory {
 
 export async function GET() {
   try {
-    const categories = query<CategoryWithCount>(`
+    const categories = await queryCategoryWithCount>(`
       SELECT 
         ac.id,
         ac.name,

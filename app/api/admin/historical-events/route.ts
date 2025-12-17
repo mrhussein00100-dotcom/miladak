@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const result = execute(
+    const result = await execute(
       'INSERT INTO daily_events (day, month, year, title, description, category) VALUES (?, ?, ?, ?, ?, ?)',
       [
         event.day,
@@ -105,7 +105,7 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    execute(
+    await execute(
       'UPDATE daily_events SET day = ?, month = ?, year = ?, title = ?, description = ?, category = ? WHERE id = ?',
       [
         event.day,
@@ -149,7 +149,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    execute('DELETE FROM daily_events WHERE id = ?', [parseInt(id)]);
+    await execute('DELETE FROM daily_events WHERE id = ?', [parseInt(id)]);
 
     return NextResponse.json({
       success: true,

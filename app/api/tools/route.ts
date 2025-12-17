@@ -73,7 +73,7 @@ export async function GET(request: NextRequest) {
       params.push(parseInt(limit, 10));
     }
 
-    const tools = query<ToolRow>(sql, params);
+    const tools = await query<ToolRow>(sql, params);
 
     // Return grouped by category if requested
     if (grouped === 'true') {

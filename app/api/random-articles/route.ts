@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
         sql += ` ORDER BY RANDOM() LIMIT ?`;
         params.push(limit);
 
-        articles = query<Article>(sql, params);
+        articles = await queryArticle>(sql, params);
       }
 
       // إذا لم نجد مقالات كافية، نجلب مقالات عامة
@@ -83,7 +83,7 @@ export async function GET(request: NextRequest) {
             ? `AND id NOT IN (${existingIds.join(',')})`
             : '';
 
-        const fallbackArticles = query<Article>(
+        const fallbackArticles = await queryArticle>(
           `SELECT a.id, a.title, a.excerpt, a.slug, a.image, a.author, a.read_time, a.created_at,
                   c.name as category_name
            FROM articles a
@@ -98,7 +98,7 @@ export async function GET(request: NextRequest) {
       }
     } else {
       // جلب مقالات عشوائية بدون فلترة
-      articles = query<Article>(
+      articles = await queryArticle>(
         `SELECT a.id, a.title, a.excerpt, a.slug, a.image, a.author, a.read_time, a.created_at,
                 c.name as category_name
          FROM articles a

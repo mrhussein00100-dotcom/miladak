@@ -55,7 +55,7 @@ export async function GET(
     }
 
     // Query celebrities for this date, sorted by birth year
-    const celebrities = query<DailyBirthday>(
+    const celebrities = await queryDailyBirthday>(
       `SELECT id, day, month, birth_year, name, profession 
        FROM daily_birthdays 
        WHERE month = ? AND day = ? 

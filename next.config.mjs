@@ -9,7 +9,7 @@ const nextConfig = {
     // تجاهل أخطاء TypeScript أثناء البناء على Vercel فقط
     ignoreBuildErrors: process.env.VERCEL === '1',
   },
-  swcMinify: true,
+
   images: {
     formats: ['image/avif', 'image/webp'],
     remotePatterns: [

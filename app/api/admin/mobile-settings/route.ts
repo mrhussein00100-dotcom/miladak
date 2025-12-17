@@ -15,7 +15,7 @@ export async function GET() {
       )
     `);
 
-    const row = queryOne<{ settings: string }>(
+    const row = await queryOne<{ settings: string }>(
       'SELECT settings FROM mobile_settings WHERE id = 1'
     );
 
@@ -52,19 +52,20 @@ export async function POST(request: Request) {
     `);
 
     // حفظ أو تحديث الإعدادات
-    const existing = queryOne<{ id: number }>(
+    const existing = await queryOne<{ id: number }>(
       'SELECT id FROM mobile_settings WHERE id = 1'
     );
 
     if (existing) {
-      execute(
+      await execute(
         'UPDATE mobile_settings SET settings = ?, updated_at = CURRENT_TIMESTAMP WHERE id = 1',
         [JSON.stringify(settings)]
       );
     } else {
-      execute('INSERT INTO mobile_settings (id, settings) VALUES (1, ?)', [
-        JSON.stringify(settings),
-      ]);
+      await execute(
+        'INSERT INTO mobile_settings (id, settings) VALUES (1, ?)',
+        [JSON.stringify(settings)]
+      );
     }
 
     return NextResponse.json({ success: true });

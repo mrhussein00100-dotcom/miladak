@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const result = execute(
+    const result = await execute(
       'INSERT INTO daily_birthdays (day, month, birth_year, name, profession) VALUES (?, ?, ?, ?, ?)',
       [
         celebrity.day,
@@ -108,7 +108,7 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    execute(
+    await execute(
       'UPDATE daily_birthdays SET day = ?, month = ?, birth_year = ?, name = ?, profession = ? WHERE id = ?',
       [
         celebrity.day,
@@ -151,7 +151,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    execute('DELETE FROM daily_birthdays WHERE id = ?', [parseInt(id)]);
+    await execute('DELETE FROM daily_birthdays WHERE id = ?', [parseInt(id)]);
 
     return NextResponse.json({
       success: true,

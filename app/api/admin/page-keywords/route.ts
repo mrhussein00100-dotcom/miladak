@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
 
     sql += ' ORDER BY page_type, page_title';
 
-    const results = query<PageKeywords>(sql, params);
+    const results = await query<PageKeywords[]>(sql, params);
 
     // تحويل الكلمات المفتاحية إلى مصفوفات
     const formattedResults = results.map((row) => ({
@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
       ? keywords.join(', ')
       : keywords;
 
-    const result = execute(
+    const result = await execute(
       `INSERT INTO page_keywords (page_type, page_slug, page_title, keywords, meta_description)
        VALUES (?, ?, ?, ?, ?)`,
       [page_type, page_slug, page_title, keywordsText, meta_description || null]

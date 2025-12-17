@@ -46,7 +46,7 @@ export async function GET(
 
   try {
     const { id } = await params;
-    const users = query<{
+    const users = await query<{
       id: number;
       username: string;
       role: string;
@@ -93,7 +93,7 @@ export async function PUT(
     const { username, password, role, active } = body;
 
     // التحقق من وجود المستخدم
-    const existing = query<{ id: number }>(
+    const existing = await query<{ id: number }>(
       'SELECT id FROM admin_users WHERE id = ?',
       [id]
     );
@@ -110,7 +110,7 @@ export async function PUT(
 
     if (username !== undefined) {
       // التحقق من عدم تكرار اسم المستخدم
-      const duplicate = query<{ id: number }>(
+      const duplicate = await query<{ id: number }>(
         'SELECT id FROM admin_users WHERE username = ? AND id != ?',
         [username, id]
       );
@@ -165,7 +165,7 @@ export async function PUT(
     updates.push('updated_at = CURRENT_TIMESTAMP');
     values.push(id);
 
-    execute(
+    await execute(
       `UPDATE admin_users SET ${updates.join(', ')} WHERE id = ?`,
       values
     );
@@ -197,7 +197,7 @@ export async function DELETE(
     const { id } = await params;
 
     // التحقق من وجود المستخدم
-    const existing = query<{ id: number; username: string }>(
+    const existing = await query<{ id: number; username: string }>(
       'SELECT id, username FROM admin_users WHERE id = ?',
       [id]
     );
@@ -216,7 +216,7 @@ export async function DELETE(
       );
     }
 
-    execute('DELETE FROM admin_users WHERE id = ?', [id]);
+    await execute('DELETE FROM admin_users WHERE id = ?', [id]);
 
     return NextResponse.json({ success: true, message: 'تم الحذف بنجاح' });
   } catch (error: unknown) {

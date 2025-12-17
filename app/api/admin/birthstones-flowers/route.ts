@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
       }
 
       stoneQuery += ' ORDER BY month';
-      birthstones = query<Birthstone>(stoneQuery, stoneParams);
+      birthstones = await query<Birthstone>(stoneQuery, stoneParams);
     }
 
     if (!type || type === 'birth_flower') {
@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
       }
 
       flowerQuery += ' ORDER BY month';
-      birthFlowers = query<BirthFlower>(flowerQuery, flowerParams);
+      birthFlowers = await query<BirthFlower>(flowerQuery, flowerParams);
     }
 
     return NextResponse.json({
@@ -95,9 +95,11 @@ export async function POST(request: NextRequest) {
       }
 
       // حذف الحجر الموجود للشهر نفسه لتجنب الازدواجية
-      execute('DELETE FROM birthstones WHERE month = ?', [birthstone.month]);
+      await await execute('DELETE FROM birthstones WHERE month = ?', [
+        birthstone.month,
+      ]);
 
-      const result = execute(
+      const result = await await execute(
         'INSERT INTO birthstones (month, primary_stone, secondary_stone, color, meaning, properties) VALUES (?, ?, ?, ?, ?, ?)',
         [
           birthstone.month,
@@ -128,9 +130,11 @@ export async function POST(request: NextRequest) {
       }
 
       // حذف الزهرة الموجودة للشهر نفسه لتجنب الازدواجية
-      execute('DELETE FROM birth_flowers WHERE month = ?', [birthFlower.month]);
+      await await execute('DELETE FROM birth_flowers WHERE month = ?', [
+        birthFlower.month,
+      ]);
 
-      const result = execute(
+      const result = await await execute(
         'INSERT INTO birth_flowers (month, primary_flower, secondary_flower, color, meaning, symbolism) VALUES (?, ?, ?, ?, ?, ?)',
         [
           birthFlower.month,
@@ -185,7 +189,7 @@ export async function PUT(request: NextRequest) {
     if (type === 'birthstone') {
       const birthstone: Birthstone = itemData;
 
-      execute(
+      await await execute(
         'UPDATE birthstones SET month = ?, primary_stone = ?, secondary_stone = ?, color = ?, meaning = ?, properties = ? WHERE id = ?',
         [
           birthstone.month,
@@ -205,7 +209,7 @@ export async function PUT(request: NextRequest) {
     } else if (type === 'birth_flower') {
       const birthFlower: BirthFlower = itemData;
 
-      execute(
+      await await execute(
         'UPDATE birth_flowers SET month = ?, primary_flower = ?, secondary_flower = ?, color = ?, meaning = ?, symbolism = ? WHERE id = ?',
         [
           birthFlower.month,
@@ -260,9 +264,9 @@ export async function DELETE(request: NextRequest) {
     }
 
     if (type === 'birthstone') {
-      execute('DELETE FROM birthstones WHERE id = ?', [parseInt(id)]);
+      await await execute('DELETE FROM birthstones WHERE id = ?', [parseInt(id)]);
     } else if (type === 'birth_flower') {
-      execute('DELETE FROM birth_flowers WHERE id = ?', [parseInt(id)]);
+      await await execute('DELETE FROM birth_flowers WHERE id = ?', [parseInt(id)]);
     } else {
       return NextResponse.json(
         {

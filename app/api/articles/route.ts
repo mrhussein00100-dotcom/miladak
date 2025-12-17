@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
       ${whereClause}
     `;
 
-    const countResult = query<{ total: number }>(countSql, params);
+    const countResult = await query<{ total: number }>(countSql, params);
     const total = countResult[0]?.total || 0;
 
     // Validate sort column
@@ -99,11 +99,9 @@ export async function GET(request: NextRequest) {
     `;
 
     const finalLimit = limit ? parseInt(limit) : pageSize;
-    const articles = query<ArticleWithCategory>(articlesSql, [
-      ...params,
-      finalLimit,
-      offset,
-    ]);
+    const articles =
+      (await queryArticleWithCategory) >
+      (articlesSql, [...params, finalLimit, offset]);
 
     const totalPages = Math.ceil(total / pageSize);
 
@@ -143,7 +141,10 @@ export async function GET(request: NextRequest) {
 // Get article categories with counts
 export async function OPTIONS() {
   try {
-    const categories = query<ArticleCategory & { articles_count: number }>(`
+    const categories =
+      (await queryArticleCategory) &
+      ({ articles_count: number } >
+        `
       SELECT 
         ac.id,
         ac.name,

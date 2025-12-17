@@ -18,7 +18,7 @@ interface RouteParams {
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params;
-    const result = queryOne<PageKeywords>(
+    const result = await queryOne<PageKeywords>(
       'SELECT * FROM page_keywords WHERE id = ?',
       [parseInt(id)]
     );
@@ -51,7 +51,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const { page_title, keywords, meta_description } = body;
 
     // التحقق من وجود الصفحة
-    const existing = queryOne<PageKeywords>(
+    const existing = await queryOne<PageKeywords>(
       'SELECT * FROM page_keywords WHERE id = ?',
       [parseInt(id)]
     );
@@ -65,7 +65,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       ? keywords.join(', ')
       : keywords;
 
-    execute(
+    await execute(
       `UPDATE page_keywords 
        SET page_title = ?, keywords = ?, meta_description = ?, updated_at = CURRENT_TIMESTAMP
        WHERE id = ?`,
@@ -106,7 +106,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'الصفحة غير موجودة' }, { status: 404 });
     }
 
-    execute('DELETE FROM page_keywords WHERE id = ?', [parseInt(id)]);
+    await execute('DELETE FROM page_keywords WHERE id = ?', [parseInt(id)]);
 
     return NextResponse.json({
       success: true,

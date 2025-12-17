@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
 
     // التحقق من وجود جدول المستخدمين وإنشائه إذا لم يكن موجوداً
     try {
-      execute(`
+      await execute(`
         CREATE TABLE IF NOT EXISTS admin_users (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           username TEXT UNIQUE NOT NULL,
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
     } catch {}
 
     // التحقق من وجود مستخدمين
-    const countResult = query<{ c: number }>(
+    const countResult = await query<{ c: number }>(
       'SELECT COUNT(*) as c FROM admin_users'
     );
     const count = countResult[0]?.c || 0;
@@ -60,14 +60,14 @@ export async function POST(request: NextRequest) {
     // إنشاء المستخدم الافتراضي إذا لم يكن هناك مستخدمين
     if (count === 0) {
       const { hash, salt } = hashPassword(ADMIN_PASS);
-      execute(
+      await execute(
         `INSERT INTO admin_users (username, password_hash, password_salt, role, active) VALUES (?, ?, ?, ?, ?)`,
         [ADMIN_USER, hash, salt, 'admin', 1]
       );
     }
 
     // البحث عن المستخدم
-    const users = query<{
+    const users = await query<{
       id: number;
       username: string;
       password_hash: string;

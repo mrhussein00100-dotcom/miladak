@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const users = query<{
+    const users = await query<{
       id: number;
       username: string;
       role: string;
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
     }
 
     // التحقق من عدم وجود المستخدم
-    const existing = query<{ id: number }>(
+    const existing = await query<{ id: number }>(
       'SELECT id FROM admin_users WHERE username = ?',
       [username]
     );
@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
     }
 
     const { hash, salt } = hashPassword(password);
-    const result = execute(
+    const result = await execute(
       `INSERT INTO admin_users (username, password_hash, password_salt, role, active) VALUES (?, ?, ?, ?, ?)`,
       [username, hash, salt, role || 'editor', 1]
     );

@@ -253,7 +253,7 @@ export async function GET(request: NextRequest) {
       try {
         // البحث بكل الأنماط
         for (const pattern of searchPatterns) {
-          const tools = query<SearchTool>(
+          const tools = await querySearchTool>(
             `SELECT t.id, t.title, t.description, t.slug, t.icon, c.name as category_name
              FROM tools t
              LEFT JOIN tool_categories c ON t.category_id = c.id
@@ -288,7 +288,7 @@ export async function GET(request: NextRequest) {
       try {
         // البحث بكل الأنماط
         for (const pattern of searchPatterns) {
-          const articles = query<SearchArticle>(
+          const articles = await querySearchArticle>(
             `SELECT a.id, a.title, a.excerpt, a.slug, a.image, c.name as category_name
              FROM articles a
              LEFT JOIN categories c ON a.category_id = c.id
