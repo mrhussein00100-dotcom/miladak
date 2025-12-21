@@ -3,39 +3,35 @@ import { query } from '@/lib/db/database';
 
 export async function GET() {
   try {
-    // اختبار الاستعلام الأصلي
-    let toolsQuery = null;
-    let toolsError = null;
-    try {
-      const sql = `
-        SELECT 
-          t.id,
-          t.slug,
-          t.title,
-          t.description,
-          t.icon,
-          t.category_id,
-          tc.name as category_name,
-          tc.slug as category_slug,
-          tc.title as category_title,
-          tc.icon as category_icon,
-          t.href,
-          t.featured,
-          t.active,
-          t.sort_order
-        FROM tools t
-        JOIN tool_categories tc ON t.category_id = tc.id
-        LIMIT 5
-      `;
-      toolsQuery = await query(sql);
-    } catch (e: any) {
-      toolsError = e.message;
-    }
+    // فحص هيكل جدول tools
+    const toolsColumns = await query(`
+      SELECT column_name, data_type 
+      FROM information_schema.columns 
+      WHERE table_name = 'tools'
+      ORDER BY ordinal_position
+    `);
+
+    // فحص هيكل جدول tool_categories
+    const categoriesColumns = await query(`
+      SELECT column_name, data_type 
+      FROM information_schema.columns 
+      WHERE table_name = 'tool_categories'
+      ORDER BY ordinal_position
+    `);
+
+    // فحص هيكل جدول articles
+    const articlesColumns = await query(`
+      SELECT column_name, data_type 
+      FROM information_schema.columns 
+      WHERE table_name = 'articles'
+      ORDER BY ordinal_position
+    `);
 
     return NextResponse.json({
       success: true,
-      toolsQuery,
-      toolsError,
+      toolsColumns,
+      categoriesColumns,
+      articlesColumns,
     });
   } catch (error: any) {
     return NextResponse.json(
