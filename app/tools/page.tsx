@@ -241,24 +241,7 @@ export default async function ToolsPage() {
 
       let toolRows: ToolRow[] = [];
       try {
-        toolRows = await query<ToolRow>(`
-          SELECT 
-            t.id,
-            t.slug,
-            t.title,
-            COALESCE(t.description, '') as description,
-            COALESCE(t.icon, '') as icon,
-            t.category_id,
-            tc.name as category_name,
-            t.href,
-            t.featured as featured,
-            t.active as active
-          FROM tools t
-          JOIN tool_categories tc ON t.category_id = tc.id
-          WHERE CAST(t.active AS TEXT) IN ('1', 'true', 't')
-          ORDER BY COALESCE(t.sort_order, 0) ASC, t.title ASC
-        `);
-      } catch {
+        // محاولة الاستعلام بأسماء الأعمدة الجديدة (PostgreSQL)
         toolRows = await query<ToolRow>(`
           SELECT 
             t.id,
@@ -273,9 +256,33 @@ export default async function ToolsPage() {
             t.is_active as active
           FROM tools t
           JOIN tool_categories tc ON t.category_id = tc.id
-          WHERE CAST(t.is_active AS TEXT) IN ('1', 'true', 't')
+          WHERE t.is_active = 1
           ORDER BY COALESCE(t.sort_order, 0) ASC, t.title ASC
         `);
+      } catch (e1) {
+        console.log('First query failed, trying alternative:', e1);
+        try {
+          // محاولة الاستعلام بأسماء الأعمدة القديمة (SQLite)
+          toolRows = await query<ToolRow>(`
+            SELECT 
+              t.id,
+              t.slug,
+              t.title,
+              COALESCE(t.description, '') as description,
+              COALESCE(t.icon, '') as icon,
+              t.category_id,
+              tc.name as category_name,
+              t.href,
+              t.featured as featured,
+              t.active as active
+            FROM tools t
+            JOIN tool_categories tc ON t.category_id = tc.id
+            WHERE t.active = 1
+            ORDER BY COALESCE(t.sort_order, 0) ASC, t.title ASC
+          `);
+        } catch (e2) {
+          console.log('Second query also failed:', e2);
+        }
       }
 
       tools = toolRows.map((row) => ({
@@ -285,29 +292,35 @@ export default async function ToolsPage() {
       }));
 
       try {
+        // محاولة الاستعلام بأسماء الأعمدة الجديدة (PostgreSQL)
         categories = await query<ToolCategory>(`
           SELECT 
             id,
             name,
-            slug,
+            name as slug,
             COALESCE(title, name) as title,
             icon,
             COALESCE(sort_order, 0) as sort_order
           FROM tool_categories
           ORDER BY COALESCE(sort_order, 0) ASC, name ASC
         `);
-      } catch {
-        categories = await query<ToolCategory>(`
-          SELECT 
-            id,
-            name,
-            name as slug,
-            name as title,
-            icon,
-            COALESCE(sort_order, 0) as sort_order
-          FROM tool_categories
-          ORDER BY COALESCE(sort_order, 0) ASC, name ASC
-        `);
+      } catch (e1) {
+        console.log('Categories query failed, trying alternative:', e1);
+        try {
+          categories = await query<ToolCategory>(`
+            SELECT 
+              id,
+              name,
+              slug,
+              COALESCE(title, name) as title,
+              icon,
+              COALESCE(sort_order, 0) as sort_order
+            FROM tool_categories
+            ORDER BY COALESCE(sort_order, 0) ASC, name ASC
+          `);
+        } catch (e2) {
+          console.log('Second categories query also failed:', e2);
+        }
       }
     } catch (error) {
       console.error('Error loading tools:', error);
