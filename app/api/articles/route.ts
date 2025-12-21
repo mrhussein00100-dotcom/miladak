@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
     const sortOrder = searchParams.get('sortOrder') || 'desc';
     const limit = searchParams.get('limit');
 
-    let whereClause = "WHERE a.published::text IN ('true', '1', 't')";
+    let whereClause = 'WHERE 1=1';
     const params: unknown[] = [];
 
     // Filter by category slug
@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
 
     // Filter featured only
     if (featured === 'true') {
-      whereClause += " AND a.featured::text IN ('true', '1', 't')";
+      whereClause += ' AND a.featured = true';
     }
 
     // Search in title, excerpt, and content
@@ -153,7 +153,7 @@ export async function OPTIONS() {
         ac.color,
         COUNT(a.id) as articles_count
       FROM article_categories ac
-      LEFT JOIN articles a ON ac.id = a.category_id AND a.published::text IN ('true', '1', 't')
+      LEFT JOIN articles a ON ac.id = a.category_id
       GROUP BY ac.id, ac.name, ac.slug, ac.description, ac.color
       ORDER BY ac.name ASC
     `);

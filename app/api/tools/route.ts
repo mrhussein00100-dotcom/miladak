@@ -55,7 +55,6 @@ export async function GET(request: NextRequest) {
         t.sort_order
       FROM tools t
       JOIN tool_categories tc ON t.category_id = tc.id
-      WHERE t.active::text IN ('true', '1', 't')
     `;
 
     const params: unknown[] = [];
@@ -74,7 +73,7 @@ export async function GET(request: NextRequest) {
 
     // Filter featured only
     if (featured === 'true') {
-      sql += " AND t.featured::text IN ('true', '1', 't')";
+      sql += ' AND t.featured = true';
     }
 
     // Search in title and description
