@@ -1,10 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db/database';
-import type { Article, ArticleCategory } from '@/types';
+import type { ArticleCategory } from '@/types';
 
-interface ArticleWithCategory extends Article {
-  category_slug: string;
-  category_color: string;
+interface ArticleRow {
+  id: number;
+  title: string;
+  slug: string;
+  excerpt: string | null;
+  category_id: string;
+  category_name: string;
+  category_color: string | null;
+  image: string | null;
+  featured_image: string | null;
+  author: string | null;
+  read_time: number;
+  views: number;
+  featured: number;
+  published: number;
+  meta_description: string | null;
+  meta_keywords: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 export async function GET(request: NextRequest) {
@@ -19,18 +35,18 @@ export async function GET(request: NextRequest) {
     const sortOrder = searchParams.get('sortOrder') || 'desc';
     const limit = searchParams.get('limit');
 
-    let whereClause = 'WHERE 1=1';
+    let whereClause = 'WHERE a.published = 1';
     const params: unknown[] = [];
 
-    // Filter by category slug
+    // Filter by category
     if (category) {
-      whereClause += ' AND ac.slug = ?';
+      whereClause += ' AND ac.name = ?';
       params.push(category);
     }
 
     // Filter featured only
     if (featured === 'true') {
-      whereClause += ' AND a.featured = true';
+      whereClause += ' AND a.featured = 1';
     }
 
     // Search in title, excerpt, and content
@@ -44,12 +60,12 @@ export async function GET(request: NextRequest) {
     const countSql = `
       SELECT COUNT(*) as total
       FROM articles a
-      JOIN article_categories ac ON a.category_id = ac.id
+      JOIN article_categories ac ON CAST(a.category_id AS INTEGER) = ac.id
       ${whereClause}
     `;
 
     const countResult = await query<{ total: number }>(countSql, params);
-    const total = countResult[0]?.total || 0;
+    const total = Number(countResult[0]?.total) || 0;
 
     // Validate sort column
     const validSortColumns = [
@@ -74,7 +90,6 @@ export async function GET(request: NextRequest) {
         a.excerpt,
         a.category_id,
         ac.name as category_name,
-        ac.slug as category_slug,
         ac.color as category_color,
         a.image,
         a.featured_image,
@@ -82,12 +97,13 @@ export async function GET(request: NextRequest) {
         a.read_time,
         a.views,
         a.featured,
+        a.published,
         a.meta_description,
         a.meta_keywords,
         a.created_at,
         a.updated_at
       FROM articles a
-      JOIN article_categories ac ON a.category_id = ac.id
+      JOIN article_categories ac ON CAST(a.category_id AS INTEGER) = ac.id
       ${whereClause}
       ORDER BY a.featured DESC, a.${sortColumn} ${order}
       LIMIT ? OFFSET ?
@@ -96,20 +112,18 @@ export async function GET(request: NextRequest) {
     const finalLimit = limit ? parseInt(limit) : pageSize;
     const articlesParams = [...params, finalLimit, offset];
 
-    // Update SQL to use PostgreSQL parameter syntax
-    const finalArticlesSql = articlesSql;
-
-    const articles = await query<ArticleWithCategory>(
-      finalArticlesSql,
-      articlesParams
-    );
+    const articles = await query<ArticleRow>(articlesSql, articlesParams);
 
     const totalPages = Math.ceil(total / pageSize);
 
     return NextResponse.json({
       success: true,
       data: {
-        items: articles,
+        items: articles.map((article) => ({
+          ...article,
+          category_slug:
+            article.category_name?.toLowerCase().replace(/\s+/g, '-') || '',
+        })),
         total,
         page,
         pageSize,
@@ -148,23 +162,25 @@ export async function OPTIONS() {
       SELECT 
         ac.id,
         ac.name,
-        ac.slug,
         ac.description,
         ac.color,
         COUNT(a.id) as articles_count
       FROM article_categories ac
-      LEFT JOIN articles a ON ac.id = a.category_id
-      GROUP BY ac.id, ac.name, ac.slug, ac.description, ac.color
+      LEFT JOIN articles a ON CAST(a.category_id AS INTEGER) = ac.id AND a.published = 1
+      GROUP BY ac.id, ac.name, ac.description, ac.color
       ORDER BY ac.name ASC
     `);
 
     return NextResponse.json({
       success: true,
-      data: categories,
+      data: categories.map((cat) => ({
+        ...cat,
+        slug: cat.name?.toLowerCase().replace(/\s+/g, '-') || '',
+      })),
       meta: {
         total: categories.length,
         totalArticles: categories.reduce(
-          (sum, cat) => sum + cat.articles_count,
+          (sum, cat) => sum + Number(cat.articles_count),
           0
         ),
       },

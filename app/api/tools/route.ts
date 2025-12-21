@@ -3,18 +3,17 @@ import { query } from '@/lib/db/database';
 
 interface ToolRow {
   id: number;
-  slug: string;
+  name: string;
   title: string;
   description: string | null;
   icon: string;
   category_id: number;
   category_name: string;
-  category_slug: string;
   category_title: string;
   category_icon: string | null;
   href: string;
-  featured: boolean | number;
-  active: boolean | number;
+  is_featured: number;
+  is_active: number;
   sort_order: number;
 }
 
@@ -40,21 +39,21 @@ export async function GET(request: NextRequest) {
     let sql = `
       SELECT 
         t.id,
-        t.slug,
+        t.name,
         t.title,
         t.description,
         t.icon,
         t.category_id,
         tc.name as category_name,
-        tc.slug as category_slug,
         tc.title as category_title,
         tc.icon as category_icon,
         t.href,
-        t.featured,
-        t.active,
+        t.is_featured,
+        t.is_active,
         t.sort_order
       FROM tools t
       JOIN tool_categories tc ON t.category_id = tc.id
+      WHERE t.is_active = 1
     `;
 
     const params: unknown[] = [];
@@ -66,14 +65,14 @@ export async function GET(request: NextRequest) {
         sql += ' AND t.category_id = ?';
         params.push(categoryId);
       } else {
-        sql += ' AND (tc.slug = ? OR tc.name = ?)';
-        params.push(category, category);
+        sql += ' AND tc.name = ?';
+        params.push(category);
       }
     }
 
     // Filter featured only
     if (featured === 'true') {
-      sql += ' AND t.featured = true';
+      sql += ' AND t.is_featured = 1';
     }
 
     // Search in title and description
@@ -126,7 +125,7 @@ export async function GET(request: NextRequest) {
             category: {
               id: tool.category_id,
               name: tool.category_name,
-              slug: tool.category_slug,
+              slug: tool.category_name.toLowerCase().replace(/\s+/g, '-'),
               icon: tool.category_icon,
               title: tool.category_title,
             },
@@ -138,14 +137,14 @@ export async function GET(request: NextRequest) {
 
         categoryMap.get(tool.category_id)!.tools.push({
           id: tool.id,
-          slug: tool.slug,
+          slug: tool.name,
           title: tool.title,
           description: tool.description,
           icon: tool.icon,
           category_id: tool.category_id,
           href: tool.href,
-          featured: toBoolean(tool.featured),
-          active: toBoolean(tool.active),
+          featured: toBoolean(tool.is_featured),
+          active: toBoolean(tool.is_active),
         });
       }
 
@@ -164,15 +163,15 @@ export async function GET(request: NextRequest) {
       success: true,
       data: tools.map((tool) => ({
         id: tool.id,
-        slug: tool.slug,
+        slug: tool.name,
         title: tool.title,
         description: tool.description || '',
         icon: tool.icon,
         category_id: tool.category_id,
         category_name: tool.category_name,
         href: tool.href,
-        featured: toBoolean(tool.featured),
-        active: toBoolean(tool.active),
+        featured: toBoolean(tool.is_featured),
+        active: toBoolean(tool.is_active),
       })),
       meta: {
         total: tools.length,
