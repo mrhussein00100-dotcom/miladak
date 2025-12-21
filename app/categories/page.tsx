@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import { CategoriesPageClient } from '@/components/CategoriesPageClient';
-import { queryAll } from '@/lib/db/unified-database';
+import { getCategories as getArticleCategories } from '@/lib/db/categories';
 
 export const metadata: Metadata = {
   title: 'تصنيفات المقالات - ميلادك',
@@ -39,15 +39,7 @@ interface Category {
 
 async function getCategories(): Promise<Category[]> {
   try {
-    const categories = queryAll<Category>(`
-      SELECT 
-        c.*,
-        COUNT(a.id) as article_count
-      FROM categories c
-      LEFT JOIN articles a ON c.id = a.category_id
-      GROUP BY c.id
-      ORDER BY article_count DESC, c.name ASC
-    `);
+    const categories = await getArticleCategories();
 
     return categories;
   } catch (error) {

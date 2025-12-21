@@ -3,18 +3,29 @@ import { query } from '@/lib/db/database';
 
 interface ToolRow {
   id: number;
-  name: string;
+  slug: string;
   title: string;
   description: string | null;
   icon: string;
   category_id: number;
   category_name: string;
+  category_slug: string;
   category_title: string;
   category_icon: string | null;
   href: string;
-  is_featured: number;
-  is_active: number;
+  featured: boolean | number;
+  active: boolean | number;
   sort_order: number;
+}
+
+function toBoolean(value: unknown): boolean {
+  return (
+    value === true ||
+    value === 1 ||
+    value === '1' ||
+    value === 'true' ||
+    value === 't'
+  );
 }
 
 export async function GET(request: NextRequest) {
@@ -29,54 +40,59 @@ export async function GET(request: NextRequest) {
     let sql = `
       SELECT 
         t.id,
-        t.name,
+        t.slug,
         t.title,
         t.description,
         t.icon,
         t.category_id,
         tc.name as category_name,
+        tc.slug as category_slug,
         tc.title as category_title,
         tc.icon as category_icon,
         t.href,
-        t.is_featured,
-        t.is_active,
+        t.featured,
+        t.active,
         t.sort_order
       FROM tools t
       JOIN tool_categories tc ON t.category_id = tc.id
-      WHERE t.is_active = 1
+      WHERE t.active = true
     `;
 
     const params: unknown[] = [];
 
-    let paramIndex = 1;
-
     // Filter by category name
     if (category) {
-      sql += ` AND tc.name = $${paramIndex}`;
-      params.push(category);
-      paramIndex++;
+      const categoryId = Number(category);
+      if (!Number.isNaN(categoryId) && category.trim() !== '') {
+        sql += ' AND t.category_id = ?';
+        params.push(categoryId);
+      } else {
+        sql += ' AND (tc.slug = ? OR tc.name = ?)';
+        params.push(category, category);
+      }
     }
 
     // Filter featured only
     if (featured === 'true') {
-      sql += ' AND t.is_featured = 1';
+      sql += ' AND t.featured = true';
     }
 
     // Search in title and description
     if (search) {
-      sql += ` AND (t.title ILIKE $${paramIndex} OR t.description ILIKE $${
-        paramIndex + 1
-      })`;
+      sql +=
+        " AND (LOWER(COALESCE(t.title, '')) LIKE LOWER(?) OR LOWER(COALESCE(t.description, '')) LIKE LOWER(?))";
       params.push(`%${search}%`, `%${search}%`);
-      paramIndex += 2;
     }
 
     sql += ' ORDER BY tc.sort_order ASC, t.sort_order ASC, t.title ASC';
 
     // Limit results
     if (limit) {
-      sql += ` LIMIT $${paramIndex}`;
-      params.push(parseInt(limit, 10));
+      const limitNum = parseInt(limit, 10);
+      if (!Number.isNaN(limitNum)) {
+        sql += ' LIMIT ?';
+        params.push(limitNum);
+      }
     }
 
     const tools = await query<ToolRow>(sql, params);
@@ -99,8 +115,8 @@ export async function GET(request: NextRequest) {
           icon: string;
           category_id: number;
           href: string;
-          featured: number;
-          active: number;
+          featured: boolean;
+          active: boolean;
         }[];
       }[] = [];
       const categoryMap = new Map<number, (typeof groupedTools)[0]>();
@@ -111,7 +127,7 @@ export async function GET(request: NextRequest) {
             category: {
               id: tool.category_id,
               name: tool.category_name,
-              slug: tool.category_name,
+              slug: tool.category_slug,
               icon: tool.category_icon,
               title: tool.category_title,
             },
@@ -123,14 +139,14 @@ export async function GET(request: NextRequest) {
 
         categoryMap.get(tool.category_id)!.tools.push({
           id: tool.id,
-          slug: tool.name,
+          slug: tool.slug,
           title: tool.title,
           description: tool.description,
           icon: tool.icon,
           category_id: tool.category_id,
           href: tool.href,
-          featured: tool.is_featured,
-          active: tool.is_active,
+          featured: toBoolean(tool.featured),
+          active: toBoolean(tool.active),
         });
       }
 
@@ -149,15 +165,15 @@ export async function GET(request: NextRequest) {
       success: true,
       data: tools.map((tool) => ({
         id: tool.id,
-        slug: tool.name,
+        slug: tool.slug,
         title: tool.title,
         description: tool.description || '',
         icon: tool.icon,
         category_id: tool.category_id,
         category_name: tool.category_name,
         href: tool.href,
-        featured: tool.is_featured,
-        active: tool.is_active,
+        featured: toBoolean(tool.featured),
+        active: toBoolean(tool.active),
       })),
       meta: {
         total: tools.length,

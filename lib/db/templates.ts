@@ -3,12 +3,7 @@
  * إنشاء جدول جديد للقوالب في قاعدة البيانات الموحدة
  */
 
-import {
-  queryAll,
-  queryOne,
-  execute,
-  getUnifiedDatabase,
-} from './unified-database';
+import { execute, query, queryOne } from './database';
 
 // أنواع البيانات
 export interface AITemplate {
@@ -16,10 +11,10 @@ export interface AITemplate {
   name: string;
   category: 'birthday' | 'zodiac' | 'age' | 'events' | 'general';
   template_content: string;
-  variables: string; // JSON array
+  variables: string[]; // JSON array
   min_words: number;
   max_words: number;
-  is_active: number;
+  is_active: boolean;
   created_at: string;
 }
 
@@ -33,35 +28,88 @@ export interface AITemplateInput {
   is_active?: boolean;
 }
 
-// إنشاء جدول القوالب إذا لم يكن موجوداً
-export function initTemplatesTable(): void {
-  const db = getUnifiedDatabase();
+interface AITemplateRow {
+  id: number;
+  name: string;
+  category: AITemplate['category'];
+  template_content: string;
+  variables: unknown;
+  min_words: number | null;
+  max_words: number | null;
+  is_active: unknown;
+  created_at: string;
+}
 
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS ai_templates (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      category TEXT NOT NULL CHECK(category IN ('birthday', 'zodiac', 'age', 'events', 'general')),
-      template_content TEXT NOT NULL,
-      variables TEXT DEFAULT '[]',
-      min_words INTEGER DEFAULT 500,
-      max_words INTEGER DEFAULT 2000,
-      is_active INTEGER DEFAULT 1,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
-
-  // إضافة قوالب افتراضية إذا كان الجدول فارغاً
-  const count = queryOne<{ count: number }>(
-    'SELECT COUNT(*) as count FROM ai_templates'
+function toBoolean(value: unknown): boolean {
+  return (
+    value === true ||
+    value === 1 ||
+    value === '1' ||
+    value === 'true' ||
+    value === 't'
   );
-  if (count?.count === 0) {
-    insertDefaultTemplates();
+}
+
+function parseVariables(value: unknown): string[] {
+  if (Array.isArray(value)) {
+    return value.map((v) => String(v));
+  }
+
+  if (typeof value === 'string') {
+    try {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed.map((v) => String(v)) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  return [];
+}
+
+function mapTemplateRow(row: AITemplateRow): AITemplate {
+  return {
+    id: row.id,
+    name: row.name,
+    category: row.category,
+    template_content: row.template_content,
+    variables: parseVariables(row.variables),
+    min_words: Number(row.min_words ?? 500),
+    max_words: Number(row.max_words ?? 2000),
+    is_active: toBoolean(row.is_active),
+    created_at: row.created_at,
+  };
+}
+
+let templatesInitialized = false;
+
+// إنشاء جدول القوالب إذا لم يكن موجوداً
+export async function initTemplatesTable(): Promise<void> {
+  if (templatesInitialized) return;
+
+  if (process.env.NEXT_PHASE === 'phase-production-build') {
+    templatesInitialized = true;
+    return;
+  }
+
+  templatesInitialized = true;
+
+  try {
+    // إضافة قوالب افتراضية إذا كان الجدول فارغاً
+    const countRow = await queryOne<{ count: number | string }>(
+      'SELECT COUNT(*) as count FROM ai_templates'
+    );
+    const count = Number((countRow as any)?.count ?? 0);
+    if (count === 0) {
+      await insertDefaultTemplates();
+    }
+  } catch {
+    // تجاهل
   }
 }
 
 // إدراج القوالب الافتراضية
-function insertDefaultTemplates(): void {
+async function insertDefaultTemplates(): Promise<void> {
   const templates: AITemplateInput[] = [
     {
       name: 'مقال عيد ميلاد شامل',
@@ -263,48 +311,81 @@ function insertDefaultTemplates(): void {
     },
   ];
 
-  templates.forEach((template) => {
-    createTemplateInternal(template);
-  });
+  for (const template of templates) {
+    await createTemplateInternal(template);
+  }
 }
 
 // جلب جميع القوالب
-export function getTemplates(
+export async function getTemplates(
   options: {
     category?: AITemplate['category'];
     activeOnly?: boolean;
   } = {}
-): AITemplate[] {
-  initTemplatesTable();
+): Promise<AITemplate[]> {
+  await initTemplatesTable();
 
   const { category, activeOnly = true } = options;
 
-  let query = 'SELECT * FROM ai_templates WHERE 1=1';
+  let sql = 'SELECT * FROM ai_templates WHERE 1=1';
   const params: any[] = [];
 
   if (category) {
-    query += ' AND category = ?';
+    sql += ' AND category = ?';
     params.push(category);
   }
 
   if (activeOnly) {
-    query += ' AND is_active = 1';
+    sql += " AND CAST(is_active AS TEXT) IN ('1', 'true', 't')";
   }
 
-  query += ' ORDER BY name ASC';
+  sql += ' ORDER BY name ASC';
 
-  return queryAll<AITemplate>(query, params);
+  const rows = await query<AITemplateRow>(sql, params);
+  return rows.map(mapTemplateRow);
 }
 
 // جلب قالب واحد
-export function getTemplateById(id: number): AITemplate | undefined {
-  initTemplatesTable();
-  return queryOne<AITemplate>('SELECT * FROM ai_templates WHERE id = ?', [id]);
+export async function getTemplateById(
+  id: number
+): Promise<AITemplate | undefined> {
+  await initTemplatesTable();
+  const row = await queryOne<AITemplateRow>(
+    'SELECT * FROM ai_templates WHERE id = ?',
+    [id]
+  );
+  return row ? mapTemplateRow(row) : undefined;
 }
 
 // إنشاء قالب جديد (داخلي - بدون تهيئة)
-function createTemplateInternal(input: AITemplateInput): number {
-  const result = execute(
+async function createTemplateInternal(input: AITemplateInput): Promise<number> {
+  const variables = JSON.stringify(input.variables || []);
+  const minWords = input.min_words ?? 500;
+  const maxWords = input.max_words ?? 2000;
+  const isActive = input.is_active !== false;
+
+  try {
+    const row = await queryOne<{ id: number }>(
+      `INSERT INTO ai_templates (
+        name, category, template_content, variables, min_words, max_words, is_active
+      ) VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id`,
+      [
+        input.name,
+        input.category,
+        input.template_content,
+        variables,
+        minWords,
+        maxWords,
+        isActive,
+      ]
+    );
+
+    if (row?.id !== undefined) return Number(row.id);
+  } catch {
+    // تجاهل
+  }
+
+  const result = await execute(
     `INSERT INTO ai_templates (
       name, category, template_content, variables, min_words, max_words, is_active
     ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
@@ -312,28 +393,28 @@ function createTemplateInternal(input: AITemplateInput): number {
       input.name,
       input.category,
       input.template_content,
-      JSON.stringify(input.variables || []),
-      input.min_words || 500,
-      input.max_words || 2000,
-      input.is_active !== false ? 1 : 0,
+      variables,
+      minWords,
+      maxWords,
+      isActive,
     ]
   );
 
-  return result.lastInsertRowid as number;
+  return result.lastInsertRowid;
 }
 
 // إنشاء قالب جديد (خارجي - مع تهيئة)
-export function createTemplate(input: AITemplateInput): number {
-  initTemplatesTable();
-  return createTemplateInternal(input);
+export async function createTemplate(input: AITemplateInput): Promise<number> {
+  await initTemplatesTable();
+  return await createTemplateInternal(input);
 }
 
 // تحديث قالب
-export function updateTemplate(
+export async function updateTemplate(
   id: number,
   input: Partial<AITemplateInput>
-): boolean {
-  const template = getTemplateById(id);
+): Promise<boolean> {
+  const template = await getTemplateById(id);
   if (!template) return false;
 
   const updates: string[] = [];
@@ -365,30 +446,33 @@ export function updateTemplate(
   }
   if (input.is_active !== undefined) {
     updates.push('is_active = ?');
-    params.push(input.is_active ? 1 : 0);
+    params.push(input.is_active);
   }
 
   if (updates.length === 0) return true;
 
   params.push(id);
-  execute(`UPDATE ai_templates SET ${updates.join(', ')} WHERE id = ?`, params);
+  await execute(
+    `UPDATE ai_templates SET ${updates.join(', ')} WHERE id = ?`,
+    params
+  );
 
   return true;
 }
 
 // حذف قالب
-export function deleteTemplate(id: number): boolean {
-  const result = execute('DELETE FROM ai_templates WHERE id = ?', [id]);
+export async function deleteTemplate(id: number): Promise<boolean> {
+  const result = await execute('DELETE FROM ai_templates WHERE id = ?', [id]);
   return result.changes > 0;
 }
 
 // تفعيل/تعطيل قالب
-export function toggleTemplate(id: number): boolean {
-  const template = getTemplateById(id);
+export async function toggleTemplate(id: number): Promise<boolean> {
+  const template = await getTemplateById(id);
   if (!template) return false;
 
-  execute('UPDATE ai_templates SET is_active = ? WHERE id = ?', [
-    template.is_active ? 0 : 1,
+  await execute('UPDATE ai_templates SET is_active = ? WHERE id = ?', [
+    !template.is_active,
     id,
   ]);
 

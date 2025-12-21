@@ -3,12 +3,7 @@
  * إنشاء جداول جديدة للنشر التلقائي في قاعدة البيانات الموحدة
  */
 
-import {
-  queryAll,
-  queryOne,
-  execute,
-  getUnifiedDatabase,
-} from './unified-database';
+import { execute, query, queryOne } from './database';
 
 // أنواع البيانات
 export interface AutoPublishSettings {
@@ -43,64 +38,106 @@ export interface AutoPublishSettingsInput {
   content_length?: 'short' | 'medium' | 'long' | 'comprehensive';
 }
 
+function isPostgresDatabase(): boolean {
+  return (
+    (process.env.VERCEL_URL && process.env.NODE_ENV === 'production') ||
+    !!process.env.POSTGRES_URL ||
+    process.env.DATABASE_URL?.startsWith('postgres') ||
+    process.env.DATABASE_TYPE === 'postgres'
+  );
+}
+
+let autoPublishTablesInitialized = false;
+
 // إنشاء جداول النشر التلقائي إذا لم تكن موجودة
-export function initAutoPublishTables(): void {
-  const db = getUnifiedDatabase();
+export async function initAutoPublishTables(): Promise<void> {
+  if (autoPublishTablesInitialized) return;
 
-  // جدول الإعدادات
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS auto_publish_settings (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      is_enabled INTEGER DEFAULT 0,
-      publish_time TEXT DEFAULT '09:00',
-      frequency TEXT DEFAULT 'daily' CHECK(frequency IN ('daily', 'weekly')),
-      topics TEXT DEFAULT '[]',
-      default_category_id INTEGER,
-      ai_provider TEXT DEFAULT 'gemini',
-      content_length TEXT DEFAULT 'medium' CHECK(content_length IN ('short', 'medium', 'long', 'comprehensive')),
-      last_run DATETIME,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
+  const isPostgres = isPostgresDatabase();
 
-  // جدول السجل
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS auto_publish_log (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      article_id INTEGER,
-      status TEXT CHECK(status IN ('success', 'failed', 'retry')),
-      error_message TEXT,
-      retry_count INTEGER DEFAULT 0,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
+  if (isPostgres) {
+    await execute(`
+      CREATE TABLE IF NOT EXISTS auto_publish_settings (
+        id SERIAL PRIMARY KEY,
+        is_enabled INTEGER DEFAULT 0,
+        publish_time TEXT DEFAULT '09:00',
+        frequency TEXT DEFAULT 'daily' CHECK(frequency IN ('daily', 'weekly')),
+        topics TEXT DEFAULT '[]',
+        default_category_id INTEGER,
+        ai_provider TEXT DEFAULT 'gemini',
+        content_length TEXT DEFAULT 'medium' CHECK(content_length IN ('short', 'medium', 'long', 'comprehensive')),
+        last_run TIMESTAMP,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
 
-  // إضافة إعدادات افتراضية إذا لم تكن موجودة
-  const settings = queryOne<{ count: number }>(
+    await execute(`
+      CREATE TABLE IF NOT EXISTS auto_publish_log (
+        id SERIAL PRIMARY KEY,
+        article_id INTEGER,
+        status TEXT CHECK(status IN ('success', 'failed', 'retry')),
+        error_message TEXT,
+        retry_count INTEGER DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+  } else {
+    await execute(`
+      CREATE TABLE IF NOT EXISTS auto_publish_settings (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        is_enabled INTEGER DEFAULT 0,
+        publish_time TEXT DEFAULT '09:00',
+        frequency TEXT DEFAULT 'daily' CHECK(frequency IN ('daily', 'weekly')),
+        topics TEXT DEFAULT '[]',
+        default_category_id INTEGER,
+        ai_provider TEXT DEFAULT 'gemini',
+        content_length TEXT DEFAULT 'medium' CHECK(content_length IN ('short', 'medium', 'long', 'comprehensive')),
+        last_run DATETIME,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    await execute(`
+      CREATE TABLE IF NOT EXISTS auto_publish_log (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        article_id INTEGER,
+        status TEXT CHECK(status IN ('success', 'failed', 'retry')),
+        error_message TEXT,
+        retry_count INTEGER DEFAULT 0,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+  }
+
+  const settings = await queryOne<{ count: number | string }>(
     'SELECT COUNT(*) as count FROM auto_publish_settings'
   );
-  if (settings?.count === 0) {
-    execute(`
+  if (Number(settings?.count || 0) === 0) {
+    await execute(`
       INSERT INTO auto_publish_settings (
         is_enabled, publish_time, frequency, topics, ai_provider, content_length
       ) VALUES (0, '09:00', 'daily', '[]', 'gemini', 'medium')
     `);
   }
+
+  autoPublishTablesInitialized = true;
 }
 
 // جلب إعدادات النشر التلقائي
-export function getAutoPublishSettings(): AutoPublishSettings | undefined {
-  initAutoPublishTables();
-  return queryOne<AutoPublishSettings>(
+export async function getAutoPublishSettings(): Promise<
+  AutoPublishSettings | undefined
+> {
+  await initAutoPublishTables();
+  return await queryOne<AutoPublishSettings>(
     'SELECT * FROM auto_publish_settings LIMIT 1'
   );
 }
 
 // تحديث إعدادات النشر التلقائي
-export function updateAutoPublishSettings(
+export async function updateAutoPublishSettings(
   input: AutoPublishSettingsInput
-): boolean {
-  initAutoPublishTables();
+): Promise<boolean> {
+  await initAutoPublishTables();
 
   const updates: string[] = [];
   const params: any[] = [];
@@ -136,7 +173,7 @@ export function updateAutoPublishSettings(
 
   if (updates.length === 0) return true;
 
-  execute(
+  await execute(
     `UPDATE auto_publish_settings SET ${updates.join(', ')} WHERE id = 1`,
     params
   );
@@ -145,75 +182,92 @@ export function updateAutoPublishSettings(
 }
 
 // تحديث وقت آخر تشغيل
-export function updateLastRun(): void {
-  initAutoPublishTables();
-  execute(
-    'UPDATE auto_publish_settings SET last_run = datetime("now") WHERE id = 1'
+export async function updateLastRun(): Promise<void> {
+  await initAutoPublishTables();
+  await execute(
+    'UPDATE auto_publish_settings SET last_run = CURRENT_TIMESTAMP WHERE id = 1'
   );
 }
 
 // إضافة سجل نشر
-export function addPublishLog(log: {
+export async function addPublishLog(log: {
   article_id?: number;
   status: 'success' | 'failed' | 'retry';
   error_message?: string;
   retry_count?: number;
-}): number {
-  initAutoPublishTables();
+}): Promise<number> {
+  await initAutoPublishTables();
 
-  const result = execute(
+  const params = [
+    log.article_id || null,
+    log.status,
+    log.error_message || null,
+    log.retry_count || 0,
+  ];
+
+  if (isPostgresDatabase()) {
+    const row = await queryOne<{ id: number | string }>(
+      `INSERT INTO auto_publish_log (article_id, status, error_message, retry_count)
+       VALUES (?, ?, ?, ?) RETURNING id`,
+      params
+    );
+    return Number(row?.id || 0);
+  }
+
+  const result = await execute(
     `INSERT INTO auto_publish_log (article_id, status, error_message, retry_count)
      VALUES (?, ?, ?, ?)`,
-    [
-      log.article_id || null,
-      log.status,
-      log.error_message || null,
-      log.retry_count || 0,
-    ]
+    params
   );
 
   return result.lastInsertRowid as number;
 }
 
 // جلب سجلات النشر
-export function getPublishLogs(
+export async function getPublishLogs(
   options: {
     limit?: number;
     status?: 'success' | 'failed' | 'retry';
     days?: number;
   } = {}
-): AutoPublishLog[] {
-  initAutoPublishTables();
+): Promise<AutoPublishLog[]> {
+  await initAutoPublishTables();
 
   const { limit = 30, status, days = 30 } = options;
 
-  let query = `
+  const isPostgres = isPostgresDatabase();
+  const sinceExpr = isPostgres
+    ? "NOW() - (? * INTERVAL '1 day')"
+    : "datetime('now', '-' || ? || ' days')";
+
+  let sql = `
     SELECT * FROM auto_publish_log 
-    WHERE created_at >= datetime('now', '-${days} days')
+    WHERE created_at >= ${sinceExpr}
   `;
   const params: any[] = [];
+  params.push(days);
 
   if (status) {
-    query += ' AND status = ?';
+    sql += ' AND status = ?';
     params.push(status);
   }
 
-  query += ' ORDER BY created_at DESC LIMIT ?';
+  sql += ' ORDER BY created_at DESC LIMIT ?';
   params.push(limit);
 
-  return queryAll<AutoPublishLog>(query, params);
+  return await query<AutoPublishLog>(sql, params);
 }
 
 // جلب آخر سجل
-export function getLastPublishLog(): AutoPublishLog | undefined {
-  initAutoPublishTables();
-  return queryOne<AutoPublishLog>(
+export async function getLastPublishLog(): Promise<AutoPublishLog | undefined> {
+  await initAutoPublishTables();
+  return await queryOne<AutoPublishLog>(
     'SELECT * FROM auto_publish_log ORDER BY created_at DESC LIMIT 1'
   );
 }
 
 // تحديث سجل (لإعادة المحاولة)
-export function updatePublishLog(
+export async function updatePublishLog(
   id: number,
   updates: {
     status?: 'success' | 'failed' | 'retry';
@@ -221,7 +275,9 @@ export function updatePublishLog(
     error_message?: string;
     retry_count?: number;
   }
-): boolean {
+): Promise<boolean> {
+  await initAutoPublishTables();
+
   const updateParts: string[] = [];
   const params: any[] = [];
 
@@ -245,7 +301,7 @@ export function updatePublishLog(
   if (updateParts.length === 0) return true;
 
   params.push(id);
-  const result = execute(
+  const result = await execute(
     `UPDATE auto_publish_log SET ${updateParts.join(', ')} WHERE id = ?`,
     params
   );
@@ -254,51 +310,65 @@ export function updatePublishLog(
 }
 
 // حذف السجلات القديمة
-export function cleanOldLogs(daysToKeep: number = 30): number {
-  initAutoPublishTables();
+export async function cleanOldLogs(daysToKeep: number = 30): Promise<number> {
+  await initAutoPublishTables();
 
-  const result = execute(
-    `DELETE FROM auto_publish_log WHERE created_at < datetime('now', '-${daysToKeep} days')`
+  const isPostgres = isPostgresDatabase();
+  const cutoffExpr = isPostgres
+    ? "NOW() - (? * INTERVAL '1 day')"
+    : "datetime('now', '-' || ? || ' days')";
+
+  const result = await execute(
+    `DELETE FROM auto_publish_log WHERE created_at < ${cutoffExpr}`,
+    [daysToKeep]
   );
 
   return result.changes;
 }
 
 // إحصائيات النشر التلقائي
-export function getAutoPublishStats(): {
+export async function getAutoPublishStats(): Promise<{
   totalPublished: number;
   successCount: number;
   failedCount: number;
   lastSuccess: string | null;
   lastFailed: string | null;
-} {
-  initAutoPublishTables();
+}> {
+  await initAutoPublishTables();
 
-  const stats = queryOne<{
-    totalPublished: number;
-    successCount: number;
-    failedCount: number;
-  }>(`
+  const isPostgres = isPostgresDatabase();
+  const sinceExpr = isPostgres
+    ? "NOW() - (? * INTERVAL '1 day')"
+    : "datetime('now', '-' || ? || ' days')";
+
+  const stats = await queryOne<{
+    totalPublished: number | string;
+    successCount: number | string | null;
+    failedCount: number | string | null;
+  }>(
+    `
     SELECT 
       COUNT(*) as totalPublished,
-      SUM(CASE WHEN status = 'success' THEN 1 ELSE 0 END) as successCount,
-      SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) as failedCount
+      COALESCE(SUM(CASE WHEN status = 'success' THEN 1 ELSE 0 END), 0) as successCount,
+      COALESCE(SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END), 0) as failedCount
     FROM auto_publish_log
-    WHERE created_at >= datetime('now', '-30 days')
-  `);
+    WHERE created_at >= ${sinceExpr}
+  `,
+    [30]
+  );
 
-  const lastSuccess = queryOne<{ created_at: string }>(
+  const lastSuccess = await queryOne<{ created_at: string }>(
     `SELECT created_at FROM auto_publish_log WHERE status = 'success' ORDER BY created_at DESC LIMIT 1`
   );
 
-  const lastFailed = queryOne<{ created_at: string }>(
+  const lastFailed = await queryOne<{ created_at: string }>(
     `SELECT created_at FROM auto_publish_log WHERE status = 'failed' ORDER BY created_at DESC LIMIT 1`
   );
 
   return {
-    totalPublished: stats?.totalPublished || 0,
-    successCount: stats?.successCount || 0,
-    failedCount: stats?.failedCount || 0,
+    totalPublished: Number(stats?.totalPublished || 0),
+    successCount: Number(stats?.successCount || 0),
+    failedCount: Number(stats?.failedCount || 0),
     lastSuccess: lastSuccess?.created_at || null,
     lastFailed: lastFailed?.created_at || null,
   };

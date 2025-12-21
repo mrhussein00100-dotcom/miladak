@@ -51,7 +51,7 @@ database.sqlite
 Thumbs.db
 
 # Logs
-logs
+/logs/
 *.log
 
 # Backup files

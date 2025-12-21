@@ -14,6 +14,63 @@ interface DatabaseConfig {
   ssl?: boolean;
 }
 
+function convertQuestionMarkPlaceholders(
+  sql: string,
+  params: unknown[]
+): string {
+  if (!sql.includes('?') || params.length === 0) return sql;
+
+  let maxIndex = 0;
+  const dollarRegex = /\$(\d+)/g;
+  let match: RegExpExecArray | null;
+  while ((match = dollarRegex.exec(sql)) !== null) {
+    const n = parseInt(match[1], 10);
+    if (!Number.isNaN(n) && n > maxIndex) maxIndex = n;
+  }
+
+  let nextIndex = maxIndex + 1;
+
+  let result = '';
+  let inSingle = false;
+  let inDouble = false;
+
+  for (let i = 0; i < sql.length; i++) {
+    const ch = sql[i];
+
+    if (ch === "'" && !inDouble) {
+      if (inSingle && sql[i + 1] === "'") {
+        result += "''";
+        i++;
+        continue;
+      }
+      inSingle = !inSingle;
+      result += ch;
+      continue;
+    }
+
+    if (ch === '"' && !inSingle) {
+      if (inDouble && sql[i + 1] === '"') {
+        result += '""';
+        i++;
+        continue;
+      }
+      inDouble = !inDouble;
+      result += ch;
+      continue;
+    }
+
+    if (ch === '?' && !inSingle && !inDouble) {
+      result += `$${nextIndex}`;
+      nextIndex++;
+      continue;
+    }
+
+    result += ch;
+  }
+
+  return result;
+}
+
 class PostgreSQLManager {
   private pool: Pool | null = null;
   private config: DatabaseConfig | null = null;
@@ -86,7 +143,11 @@ class PostgreSQLManager {
     }
 
     try {
-      const result: QueryResult = await this.pool!.query(text, params);
+      const normalizedText = convertQuestionMarkPlaceholders(text, params);
+      const result: QueryResult = await this.pool!.query(
+        normalizedText,
+        params
+      );
       return result.rows as T[];
     } catch (error) {
       console.error('Database query error:', error);
@@ -111,7 +172,8 @@ class PostgreSQLManager {
     }
 
     try {
-      return await this.pool!.query(text, params);
+      const normalizedText = convertQuestionMarkPlaceholders(text, params);
+      return await this.pool!.query(normalizedText, params);
     } catch (error) {
       console.error('Database execute error:', error);
       throw error;
@@ -239,6 +301,9 @@ class PostgreSQLManager {
         description TEXT,
         color VARCHAR(50),
         icon VARCHAR(100),
+        image VARCHAR(500),
+        parent_id INTEGER,
+        article_count INTEGER DEFAULT 0,
         sort_order INTEGER DEFAULT 0,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -256,11 +321,42 @@ class PostgreSQLManager {
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
 
+      -- جدول الأدوات السريعة
+      CREATE TABLE IF NOT EXISTS quick_tools (
+        id TEXT PRIMARY KEY,
+        href TEXT NOT NULL,
+        label TEXT NOT NULL,
+        icon TEXT,
+        color TEXT,
+        emoji TEXT,
+        is_scroll BOOLEAN DEFAULT FALSE,
+        display_order INTEGER DEFAULT 0,
+        is_active BOOLEAN DEFAULT TRUE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      -- جدول قوالب الذكاء الاصطناعي
+      CREATE TABLE IF NOT EXISTS ai_templates (
+        id SERIAL PRIMARY KEY,
+        name TEXT NOT NULL,
+        category TEXT NOT NULL,
+        template_content TEXT NOT NULL,
+        variables JSONB DEFAULT '[]'::jsonb,
+        min_words INTEGER DEFAULT 500,
+        max_words INTEGER DEFAULT 2000,
+        is_active BOOLEAN DEFAULT TRUE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
       -- الفهارس
       CREATE INDEX IF NOT EXISTS idx_tools_slug ON tools(slug);
       CREATE INDEX IF NOT EXISTS idx_tools_category ON tools(category_id);
       CREATE INDEX IF NOT EXISTS idx_articles_slug ON articles(slug);
       CREATE INDEX IF NOT EXISTS idx_articles_published ON articles(published);
+      CREATE INDEX IF NOT EXISTS idx_quick_tools_active_order ON quick_tools(is_active, display_order);
+      CREATE INDEX IF NOT EXISTS idx_ai_templates_category_active ON ai_templates(category, is_active);
     `;
 
     const statements = schema.split(';').filter((stmt) => stmt.trim());

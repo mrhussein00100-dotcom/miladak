@@ -1,6 +1,28 @@
 import { NextResponse } from 'next/server';
 import { getDatabase } from '@/lib/db/database';
 
+interface QuickToolRow {
+  id: string;
+  href: string;
+  label: string;
+  icon: string;
+  color: string;
+  emoji: string;
+  is_scroll: boolean | number | string | null;
+  display_order: number | string | null;
+  is_active: boolean | number | string | null;
+}
+
+function toBoolean(value: unknown): boolean {
+  return (
+    value === true ||
+    value === 1 ||
+    value === '1' ||
+    value === 'true' ||
+    value === 't'
+  );
+}
+
 // الأدوات الافتراضية
 const DEFAULT_QUICK_TOOLS = [
   {
@@ -66,9 +88,9 @@ export async function GET() {
     const db = await getDatabase();
 
     // محاولة جلب من قاعدة البيانات
-    const tools = await db.all(`
+    const tools = await db.all<QuickToolRow>(`
       SELECT * FROM quick_tools 
-      WHERE is_active = 1 
+      WHERE CAST(is_active AS TEXT) IN ('1', 'true', 't')
       ORDER BY display_order ASC
     `);
 
@@ -80,9 +102,9 @@ export async function GET() {
         icon: tool.icon,
         color: tool.color,
         emoji: tool.emoji,
-        isScroll: tool.is_scroll === 1,
-        order: tool.display_order,
-        isActive: tool.is_active === 1,
+        isScroll: toBoolean(tool.is_scroll),
+        order: Number(tool.display_order ?? 0),
+        isActive: toBoolean(tool.is_active),
       }));
 
       return NextResponse.json({ success: true, tools: formattedTools });
@@ -103,31 +125,34 @@ export async function POST(request: Request) {
     const { id, href, label, icon, color, emoji, isScroll, order, isActive } =
       body;
 
+    if (typeof id !== 'string' || id.trim() === '') {
+      return NextResponse.json(
+        { success: false, error: 'معرف الأداة مطلوب' },
+        { status: 400 }
+      );
+    }
+
     const db = await getDatabase();
 
-    // إنشاء الجدول إذا لم يكن موجوداً
-    await db.run(`
-      CREATE TABLE IF NOT EXISTS quick_tools (
-        id TEXT PRIMARY KEY,
-        href TEXT NOT NULL,
-        label TEXT NOT NULL,
-        icon TEXT NOT NULL,
-        color TEXT NOT NULL,
-        emoji TEXT NOT NULL,
-        is_scroll INTEGER DEFAULT 0,
-        display_order INTEGER DEFAULT 0,
-        is_active INTEGER DEFAULT 1,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
+    const displayOrder = Number(order ?? 0);
 
-    // إدراج أو تحديث
+    // Upsert (PostgreSQL + SQLite)
     await db.run(
       `
-      INSERT OR REPLACE INTO quick_tools 
-      (id, href, label, icon, color, emoji, is_scroll, display_order, is_active, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+      INSERT INTO quick_tools
+        (id, href, label, icon, color, emoji, is_scroll, display_order, is_active, updated_at)
+      VALUES
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+      ON CONFLICT (id) DO UPDATE SET
+        href = EXCLUDED.href,
+        label = EXCLUDED.label,
+        icon = EXCLUDED.icon,
+        color = EXCLUDED.color,
+        emoji = EXCLUDED.emoji,
+        is_scroll = EXCLUDED.is_scroll,
+        display_order = EXCLUDED.display_order,
+        is_active = EXCLUDED.is_active,
+        updated_at = CURRENT_TIMESTAMP
     `,
       [
         id,
@@ -136,9 +161,9 @@ export async function POST(request: Request) {
         icon,
         color,
         emoji,
-        isScroll ? 1 : 0,
-        order,
-        isActive ? 1 : 0,
+        toBoolean(isScroll),
+        displayOrder,
+        toBoolean(isActive),
       ]
     );
 

@@ -126,7 +126,41 @@ function initializeInMemoryDatabase(database: Database.Database) {
       description TEXT,
       color TEXT,
       icon TEXT,
+      image TEXT,
+      parent_id INTEGER,
+      article_count INTEGER DEFAULT 0,
       sort_order INTEGER DEFAULT 0,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
+
+  database.exec(`
+    CREATE TABLE IF NOT EXISTS quick_tools (
+      id TEXT PRIMARY KEY,
+      href TEXT NOT NULL,
+      label TEXT NOT NULL,
+      icon TEXT,
+      color TEXT,
+      emoji TEXT,
+      is_scroll INTEGER DEFAULT 0,
+      display_order INTEGER DEFAULT 0,
+      is_active INTEGER DEFAULT 1,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
+
+  database.exec(`
+    CREATE TABLE IF NOT EXISTS ai_templates (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      category TEXT NOT NULL,
+      template_content TEXT NOT NULL,
+      variables TEXT DEFAULT '[]',
+      min_words INTEGER DEFAULT 500,
+      max_words INTEGER DEFAULT 2000,
+      is_active INTEGER DEFAULT 1,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );

@@ -3,12 +3,9 @@
  * لا ينشئ جداول جديدة - يعمل مع الجداول الموجودة
  */
 
-import {
-  queryAll,
-  queryOne,
-  execute,
-  getUnifiedDatabase,
-} from './unified-database';
+import { execute, query, queryOne } from './database';
+
+const ARTICLE_CATEGORIES_TABLE = 'article_categories';
 
 // أنواع البيانات
 export interface Category {
@@ -51,54 +48,27 @@ export function generateSlug(name: string): string {
 }
 
 // التأكد من وجود الأعمدة الجديدة
-export function ensureCategoryColumns(): void {
-  const db = getUnifiedDatabase();
-
-  // إضافة عمود icon إذا لم يكن موجوداً
-  try {
-    db.exec(`ALTER TABLE categories ADD COLUMN icon TEXT DEFAULT ''`);
-  } catch (e) {
-    // العمود موجود بالفعل
+export async function ensureCategoryColumns(): Promise<void> {
+  // تجاهل أثناء البناء
+  if (process.env.NEXT_PHASE === 'phase-production-build') {
+    return;
   }
 
-  // إضافة عمود parent_id إذا لم يكن موجوداً
-  try {
-    db.exec(
-      `ALTER TABLE categories ADD COLUMN parent_id INTEGER REFERENCES categories(id)`
-    );
-  } catch (e) {
-    // العمود موجود بالفعل
-  }
-
-  // إضافة عمود sort_order إذا لم يكن موجوداً
-  try {
-    db.exec(`ALTER TABLE categories ADD COLUMN sort_order INTEGER DEFAULT 0`);
-  } catch (e) {
-    // العمود موجود بالفعل
-  }
-
-  // إضافة عمود article_count إذا لم يكن موجوداً
-  try {
-    db.exec(
-      `ALTER TABLE categories ADD COLUMN article_count INTEGER DEFAULT 0`
-    );
-  } catch (e) {
-    // العمود موجود بالفعل
-  }
+  return;
 }
 
 // جلب جميع التصنيفات
-export function getCategories(
+export async function getCategories(
   options: {
     includeCount?: boolean;
     parentId?: number | null;
   } = {}
-): Category[] {
-  ensureCategoryColumns();
+): Promise<Category[]> {
+  await ensureCategoryColumns();
 
   const { includeCount = true, parentId } = options;
 
-  let query = `
+  let sql = `
     SELECT 
       c.id,
       c.name,
@@ -114,26 +84,26 @@ export function getCategories(
       COALESCE(c.article_count, 0) as article_count
   `;
 
-  query += ` FROM categories c`;
+  sql += ` FROM ${ARTICLE_CATEGORIES_TABLE} c`;
 
   const params: any[] = [];
   if (parentId !== undefined) {
     if (parentId === null) {
-      query += ` WHERE c.parent_id IS NULL`;
+      sql += ` WHERE c.parent_id IS NULL`;
     } else {
-      query += ` WHERE c.parent_id = ?`;
+      sql += ` WHERE c.parent_id = ?`;
       params.push(parentId);
     }
   }
 
-  query += ` ORDER BY COALESCE(c.sort_order, 0) ASC, c.name ASC`;
+  sql += ` ORDER BY COALESCE(c.sort_order, 0) ASC, c.name ASC`;
 
-  return queryAll<Category>(query, params);
+  return await query<Category>(sql, params);
 }
 
 // جلب التصنيفات كشجرة
-export function getCategoriesTree(): CategoryTree[] {
-  const categories = getCategories();
+export async function getCategoriesTree(): Promise<CategoryTree[]> {
+  const categories = await getCategories();
 
   const buildTree = (parentId: number | null): CategoryTree[] => {
     return categories
@@ -148,48 +118,75 @@ export function getCategoriesTree(): CategoryTree[] {
 }
 
 // جلب تصنيف واحد
-export function getCategoryById(id: number): Category | undefined {
-  ensureCategoryColumns();
+export async function getCategoryById(
+  id: number
+): Promise<Category | undefined> {
+  await ensureCategoryColumns();
 
-  return queryOne<Category>(
+  return await queryOne<Category>(
     `SELECT 
       c.*,
       COALESCE(c.article_count, 0) as article_count
-    FROM categories c
+    FROM ${ARTICLE_CATEGORIES_TABLE} c
     WHERE c.id = ?`,
     [id]
   );
 }
 
 // جلب تصنيف بالـ slug
-export function getCategoryBySlug(slug: string): Category | undefined {
-  ensureCategoryColumns();
+export async function getCategoryBySlug(
+  slug: string
+): Promise<Category | undefined> {
+  await ensureCategoryColumns();
 
-  return queryOne<Category>(
+  return await queryOne<Category>(
     `SELECT 
       c.*,
       COALESCE(c.article_count, 0) as article_count
-    FROM categories c
+    FROM ${ARTICLE_CATEGORIES_TABLE} c
     WHERE c.slug = ?`,
     [slug]
   );
 }
 
 // إنشاء تصنيف جديد
-export function createCategory(input: CategoryInput): number {
-  ensureCategoryColumns();
+export async function createCategory(input: CategoryInput): Promise<number> {
+  await ensureCategoryColumns();
 
   const slug = input.slug || generateSlug(input.name);
   const now = new Date().toISOString();
 
   // الحصول على أعلى sort_order
-  const maxOrder = queryOne<{ max_order: number }>(
-    'SELECT MAX(sort_order) as max_order FROM categories'
+  const maxOrder = await queryOne<{ max_order: number }>(
+    `SELECT MAX(sort_order) as max_order FROM ${ARTICLE_CATEGORIES_TABLE}`
   );
   const sortOrder = input.sort_order ?? (maxOrder?.max_order || 0) + 1;
 
-  const result = execute(
-    `INSERT INTO categories (
+  try {
+    const row = await queryOne<{ id: number }>(
+      `INSERT INTO ${ARTICLE_CATEGORIES_TABLE} (
+        name, slug, description, color, icon, parent_id, sort_order, article_count, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?, ?) RETURNING id`,
+      [
+        input.name,
+        slug,
+        input.description || '',
+        input.color || '#6366f1',
+        input.icon || '',
+        input.parent_id || null,
+        sortOrder,
+        now,
+        now,
+      ]
+    );
+
+    if (row?.id !== undefined) return Number(row.id);
+  } catch {
+    // تجاهل
+  }
+
+  const result = await execute(
+    `INSERT INTO ${ARTICLE_CATEGORIES_TABLE} (
       name, slug, description, color, icon, parent_id, sort_order, article_count, created_at, updated_at
     ) VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?, ?)`,
     [
@@ -209,13 +206,13 @@ export function createCategory(input: CategoryInput): number {
 }
 
 // تحديث تصنيف
-export function updateCategory(
+export async function updateCategory(
   id: number,
   input: Partial<CategoryInput>
-): boolean {
-  ensureCategoryColumns();
+): Promise<boolean> {
+  await ensureCategoryColumns();
 
-  const category = getCategoryById(id);
+  const category = await getCategoryById(id);
   if (!category) return false;
 
   const updates: string[] = [];
@@ -256,25 +253,31 @@ export function updateCategory(
   params.push(new Date().toISOString());
   params.push(id);
 
-  execute(`UPDATE categories SET ${updates.join(', ')} WHERE id = ?`, params);
+  await execute(
+    `UPDATE ${ARTICLE_CATEGORIES_TABLE} SET ${updates.join(', ')} WHERE id = ?`,
+    params
+  );
 
   return true;
 }
 
 // حذف تصنيف
-export function deleteCategory(id: number, reassignTo?: number): boolean {
-  const category = getCategoryById(id);
+export async function deleteCategory(
+  id: number,
+  reassignTo?: number
+): Promise<boolean> {
+  const category = await getCategoryById(id);
   if (!category) return false;
 
   // نقل المقالات إلى تصنيف آخر إذا تم تحديده
   if (reassignTo) {
-    execute('UPDATE articles SET category_id = ? WHERE category_id = ?', [
+    await execute('UPDATE articles SET category_id = ? WHERE category_id = ?', [
       reassignTo,
       id,
     ]);
     // تحديث عدد المقالات
-    execute(
-      `UPDATE categories SET article_count = (
+    await execute(
+      `UPDATE ${ARTICLE_CATEGORIES_TABLE} SET article_count = (
         SELECT COUNT(*) FROM articles WHERE category_id = ?
       ) WHERE id = ?`,
       [reassignTo, reassignTo]
@@ -282,43 +285,49 @@ export function deleteCategory(id: number, reassignTo?: number): boolean {
   }
 
   // نقل التصنيفات الفرعية للمستوى الأعلى
-  execute('UPDATE categories SET parent_id = ? WHERE parent_id = ?', [
-    category.parent_id,
-    id,
-  ]);
+  await execute(
+    `UPDATE ${ARTICLE_CATEGORIES_TABLE} SET parent_id = ? WHERE parent_id = ?`,
+    [category.parent_id, id]
+  );
 
   // حذف التصنيف
-  execute('DELETE FROM categories WHERE id = ?', [id]);
+  await execute(`DELETE FROM ${ARTICLE_CATEGORIES_TABLE} WHERE id = ?`, [id]);
 
   return true;
 }
 
 // إعادة ترتيب التصنيفات
-export function reorderCategories(orderedIds: number[]): boolean {
-  orderedIds.forEach((id, index) => {
-    execute('UPDATE categories SET sort_order = ? WHERE id = ?', [index, id]);
-  });
+export async function reorderCategories(
+  orderedIds: number[]
+): Promise<boolean> {
+  for (let index = 0; index < orderedIds.length; index++) {
+    const id = orderedIds[index];
+    await execute(
+      `UPDATE ${ARTICLE_CATEGORIES_TABLE} SET sort_order = ? WHERE id = ?`,
+      [index, id]
+    );
+  }
   return true;
 }
 
 // تحديث عدد المقالات لجميع التصنيفات
-export function updateAllArticleCounts(): void {
-  execute(`
-    UPDATE categories SET article_count = (
-      SELECT COUNT(*) FROM articles WHERE articles.category_id = categories.id
+export async function updateAllArticleCounts(): Promise<void> {
+  await execute(`
+    UPDATE ${ARTICLE_CATEGORIES_TABLE} SET article_count = (
+      SELECT COUNT(*) FROM articles WHERE articles.category_id = ${ARTICLE_CATEGORIES_TABLE}.id
     )
   `);
 }
 
 // إحصائيات التصنيفات
-export function getCategoryStats(): {
+export async function getCategoryStats(): Promise<{
   total: number;
   withArticles: number;
   empty: number;
-} {
-  ensureCategoryColumns();
+}> {
+  await ensureCategoryColumns();
 
-  const stats = queryOne<{
+  const stats = await queryOne<{
     total: number;
     withArticles: number;
     empty: number;
@@ -327,7 +336,7 @@ export function getCategoryStats(): {
       COUNT(*) as total,
       SUM(CASE WHEN article_count > 0 THEN 1 ELSE 0 END) as withArticles,
       SUM(CASE WHEN article_count = 0 THEN 1 ELSE 0 END) as empty
-    FROM categories
+    FROM ${ARTICLE_CATEGORIES_TABLE}
   `);
 
   return stats || { total: 0, withArticles: 0, empty: 0 };

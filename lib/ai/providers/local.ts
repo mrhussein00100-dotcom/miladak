@@ -253,7 +253,7 @@ export async function generateArticle(
   }
 
   // جلب القوالب المناسبة
-  const templates = getTemplates({ category, activeOnly: true });
+  const templates = await getTemplates({ category, activeOnly: true });
 
   if (templates.length === 0) {
     // استخدام قالب افتراضي

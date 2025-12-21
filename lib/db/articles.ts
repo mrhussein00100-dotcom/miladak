@@ -3,12 +3,7 @@
  * لا ينشئ جداول جديدة - يعمل مع الجداول الموجودة
  */
 
-import {
-  queryAll,
-  queryOne,
-  execute,
-  getUnifiedDatabase,
-} from './unified-database';
+import { execute, query, queryOne } from './database';
 
 // أنواع البيانات
 export interface Article {
@@ -65,33 +60,54 @@ export function generateSlug(title: string): string {
 }
 
 // التأكد من وجود الأعمدة الجديدة
-export function ensureArticleColumns(): void {
-  const db = getUnifiedDatabase();
-
-  // إضافة عمود ai_provider إذا لم يكن موجوداً
-  try {
-    db.exec(`ALTER TABLE articles ADD COLUMN ai_provider TEXT`);
-  } catch (e) {
-    // العمود موجود بالفعل
+export async function ensureArticleColumns(): Promise<void> {
+  // تجاهل أثناء البناء
+  if (process.env.NEXT_PHASE === 'phase-production-build') {
+    return;
   }
 
-  // إضافة عمود publish_date إذا لم يكن موجوداً
-  try {
-    db.exec(`ALTER TABLE articles ADD COLUMN publish_date DATETIME`);
-  } catch (e) {
-    // العمود موجود بالفعل
+  const isPostgres =
+    !!process.env.POSTGRES_URL ||
+    process.env.DATABASE_URL?.startsWith('postgres') ||
+    (process.env.VERCEL_URL && process.env.NODE_ENV === 'production');
+
+  if (!isPostgres) {
+    // SQLite: إضافة الأعمدة إن لم تكن موجودة
+    const sqliteAlterStatements = [
+      `ALTER TABLE articles ADD COLUMN ai_provider TEXT`,
+      `ALTER TABLE articles ADD COLUMN publish_date DATETIME`,
+      `ALTER TABLE articles ADD COLUMN featured_image TEXT`,
+    ];
+
+    for (const stmt of sqliteAlterStatements) {
+      try {
+        await execute(stmt);
+      } catch {
+        // العمود موجود بالفعل
+      }
+    }
+
+    return;
   }
 
-  // إضافة عمود featured_image إذا لم يكن موجوداً
-  try {
-    db.exec(`ALTER TABLE articles ADD COLUMN featured_image TEXT`);
-  } catch (e) {
-    // العمود موجود بالفعل
+  // PostgreSQL
+  const postgresAlterStatements = [
+    `ALTER TABLE articles ADD COLUMN IF NOT EXISTS ai_provider TEXT`,
+    `ALTER TABLE articles ADD COLUMN IF NOT EXISTS publish_date TIMESTAMP`,
+    `ALTER TABLE articles ADD COLUMN IF NOT EXISTS featured_image TEXT`,
+  ];
+
+  for (const stmt of postgresAlterStatements) {
+    try {
+      await execute(stmt);
+    } catch {
+      // تجاهل
+    }
   }
 }
 
 // جلب جميع المقالات مع الفلترة
-export function getArticles(
+export async function getArticles(
   options: {
     page?: number;
     pageSize?: number;
@@ -101,7 +117,9 @@ export function getArticles(
     sortBy?: string;
     sortOrder?: 'asc' | 'desc';
   } = {}
-): { articles: Article[]; total: number } {
+): Promise<{ articles: Article[]; total: number }> {
+  await ensureArticleColumns();
+
   const {
     page = 1,
     pageSize = 20,
@@ -115,13 +133,20 @@ export function getArticles(
   let whereClause = '1=1';
   const params: any[] = [];
 
+  const isPostgres =
+    !!process.env.POSTGRES_URL ||
+    process.env.DATABASE_URL?.startsWith('postgres') ||
+    (process.env.VERCEL_URL && process.env.NODE_ENV === 'production');
+
   // فلترة حسب الحالة
   if (status === 'published') {
-    whereClause += ' AND a.published = 1';
+    whereClause += " AND CAST(a.published AS TEXT) IN ('1', 'true', 't')";
   } else if (status === 'draft') {
-    whereClause += ' AND a.published = 0';
+    whereClause += " AND CAST(a.published AS TEXT) NOT IN ('1', 'true', 't')";
   } else if (status === 'scheduled') {
-    whereClause += ' AND a.publish_date > datetime("now")';
+    whereClause += isPostgres
+      ? ' AND a.publish_date > NOW()'
+      : " AND datetime(a.publish_date) > datetime('now')";
   }
 
   // فلترة حسب التصنيف
@@ -138,7 +163,7 @@ export function getArticles(
   }
 
   // عدد المقالات الكلي
-  const countResult = queryOne<{ total: number }>(
+  const countResult = await queryOne<{ total: number }>(
     `SELECT COUNT(*) as total FROM articles a WHERE ${whereClause}`,
     params
   );
@@ -156,14 +181,14 @@ export function getArticles(
   const order = sortOrder === 'asc' ? 'ASC' : 'DESC';
   const offset = (page - 1) * pageSize;
 
-  const articles = queryAll<Article>(
+  const articles = await query<Article>(
     `SELECT 
       a.*,
       c.name as category_name,
       c.slug as category_slug,
       c.color as category_color
     FROM articles a
-    LEFT JOIN categories c ON a.category_id = c.id
+    LEFT JOIN article_categories c ON a.category_id = c.id
     WHERE ${whereClause}
     ORDER BY a.${sortColumn} ${order}
     LIMIT ? OFFSET ?`,
@@ -174,43 +199,49 @@ export function getArticles(
 }
 
 // جلب مقال واحد
-export function getArticleById(id: number): Article | undefined {
-  return queryOne<Article>(
+export async function getArticleById(id: number): Promise<Article | undefined> {
+  await ensureArticleColumns();
+
+  return await queryOne<Article>(
     `SELECT 
       a.*,
       c.name as category_name,
       c.slug as category_slug,
       c.color as category_color
     FROM articles a
-    LEFT JOIN categories c ON a.category_id = c.id
+    LEFT JOIN article_categories c ON a.category_id = c.id
     WHERE a.id = ?`,
     [id]
   );
 }
 
 // جلب مقال بالـ slug
-export function getArticleBySlug(slug: string): Article | undefined {
-  return queryOne<Article>(
+export async function getArticleBySlug(
+  slug: string
+): Promise<Article | undefined> {
+  await ensureArticleColumns();
+
+  return await queryOne<Article>(
     `SELECT 
       a.*,
       c.name as category_name,
       c.slug as category_slug,
       c.color as category_color
     FROM articles a
-    LEFT JOIN categories c ON a.category_id = c.id
+    LEFT JOIN article_categories c ON a.category_id = c.id
     WHERE a.slug = ?`,
     [slug]
   );
 }
 
 // إنشاء مقال جديد
-export function createArticle(input: ArticleInput): number {
-  ensureArticleColumns();
+export async function createArticle(input: ArticleInput): Promise<number> {
+  await ensureArticleColumns();
 
   const slug = input.slug || generateSlug(input.title);
   const now = new Date().toISOString();
 
-  const result = execute(
+  const result = await execute(
     `INSERT INTO articles (
       title, slug, content, excerpt, image, featured_image, category_id,
       published, featured, author, read_time, views,
@@ -239,8 +270,8 @@ export function createArticle(input: ArticleInput): number {
   );
 
   // تحديث عدد المقالات في التصنيف
-  execute(
-    `UPDATE categories SET article_count = (
+  await execute(
+    `UPDATE article_categories SET article_count = (
       SELECT COUNT(*) FROM articles WHERE category_id = ?
     ) WHERE id = ?`,
     [input.category_id, input.category_id]
@@ -250,13 +281,13 @@ export function createArticle(input: ArticleInput): number {
 }
 
 // تحديث مقال
-export function updateArticle(
+export async function updateArticle(
   id: number,
   input: Partial<ArticleInput>
-): boolean {
-  ensureArticleColumns();
+): Promise<boolean> {
+  await ensureArticleColumns();
 
-  const article = getArticleById(id);
+  const article = await getArticleById(id);
   if (!article) return false;
 
   const updates: string[] = [];
@@ -328,16 +359,19 @@ export function updateArticle(
   params.push(new Date().toISOString());
   params.push(id);
 
-  execute(`UPDATE articles SET ${updates.join(', ')} WHERE id = ?`, params);
+  await execute(
+    `UPDATE articles SET ${updates.join(', ')} WHERE id = ?`,
+    params
+  );
 
   // تحديث عدد المقالات في التصنيفات
   if (
     input.category_id !== undefined &&
     input.category_id !== article.category_id
   ) {
-    execute(
-      `UPDATE categories SET article_count = (
-        SELECT COUNT(*) FROM articles WHERE category_id = categories.id
+    await execute(
+      `UPDATE article_categories SET article_count = (
+        SELECT COUNT(*) FROM articles WHERE category_id = article_categories.id
       ) WHERE id IN (?, ?)`,
       [article.category_id, input.category_id]
     );
@@ -347,15 +381,15 @@ export function updateArticle(
 }
 
 // حذف مقال (soft delete - تغيير الحالة)
-export function deleteArticle(id: number): boolean {
-  const article = getArticleById(id);
+export async function deleteArticle(id: number): Promise<boolean> {
+  const article = await getArticleById(id);
   if (!article) return false;
 
-  execute('DELETE FROM articles WHERE id = ?', [id]);
+  await execute('DELETE FROM articles WHERE id = ?', [id]);
 
   // تحديث عدد المقالات في التصنيف
-  execute(
-    `UPDATE categories SET article_count = (
+  await execute(
+    `UPDATE article_categories SET article_count = (
       SELECT COUNT(*) FROM articles WHERE category_id = ?
     ) WHERE id = ?`,
     [article.category_id, article.category_id]
@@ -365,18 +399,18 @@ export function deleteArticle(id: number): boolean {
 }
 
 // زيادة عدد المشاهدات
-export function incrementViews(id: number): void {
-  execute('UPDATE articles SET views = views + 1 WHERE id = ?', [id]);
+export async function incrementViews(id: number): Promise<void> {
+  await execute('UPDATE articles SET views = views + 1 WHERE id = ?', [id]);
 }
 
 // إحصائيات المقالات
-export function getArticleStats(): {
+export async function getArticleStats(): Promise<{
   total: number;
   published: number;
   draft: number;
   totalViews: number;
-} {
-  const stats = queryOne<{
+}> {
+  const stats = await queryOne<{
     total: number;
     published: number;
     draft: number;
@@ -384,8 +418,8 @@ export function getArticleStats(): {
   }>(`
     SELECT 
       COUNT(*) as total,
-      SUM(CASE WHEN published = 1 THEN 1 ELSE 0 END) as published,
-      SUM(CASE WHEN published = 0 THEN 1 ELSE 0 END) as draft,
+      SUM(CASE WHEN CAST(published AS TEXT) IN ('1', 'true', 't') THEN 1 ELSE 0 END) as published,
+      SUM(CASE WHEN CAST(published AS TEXT) NOT IN ('1', 'true', 't') THEN 1 ELSE 0 END) as draft,
       SUM(views) as totalViews
     FROM articles
   `);

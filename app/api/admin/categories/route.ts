@@ -15,11 +15,11 @@ import {
 } from '@/lib/db/categories';
 
 // التأكد من وجود التصنيفات الافتراضية عند بدء التشغيل
-ensureCategoryColumns();
 
 // GET - جلب قائمة التصنيفات
 export async function GET(request: NextRequest) {
   try {
+    await ensureCategoryColumns();
     const { searchParams } = new URL(request.url);
 
     const tree = searchParams.get('tree') === 'true';
@@ -30,9 +30,9 @@ export async function GET(request: NextRequest) {
     let categories;
 
     if (tree) {
-      categories = getCategoriesTree();
+      categories = await getCategoriesTree();
     } else {
-      categories = getCategories({
+      categories = await getCategories({
         includeCount,
         parentId:
           parentId === 'null'
@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
     };
 
     if (includeStats) {
-      response.stats = getCategoryStats();
+      response.stats = await getCategoryStats();
     }
 
     return NextResponse.json(response);
@@ -74,6 +74,7 @@ export async function GET(request: NextRequest) {
 // POST - إنشاء تصنيف جديد
 export async function POST(request: NextRequest) {
   try {
+    await ensureCategoryColumns();
     const body = await request.json();
 
     // التحقق من الحقول المطلوبة
@@ -94,7 +95,7 @@ export async function POST(request: NextRequest) {
       sort_order: body.sort_order,
     };
 
-    const categoryId = createCategory(input);
+    const categoryId = await createCategory(input);
 
     return NextResponse.json(
       {
@@ -131,11 +132,12 @@ export async function POST(request: NextRequest) {
 // PUT - إعادة ترتيب التصنيفات أو تحديث عدد المقالات
 export async function PUT(request: NextRequest) {
   try {
+    await ensureCategoryColumns();
     const body = await request.json();
 
     // إعادة ترتيب التصنيفات
     if (body.reorder && Array.isArray(body.orderedIds)) {
-      reorderCategories(body.orderedIds);
+      await reorderCategories(body.orderedIds);
       return NextResponse.json({
         success: true,
         message: 'تم إعادة ترتيب التصنيفات بنجاح',
@@ -144,7 +146,7 @@ export async function PUT(request: NextRequest) {
 
     // تحديث عدد المقالات
     if (body.updateCounts) {
-      updateAllArticleCounts();
+      await updateAllArticleCounts();
       return NextResponse.json({
         success: true,
         message: 'تم تحديث عدد المقالات بنجاح',

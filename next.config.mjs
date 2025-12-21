@@ -8,7 +8,8 @@ const nextConfig = {
     return config;
   },
   env: {
-    DATABASE_TYPE: process.env.DATABASE_TYPE || 'postgresql',
+    DATABASE_TYPE: process.env.DATABASE_TYPE || 'postgres',
+    DATABASE_URL: process.env.DATABASE_URL,
     POSTGRES_URL: process.env.POSTGRES_URL,
   },
   typescript: {

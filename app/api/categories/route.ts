@@ -1,44 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { queryAll, queryOne } from '@/lib/db/unified-database';
-import { ensureCategoryColumns } from '@/lib/db/categories';
-
-// التأكد من وجود التصنيفات الافتراضية
-ensureCategoryColumns();
+import {
+  ensureCategoryColumns,
+  getCategories,
+  getCategoryBySlug,
+} from '@/lib/db/categories';
 
 export async function GET(request: NextRequest) {
   try {
+    await ensureCategoryColumns();
     const { searchParams } = new URL(request.url);
     const includeCount = searchParams.get('includeCount') === 'true';
 
-    let query = `
-      SELECT 
-        c.id,
-        c.name,
-        c.description,
-        c.slug,
-        c.icon,
-        c.color,
-        c.created_at,
-        c.updated_at
-    `;
-
-    if (includeCount) {
-      query += `, COUNT(a.id) as article_count`;
-    }
-
-    query += ` FROM categories c`;
-
-    if (includeCount) {
-      query += ` LEFT JOIN articles a ON c.id = a.category_id`;
-    }
-
-    if (includeCount) {
-      query += ` GROUP BY c.id`;
-    }
-
-    query += ` ORDER BY c.name ASC`;
-
-    const categories = queryAll(query);
+    const categories = await getCategories({ includeCount });
 
     return NextResponse.json({
       success: true,
@@ -64,6 +37,7 @@ export async function GET(request: NextRequest) {
 // GET single category by slug
 export async function POST(request: NextRequest) {
   try {
+    await ensureCategoryColumns();
     const { slug } = await request.json();
 
     if (!slug) {
@@ -73,18 +47,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const category = queryOne(
-      `
-      SELECT 
-        c.*,
-        COUNT(a.id) as article_count
-      FROM categories c
-      LEFT JOIN articles a ON c.id = a.category_id
-      WHERE c.slug = ?
-      GROUP BY c.id
-    `,
-      [slug]
-    );
+    const category = await getCategoryBySlug(slug);
 
     if (!category) {
       return NextResponse.json(

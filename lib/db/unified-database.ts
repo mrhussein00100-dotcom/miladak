@@ -23,9 +23,25 @@ let db: Database.Database | null = null;
  * الحصول على اتصال قاعدة البيانات الموحدة
  */
 export function getUnifiedDatabase(): Database.Database {
+  // تجاهل أثناء البناء أو إذا كنا نستخدم PostgreSQL
+  const dbType = getDatabaseType();
+  if (
+    dbType === 'postgres' ||
+    process.env.NEXT_PHASE === 'phase-production-build'
+  ) {
+    // إرجاع كائن وهمي لتجنب الأخطاء
+    return null as any;
+  }
+
   if (db) return db;
 
-  db = new Database(UNIFIED_DB_PATH);
+  // تأكد من أن المسار ليس postgres URL
+  let dbPath = UNIFIED_DB_PATH;
+  if (dbPath.startsWith('postgres')) {
+    dbPath = path.join(process.cwd(), 'database.sqlite');
+  }
+
+  db = new Database(dbPath);
 
   // تحسينات الأداء
   db.pragma('journal_mode = WAL');
@@ -33,7 +49,7 @@ export function getUnifiedDatabase(): Database.Database {
   db.pragma('foreign_keys = ON');
   db.pragma('synchronous = NORMAL');
 
-  console.log('✅ قاعدة البيانات الموحدة جاهزة:', UNIFIED_DB_PATH);
+  console.log('✅ قاعدة البيانات الموحدة جاهزة:', dbPath);
 
   return db;
 }

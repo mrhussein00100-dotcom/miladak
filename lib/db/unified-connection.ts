@@ -1,17 +1,17 @@
 /**
- * Unified Database Connection Manager
- * نظام موحد يدعم SQLite و PostgreSQL
+ * Unified Database Connection Manager - Fixed Version
+ * نظام موحد يدعم SQLite و PostgreSQL مع حل مشاكل النشر
  */
 
 import Database from 'better-sqlite3';
-import postgresManager from './postgres-advanced';
+import postgresManager from './postgres-fixed';
 
 export type DatabaseType = 'sqlite' | 'postgres';
 
 interface QueryResult {
   rows?: any[];
   rowCount?: number;
-  lastInsertRowid?: number;
+  lastInsertRowid?: number | bigint;
   changes?: number;
 }
 
@@ -27,23 +27,28 @@ class UnifiedDatabaseManager {
    * تحديد نوع قاعدة البيانات المستخدمة
    */
   private detectDatabaseType(): DatabaseType {
-    // إذا كان هناك POSTGRES_URL، استخدم PostgreSQL
+    // إذا كان هناك اتصال PostgreSQL صريح
     if (
       process.env.POSTGRES_URL ||
       process.env.DATABASE_URL?.startsWith('postgres') ||
-      process.env.DATABASE_TYPE === 'postgresql'
+      process.env.DATABASE_TYPE === 'postgres'
     ) {
       console.log('🐘 استخدام PostgreSQL');
       return 'postgres';
     }
 
-    // إذا كان في بيئة الإنتاج على Vercel، استخدم PostgreSQL
-    if (process.env.VERCEL || process.env.NODE_ENV === 'production') {
+    // في بيئة الإنتاج على Vercel
+    if (
+      process.env.VERCEL ||
+      process.env.VERCEL_URL ||
+      process.env.NODE_ENV === 'production'
+    ) {
       console.log('🐘 استخدام PostgreSQL (بيئة الإنتاج)');
       return 'postgres';
     }
 
-    console.log('📁 استخدام SQLite (بيئة التطوير)');
+    // في جميع الحالات الأخرى (التطوير المحلي)
+    console.log('📁 استخدام SQLite');
     return 'sqlite';
   }
 
@@ -51,6 +56,16 @@ class UnifiedDatabaseManager {
    * تهيئة قاعدة البيانات
    */
   async initialize(): Promise<void> {
+    // تجاهل التهيئة أثناء البناء فقط (ليس في الإنتاج)
+    if (
+      process.env.NODE_ENV === 'production' &&
+      !process.env.VERCEL &&
+      !process.env.VERCEL_URL
+    ) {
+      console.log('⏭️ تجاهل تهيئة قاعدة البيانات (وضع البناء)');
+      return;
+    }
+
     console.log(`🔄 تهيئة قاعدة البيانات: ${this.dbType}`);
 
     if (this.dbType === 'postgres') {
@@ -68,8 +83,14 @@ class UnifiedDatabaseManager {
    */
   private initializeSQLite(): void {
     const path = require('path');
-    const dbPath =
-      process.env.DATABASE_URL || path.join(process.cwd(), 'database.sqlite');
+    let dbPath = path.join(process.cwd(), 'database.sqlite');
+
+    if (
+      process.env.DATABASE_URL &&
+      !process.env.DATABASE_URL.startsWith('postgres')
+    ) {
+      dbPath = process.env.DATABASE_URL;
+    }
 
     this.sqliteDb = new Database(dbPath);
 
@@ -85,6 +106,15 @@ class UnifiedDatabaseManager {
    * تنفيذ استعلام
    */
   async query<T = any>(sql: string, params: any[] = []): Promise<T[]> {
+    // أثناء البناء فقط (ليس في الإنتاج)، أرجع مصفوفة فارغة
+    if (
+      process.env.NODE_ENV === 'production' &&
+      !process.env.VERCEL &&
+      !process.env.VERCEL_URL
+    ) {
+      return [];
+    }
+
     if (this.dbType === 'postgres') {
       return await postgresManager.query<T>(sql, params);
     } else {
@@ -132,7 +162,10 @@ class UnifiedDatabaseManager {
       const result = stmt.run(...params);
       return {
         changes: result.changes,
-        lastInsertRowid: result.lastInsertRowid,
+        lastInsertRowid:
+          typeof result.lastInsertRowid === 'bigint'
+            ? Number(result.lastInsertRowid)
+            : result.lastInsertRowid,
       };
     }
   }

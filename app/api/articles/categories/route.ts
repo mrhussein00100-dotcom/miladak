@@ -8,7 +8,7 @@ interface CategoryWithCount extends ArticleCategory {
 
 export async function GET() {
   try {
-    const categories = await queryCategoryWithCount>(`
+    const categories = await query<CategoryWithCount>(`
       SELECT 
         ac.id,
         ac.name,
@@ -16,8 +16,8 @@ export async function GET() {
         ac.description,
         ac.color,
         COUNT(a.id) as articles_count
-      FROM categories ac
-      LEFT JOIN articles a ON ac.id = a.category_id AND a.published = 1
+      FROM article_categories ac
+      LEFT JOIN articles a ON ac.id = a.category_id AND CAST(a.published AS TEXT) IN ('1', 'true', 't')
       GROUP BY ac.id, ac.name, ac.slug, ac.description, ac.color
       ORDER BY ac.name ASC
     `);

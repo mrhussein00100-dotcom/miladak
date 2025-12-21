@@ -159,50 +159,43 @@ export default async function ArticlesPage() {
 
   try {
     // جلب إجمالي عدد المقالات
-    const countResult = query<{ total: number }>(`
-      SELECT COUNT(*) as total FROM articles WHERE published = 1
+    const countResult = await query<{ total: number }>(`
+      SELECT COUNT(*) as total FROM articles
     `);
     totalArticles = countResult[0]?.total || 0;
 
     // جلب المقالات مع pagination
-    articles = query<Article>(`
+    articles = await query<Article>(`
       SELECT 
         a.id,
         a.title,
         a.slug,
         a.excerpt,
         a.category_id,
-        c.name as category_name,
-        c.color as category_color,
-        a.image,
-        a.featured_image,
         a.author,
         a.read_time,
         a.views,
-        a.featured,
+        a.featured_image,
         a.created_at,
         a.updated_at
       FROM articles a
-      LEFT JOIN categories c ON a.category_id = c.id
-      WHERE a.published = 1
-      ORDER BY a.featured DESC, a.created_at DESC
+      ORDER BY a.created_at DESC
+      LIMIT 20
     `);
 
-    // جلب التصنيفات مع عدد المقالات لكل تصنيف
-    categories = query<ArticleCategory & { articles_count: number }>(`
+    // جلب التصنيفات
+    categories = await query<ArticleCategory>(`
       SELECT 
         c.id,
         c.name,
         c.slug,
         c.description,
-        c.color,
-        COUNT(a.id) as articles_count
-      FROM categories c
-      LEFT JOIN articles a ON c.id = a.category_id AND a.published = 1
-      GROUP BY c.id, c.name, c.slug, c.description, c.color
-      ORDER BY articles_count DESC, c.name ASC
+        c.color
+      FROM article_categories c
+      ORDER BY c.name ASC
     `);
-  } catch {
+  } catch (error) {
+    console.log('Database not available during build:', error);
     // Database not initialized yet - use empty arrays
   }
 

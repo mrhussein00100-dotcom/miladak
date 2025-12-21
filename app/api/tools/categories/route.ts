@@ -8,7 +8,7 @@ interface CategoryWithCount extends ToolCategory {
 
 export async function GET() {
   try {
-    const categories = await queryCategoryWithCount>(`
+    const categories = await query<CategoryWithCount>(`
       SELECT 
         tc.id,
         tc.name,
@@ -18,7 +18,7 @@ export async function GET() {
         tc.sort_order,
         COUNT(t.id) as tools_count
       FROM tool_categories tc
-      LEFT JOIN tools t ON tc.id = t.category_id AND t.active = 1
+      LEFT JOIN tools t ON tc.id = t.category_id AND CAST(t.active AS TEXT) IN ('1','true','t')
       GROUP BY tc.id, tc.name, tc.slug, tc.title, tc.icon, tc.sort_order
       ORDER BY tc.sort_order ASC, tc.name ASC
     `);

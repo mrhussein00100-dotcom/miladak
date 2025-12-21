@@ -7,6 +7,63 @@ import { Pool, PoolClient } from 'pg';
 
 let pool: Pool | null = null;
 
+function convertQuestionMarkPlaceholders(
+  sql: string,
+  params: unknown[]
+): string {
+  if (!sql.includes('?') || params.length === 0) return sql;
+
+  let maxIndex = 0;
+  const dollarRegex = /\$(\d+)/g;
+  let match: RegExpExecArray | null;
+  while ((match = dollarRegex.exec(sql)) !== null) {
+    const n = parseInt(match[1], 10);
+    if (!Number.isNaN(n) && n > maxIndex) maxIndex = n;
+  }
+
+  let nextIndex = maxIndex + 1;
+
+  let result = '';
+  let inSingle = false;
+  let inDouble = false;
+
+  for (let i = 0; i < sql.length; i++) {
+    const ch = sql[i];
+
+    if (ch === "'" && !inDouble) {
+      if (inSingle && sql[i + 1] === "'") {
+        result += "''";
+        i++;
+        continue;
+      }
+      inSingle = !inSingle;
+      result += ch;
+      continue;
+    }
+
+    if (ch === '"' && !inSingle) {
+      if (inDouble && sql[i + 1] === '"') {
+        result += '""';
+        i++;
+        continue;
+      }
+      inDouble = !inDouble;
+      result += ch;
+      continue;
+    }
+
+    if (ch === '?' && !inSingle && !inDouble) {
+      result += `$${nextIndex}`;
+      nextIndex++;
+      continue;
+    }
+
+    result += ch;
+  }
+
+  return result;
+}
+
 /**
  * إنشاء pool اتصالات PostgreSQL
  */
@@ -62,7 +119,8 @@ export async function executePostgresQuery<T>(
   const client = await getPostgresConnection();
 
   try {
-    const result = await client.query(sql, params);
+    const normalizedSql = convertQuestionMarkPlaceholders(sql, params);
+    const result = await client.query(normalizedSql, params);
     return result.rows as T[];
   } finally {
     client.release();
@@ -90,7 +148,8 @@ export async function executePostgresCommand(
   const client = await getPostgresConnection();
 
   try {
-    const result = await client.query(sql, params);
+    const normalizedSql = convertQuestionMarkPlaceholders(sql, params);
+    const result = await client.query(normalizedSql, params);
     return {
       rowCount: result.rowCount || 0,
       insertId: result.rows[0]?.id,

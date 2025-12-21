@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { queryAll } from '@/lib/db/unified-database';
+import { query } from '@/lib/db/database';
 import { ToolsPageClient } from '@/components/ToolsPageClient';
 import { JsonLd } from '@/components/SEO/JsonLd';
 import { generateBreadcrumbSchema } from '@/lib/seo/jsonld';
@@ -7,6 +7,16 @@ import { InContentAd, FooterAd } from '@/components/AdSense/AdSenseSlot';
 import KeywordsSection from '@/components/tools/KeywordsSection';
 import ToolRandomArticles from '@/components/tools/ToolRandomArticles';
 import type { Tool, ToolCategory } from '@/types';
+
+function toBoolean(value: unknown): boolean {
+  return (
+    value === true ||
+    value === 1 ||
+    value === '1' ||
+    value === 'true' ||
+    value === 't'
+  );
+}
 
 export const metadata: Metadata = {
   title:
@@ -183,38 +193,125 @@ export default async function ToolsPage() {
   let tools: Tool[] = [];
   let categories: ToolCategory[] = [];
 
-  try {
-    tools = queryAll<Tool>(`
-      SELECT 
-        t.id,
-        t.name as slug,
-        t.title,
-        t.description,
-        t.icon,
-        t.category_id,
-        tc.name as category_name,
-        t.href,
-        t.is_featured as featured,
-        t.is_active as active
-      FROM tools t
-      JOIN tool_categories tc ON t.category_id = tc.id
-      WHERE t.is_active = 1
-      ORDER BY t.sort_order ASC, t.title ASC
-    `);
+  // أثناء البناء، استخدم بيانات افتراضية
+  if (process.env.NODE_ENV === 'production' && !process.env.VERCEL_URL) {
+    tools = [
+      {
+        id: 1,
+        slug: 'age-calculator',
+        title: 'حاسبة العمر',
+        description: 'احسب عمرك بالسنوات والشهور والأيام',
+        icon: '🎂',
+        category_id: 1,
+        category_name: 'حاسبات التاريخ',
+        href: '/age-calculator',
+        featured: true,
+        active: true,
+      },
+      {
+        id: 2,
+        slug: 'days-between',
+        title: 'حاسبة الأيام بين تاريخين',
+        description: 'احسب عدد الأيام بين تاريخين',
+        icon: '📊',
+        category_id: 1,
+        category_name: 'حاسبات التاريخ',
+        href: '/days-between',
+        featured: true,
+        active: true,
+      },
+    ];
 
-    categories = queryAll<ToolCategory>(`
-      SELECT 
-        id,
-        name,
-        name as slug,
-        name as title,
-        icon,
-        sort_order
-      FROM tool_categories
-      ORDER BY sort_order ASC, name ASC
-    `);
-  } catch (error) {
-    console.error('Error loading tools:', error);
+    categories = [
+      {
+        id: 1,
+        name: 'حاسبات التاريخ',
+        slug: 'date-calculators',
+        title: 'حاسبات التاريخ والوقت',
+        icon: '📅',
+        sort_order: 1,
+      },
+    ];
+  } else {
+    try {
+      type ToolRow = Omit<Tool, 'featured' | 'active'> & {
+        featured: unknown;
+        active: unknown;
+      };
+
+      let toolRows: ToolRow[] = [];
+      try {
+        toolRows = await query<ToolRow>(`
+          SELECT 
+            t.id,
+            t.slug,
+            t.title,
+            COALESCE(t.description, '') as description,
+            COALESCE(t.icon, '') as icon,
+            t.category_id,
+            tc.name as category_name,
+            t.href,
+            t.featured as featured,
+            t.active as active
+          FROM tools t
+          JOIN tool_categories tc ON t.category_id = tc.id
+          WHERE CAST(t.active AS TEXT) IN ('1', 'true', 't')
+          ORDER BY COALESCE(t.sort_order, 0) ASC, t.title ASC
+        `);
+      } catch {
+        toolRows = await query<ToolRow>(`
+          SELECT 
+            t.id,
+            t.name as slug,
+            t.title,
+            COALESCE(t.description, '') as description,
+            COALESCE(t.icon, '') as icon,
+            t.category_id,
+            tc.name as category_name,
+            t.href,
+            t.is_featured as featured,
+            t.is_active as active
+          FROM tools t
+          JOIN tool_categories tc ON t.category_id = tc.id
+          WHERE CAST(t.is_active AS TEXT) IN ('1', 'true', 't')
+          ORDER BY COALESCE(t.sort_order, 0) ASC, t.title ASC
+        `);
+      }
+
+      tools = toolRows.map((row) => ({
+        ...row,
+        featured: toBoolean(row.featured),
+        active: toBoolean(row.active),
+      }));
+
+      try {
+        categories = await query<ToolCategory>(`
+          SELECT 
+            id,
+            name,
+            slug,
+            COALESCE(title, name) as title,
+            icon,
+            COALESCE(sort_order, 0) as sort_order
+          FROM tool_categories
+          ORDER BY COALESCE(sort_order, 0) ASC, name ASC
+        `);
+      } catch {
+        categories = await query<ToolCategory>(`
+          SELECT 
+            id,
+            name,
+            name as slug,
+            name as title,
+            icon,
+            COALESCE(sort_order, 0) as sort_order
+          FROM tool_categories
+          ORDER BY COALESCE(sort_order, 0) ASC, name ASC
+        `);
+      }
+    } catch (error) {
+      console.error('Error loading tools:', error);
+    }
   }
 
   // Breadcrumb schema

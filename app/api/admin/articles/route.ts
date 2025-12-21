@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
       (searchParams.get('sortOrder') as 'asc' | 'desc') || 'desc';
     const includeStats = searchParams.get('includeStats') === 'true';
 
-    const { articles, total } = getArticles({
+    const { articles, total } = await getArticles({
       page,
       pageSize,
       status,
@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
 
     // إضافة الإحصائيات إذا طُلبت
     if (includeStats) {
-      response.stats = getArticleStats();
+      response.stats = await getArticleStats();
     }
 
     return NextResponse.json(response);
@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
       publish_date: body.publish_date,
     };
 
-    const articleId = createArticle(input);
+    const articleId = await createArticle(input);
 
     return NextResponse.json(
       {

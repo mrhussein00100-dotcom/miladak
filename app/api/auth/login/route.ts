@@ -10,6 +10,16 @@ const AUTH_SECRET = process.env.AUTH_SECRET || 'miladak_secret_2025';
 const ADMIN_USER = process.env.ADMIN_USER || 'admin';
 const ADMIN_PASS = process.env.ADMIN_PASS || 'Admin@2025!';
 
+function toBoolean(value: unknown): boolean {
+  return (
+    value === true ||
+    value === 1 ||
+    value === '1' ||
+    value === 'true' ||
+    value === 't'
+  );
+}
+
 function signToken(payload: Record<string, unknown>) {
   const payloadB64 = Buffer.from(JSON.stringify(payload)).toString('base64url');
   const sig = createHmac('sha256', AUTH_SECRET)
@@ -35,34 +45,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // التحقق من وجود جدول المستخدمين وإنشائه إذا لم يكن موجوداً
-    try {
-      await execute(`
-        CREATE TABLE IF NOT EXISTS admin_users (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          username TEXT UNIQUE NOT NULL,
-          password_hash TEXT NOT NULL,
-          password_salt TEXT NOT NULL,
-          role TEXT DEFAULT 'editor',
-          active INTEGER DEFAULT 1,
-          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-        )
-      `);
-    } catch {}
-
     // التحقق من وجود مستخدمين
     const countResult = await query<{ c: number }>(
       'SELECT COUNT(*) as c FROM admin_users'
     );
-    const count = countResult[0]?.c || 0;
+    const count = Number((countResult[0] as any)?.c ?? 0);
 
     // إنشاء المستخدم الافتراضي إذا لم يكن هناك مستخدمين
     if (count === 0) {
       const { hash, salt } = hashPassword(ADMIN_PASS);
       await execute(
         `INSERT INTO admin_users (username, password_hash, password_salt, role, active) VALUES (?, ?, ?, ?, ?)`,
-        [ADMIN_USER, hash, salt, 'admin', 1]
+        [ADMIN_USER, hash, salt, 'admin', true]
       );
     }
 
@@ -73,12 +67,12 @@ export async function POST(request: NextRequest) {
       password_hash: string;
       password_salt: string;
       role: string;
-      active: number;
+      active: unknown;
     }>('SELECT * FROM admin_users WHERE username = ?', [username]);
 
     const user = users[0];
 
-    if (!user || user.active !== 1) {
+    if (!user || !toBoolean(user.active)) {
       return NextResponse.json(
         { success: false, error: 'بيانات الدخول غير صحيحة' },
         { status: 401 }

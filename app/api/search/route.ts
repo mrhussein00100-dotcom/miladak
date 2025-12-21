@@ -253,11 +253,11 @@ export async function GET(request: NextRequest) {
       try {
         // البحث بكل الأنماط
         for (const pattern of searchPatterns) {
-          const tools = await querySearchTool>(
+          const tools = await query<SearchTool>(
             `SELECT t.id, t.title, t.description, t.slug, t.icon, c.name as category_name
              FROM tools t
              LEFT JOIN tool_categories c ON t.category_id = c.id
-             WHERE t.active = 1 AND (t.title LIKE ? OR t.description LIKE ? OR t.slug LIKE ?)
+             WHERE CAST(t.active AS TEXT) IN ('1', 'true', 't') AND (t.title LIKE ? OR t.description LIKE ? OR t.slug LIKE ?)
              ORDER BY t.sort_order ASC
              LIMIT 20`,
             [pattern, pattern, pattern]
@@ -288,11 +288,11 @@ export async function GET(request: NextRequest) {
       try {
         // البحث بكل الأنماط
         for (const pattern of searchPatterns) {
-          const articles = await querySearchArticle>(
+          const articles = await query<SearchArticle>(
             `SELECT a.id, a.title, a.excerpt, a.slug, a.image, c.name as category_name
              FROM articles a
-             LEFT JOIN categories c ON a.category_id = c.id
-             WHERE a.published = 1 AND (a.title LIKE ? OR a.excerpt LIKE ? OR a.content LIKE ?)
+             LEFT JOIN article_categories c ON a.category_id = c.id
+             WHERE CAST(a.published AS TEXT) IN ('1', 'true', 't') AND (a.title LIKE ? OR a.excerpt LIKE ? OR a.content LIKE ?)
              ORDER BY a.created_at DESC
              LIMIT 20`,
             [pattern, pattern, pattern]

@@ -17,14 +17,20 @@ const BASE_URL = SEO_CONFIG.baseUrl;
  * جلب المقالات المنشورة من قاعدة البيانات
  */
 async function getPublishedArticles() {
+  // أثناء البناء، أرجع مصفوفة فارغة
+  if (process.env.NODE_ENV === 'production' && !process.env.VERCEL_URL) {
+    return [];
+  }
+
   try {
-    // في بيئة الإنتاج، سنجلب من PostgreSQL عبر API
-    const response = await fetch(`${BASE_URL}/api/articles?published=true`, {
-      cache: 'no-store',
-    });
-    if (!response.ok) return [];
-    const data = await response.json();
-    return data.articles || [];
+    // استخدم قاعدة البيانات مباشرة بدلاً من API
+    const unifiedDb = (await import('@/lib/db/unified-connection')).default;
+    await unifiedDb.initialize();
+
+    const articles = await unifiedDb.query(
+      "SELECT slug, updated_at FROM articles WHERE CAST(published AS TEXT) IN ('1', 'true', 't') ORDER BY created_at DESC"
+    );
+    return articles;
   } catch (error) {
     console.error('Error fetching articles for sitemap:', error);
     return [];
@@ -35,14 +41,20 @@ async function getPublishedArticles() {
  * جلب الأدوات النشطة من قاعدة البيانات
  */
 async function getActiveTools() {
+  // أثناء البناء، أرجع مصفوفة فارغة
+  if (process.env.NODE_ENV === 'production' && !process.env.VERCEL_URL) {
+    return [];
+  }
+
   try {
-    // في بيئة الإنتاج، سنجلب من PostgreSQL عبر API
-    const response = await fetch(`${BASE_URL}/api/tools?active=true`, {
-      cache: 'no-store',
-    });
-    if (!response.ok) return [];
-    const data = await response.json();
-    return data.tools || [];
+    // استخدم قاعدة البيانات مباشرة بدلاً من API
+    const unifiedDb = (await import('@/lib/db/unified-connection')).default;
+    await unifiedDb.initialize();
+
+    const tools = await unifiedDb.query(
+      "SELECT href FROM tools WHERE CAST(active AS TEXT) IN ('1', 'true', 't') ORDER BY sort_order"
+    );
+    return tools;
   } catch (error) {
     console.error('Error fetching tools for sitemap:', error);
     return [];
@@ -53,16 +65,22 @@ async function getActiveTools() {
  * جلب التصنيفات من قاعدة البيانات
  */
 async function getCategories() {
+  // أثناء البناء، أرجع مصفوفة فارغة
+  if (process.env.NODE_ENV === 'production' && !process.env.VERCEL_URL) {
+    return [];
+  }
+
   try {
-    // في بيئة الإنتاج، سنجلب من PostgreSQL عبر API
-    const response = await fetch(`${BASE_URL}/api/categories`, {
-      cache: 'no-store',
-    });
-    if (!response.ok) return [];
-    const data = await response.json();
-    return data.categories || [];
+    // استخدم قاعدة البيانات مباشرة بدلاً من API
+    const unifiedDb = (await import('@/lib/db/unified-connection')).default;
+    await unifiedDb.initialize();
+
+    const categories = await unifiedDb.query(
+      'SELECT slug FROM article_categories ORDER BY sort_order'
+    );
+    return categories;
   } catch (error) {
-    console.error('Error fetching categories for sitemap:', error);
+    console.error('Error fetching categories:', error);
     return [];
   }
 }
@@ -77,6 +95,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     changeFrequency: page.changeFreq,
     priority: page.priority,
   }));
+
+  // أثناء البناء، أرجع الصفحات الثابتة فقط
+  if (process.env.NODE_ENV === 'production' && !process.env.VERCEL_URL) {
+    return staticPages;
+  }
 
   try {
     // 2. صفحات المقالات من قاعدة البيانات

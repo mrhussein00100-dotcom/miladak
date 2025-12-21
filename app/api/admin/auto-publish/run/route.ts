@@ -14,7 +14,7 @@ import { createArticle } from '@/lib/db/articles';
 // POST - تشغيل النشر
 export async function POST() {
   try {
-    const settings = getAutoPublishSettings();
+    const settings = await getAutoPublishSettings();
 
     if (!settings) {
       return NextResponse.json(
@@ -47,7 +47,7 @@ export async function POST() {
       });
 
       // إنشاء المقال
-      const articleId = createArticle({
+      const articleId = await createArticle({
         title: result.title,
         content: result.content,
         excerpt: result.metaDescription,
@@ -59,13 +59,13 @@ export async function POST() {
       });
 
       // تسجيل النجاح
-      addPublishLog({
+      await addPublishLog({
         article_id: articleId,
         status: 'success',
       });
 
       // تحديث وقت آخر تشغيل
-      updateLastRun();
+      await updateLastRun();
 
       return NextResponse.json({
         success: true,
@@ -77,7 +77,7 @@ export async function POST() {
       });
     } catch (error) {
       // تسجيل الفشل
-      addPublishLog({
+      await addPublishLog({
         status: 'failed',
         error_message: String(error),
       });

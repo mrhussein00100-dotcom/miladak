@@ -27,7 +27,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    const article = getArticleById(articleId);
+    const article = await getArticleById(articleId);
 
     if (!article) {
       return NextResponse.json(
@@ -89,7 +89,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     if (body.publish_date !== undefined) input.publish_date = body.publish_date;
     if (body.author !== undefined) input.author = body.author;
 
-    const success = updateArticle(articleId, input);
+    const success = await updateArticle(articleId, input);
 
     if (!success) {
       return NextResponse.json(
@@ -98,7 +98,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    const updatedArticle = getArticleById(articleId);
+    const updatedArticle = await getArticleById(articleId);
 
     return NextResponse.json({
       success: true,
@@ -140,7 +140,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    const success = deleteArticle(articleId);
+    const success = await deleteArticle(articleId);
 
     if (!success) {
       return NextResponse.json(

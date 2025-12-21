@@ -7,7 +7,7 @@ import {
   generateBreadcrumbSchema,
 } from '@/lib/seo/jsonld';
 import type { Article } from '@/types';
-import Database from 'better-sqlite3';
+import { execute, query, queryOne } from '@/lib/db/database';
 
 // Force dynamic rendering - no caching
 export const dynamic = 'force-dynamic';
@@ -17,27 +17,23 @@ interface ArticlePageProps {
   params: Promise<{ slug: string }>;
 }
 
-function getArticle(slug: string): Article | null {
-  let db: Database.Database | null = null;
+async function getArticle(slug: string): Promise<Article | null> {
   try {
-    db = new Database('database.sqlite');
-
-    const article = db
-      .prepare(
-        `
-      SELECT a.*, c.name as category_name, c.color as category_color
-      FROM articles a
-      LEFT JOIN categories c ON a.category_id = c.id
-      WHERE a.slug = ? AND a.published = 1
-    `
-      )
-      .get(slug) as Article | undefined;
+    const article = await queryOne<Article>(
+      `
+        SELECT a.*, c.name as category_name, c.color as category_color
+        FROM articles a
+        LEFT JOIN article_categories c ON a.category_id = c.id
+        WHERE a.slug = ? AND CAST(a.published AS TEXT) IN ('1', 'true', 't')
+      `,
+      [slug]
+    );
 
     if (article) {
       try {
-        db.prepare('UPDATE articles SET views = views + 1 WHERE id = ?').run(
-          article.id
-        );
+        await execute('UPDATE articles SET views = views + 1 WHERE id = ?', [
+          article.id,
+        ]);
       } catch (e) {
         console.error('Error updating views:', e);
       }
@@ -47,34 +43,29 @@ function getArticle(slug: string): Article | null {
   } catch (error) {
     console.error('Error fetching article:', error);
     return null;
-  } finally {
-    if (db) db.close();
   }
 }
 
-function getRelatedArticles(categoryId: number, currentId: number): Article[] {
-  let db: Database.Database | null = null;
+async function getRelatedArticles(
+  categoryId: number,
+  currentId: number
+): Promise<Article[]> {
   try {
-    db = new Database('database.sqlite');
-
-    return db
-      .prepare(
-        `
-      SELECT a.id, a.title, a.slug, a.excerpt, a.image, a.featured_image, a.read_time, a.category_id,
-             c.name as category_name, c.color as category_color
-      FROM articles a
-      LEFT JOIN categories c ON a.category_id = c.id
-      WHERE a.category_id = ? AND a.id != ? AND a.published = 1
-      ORDER BY a.created_at DESC
-      LIMIT 3
-    `
-      )
-      .all(categoryId, currentId) as Article[];
+    return await query<Article>(
+      `
+        SELECT a.id, a.title, a.slug, a.excerpt, a.image, a.featured_image, a.read_time, a.category_id,
+               c.name as category_name, c.color as category_color
+        FROM articles a
+        LEFT JOIN article_categories c ON a.category_id = c.id
+        WHERE a.category_id = ? AND a.id != ? AND CAST(a.published AS TEXT) IN ('1', 'true', 't')
+        ORDER BY a.created_at DESC
+        LIMIT 3
+      `,
+      [categoryId, currentId]
+    );
   } catch (error) {
     console.error('Error fetching related articles:', error);
     return [];
-  } finally {
-    if (db) db.close();
   }
 }
 
@@ -84,7 +75,7 @@ export async function generateMetadata({
   const { slug } = await params;
   // Decode the slug in case it's URL encoded (Arabic characters)
   const decodedSlug = decodeURIComponent(slug);
-  const article = getArticle(decodedSlug);
+  const article = await getArticle(decodedSlug);
 
   if (!article) {
     return { title: 'المقال غير موجود - ميلادك' };
@@ -118,7 +109,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   const { slug } = await params;
   // Decode the slug in case it's URL encoded (Arabic characters)
   const decodedSlug = decodeURIComponent(slug);
-  const article = getArticle(decodedSlug);
+  const article = await getArticle(decodedSlug);
 
   // Server-side debug logging
   console.log('=== SERVER DEBUG ===');
@@ -139,6 +130,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     article.category_id ?? 0,
     article.id
   );
+  const relatedArticlesResult = await relatedArticles;
 
   // Generate Article JSON-LD schema
   const articleSchema = generateArticleSchema({
@@ -172,7 +164,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           category_id: article.category_id ?? 0,
           category_name: article.category_name ?? 'عام',
         }}
-        relatedArticles={relatedArticles.map((a) => ({
+        relatedArticles={relatedArticlesResult.map((a) => ({
           id: a.id,
           title: a.title,
           slug: a.slug,

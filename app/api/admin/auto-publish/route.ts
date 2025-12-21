@@ -11,7 +11,7 @@ import {
 // GET - جلب الإعدادات
 export async function GET() {
   try {
-    const settings = getAutoPublishSettings();
+    const settings = await getAutoPublishSettings();
 
     return NextResponse.json({
       success: true,
@@ -31,7 +31,7 @@ export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
 
-    updateAutoPublishSettings({
+    await updateAutoPublishSettings({
       is_enabled: body.is_enabled,
       publish_time: body.publish_time,
       frequency: body.frequency,

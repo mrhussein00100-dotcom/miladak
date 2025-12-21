@@ -27,7 +27,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    const category = getCategoryById(categoryId);
+    const category = await getCategoryById(categoryId);
 
     if (!category) {
       return NextResponse.json(
@@ -79,7 +79,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     if (body.parent_id !== undefined) input.parent_id = body.parent_id;
     if (body.sort_order !== undefined) input.sort_order = body.sort_order;
 
-    const success = updateCategory(categoryId, input);
+    const success = await updateCategory(categoryId, input);
 
     if (!success) {
       return NextResponse.json(
@@ -88,7 +88,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    const updatedCategory = getCategoryById(categoryId);
+    const updatedCategory = await getCategoryById(categoryId);
 
     return NextResponse.json({
       success: true,
@@ -133,7 +133,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     const { searchParams } = new URL(request.url);
     const reassignTo = searchParams.get('reassignTo');
 
-    const success = deleteCategory(
+    const success = await deleteCategory(
       categoryId,
       reassignTo ? parseInt(reassignTo) : undefined
     );

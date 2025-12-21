@@ -45,8 +45,8 @@ export async function GET(request: NextRequest) {
           SELECT a.id, a.title, a.excerpt, a.slug, a.image, a.author, a.read_time, a.created_at,
                  c.name as category_name
           FROM articles a
-          LEFT JOIN categories c ON a.category_id = c.id
-          WHERE a.published = 1
+          LEFT JOIN article_categories c ON a.category_id = c.id
+          WHERE CAST(a.published AS TEXT) IN ('1', 'true', 't')
         `;
         const params: (string | number)[] = [];
 
@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
         sql += ` ORDER BY RANDOM() LIMIT ?`;
         params.push(limit);
 
-        articles = await queryArticle>(sql, params);
+        articles = await query<Article>(sql, params);
       }
 
       // إذا لم نجد مقالات كافية، نجلب مقالات عامة
@@ -80,15 +80,15 @@ export async function GET(request: NextRequest) {
         const existingIds = articles.map((a) => a.id);
         const excludeClause =
           existingIds.length > 0
-            ? `AND id NOT IN (${existingIds.join(',')})`
+            ? `AND a.id NOT IN (${existingIds.join(',')})`
             : '';
 
-        const fallbackArticles = await queryArticle>(
+        const fallbackArticles = await query<Article>(
           `SELECT a.id, a.title, a.excerpt, a.slug, a.image, a.author, a.read_time, a.created_at,
                   c.name as category_name
            FROM articles a
-           LEFT JOIN categories c ON a.category_id = c.id
-           WHERE a.published = 1 ${excludeClause}
+           LEFT JOIN article_categories c ON a.category_id = c.id
+           WHERE CAST(a.published AS TEXT) IN ('1', 'true', 't') ${excludeClause}
            ORDER BY RANDOM() 
            LIMIT ?`,
           [remainingCount]
@@ -98,12 +98,12 @@ export async function GET(request: NextRequest) {
       }
     } else {
       // جلب مقالات عشوائية بدون فلترة
-      articles = await queryArticle>(
+      articles = await query<Article>(
         `SELECT a.id, a.title, a.excerpt, a.slug, a.image, a.author, a.read_time, a.created_at,
                 c.name as category_name
          FROM articles a
-         LEFT JOIN categories c ON a.category_id = c.id
-         WHERE a.published = 1 
+         LEFT JOIN article_categories c ON a.category_id = c.id
+         WHERE CAST(a.published AS TEXT) IN ('1', 'true', 't') 
          ORDER BY RANDOM() 
          LIMIT ?`,
         [limit]

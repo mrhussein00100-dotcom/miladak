@@ -1,11 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db/database';
-import type {
-  ApiResponse,
-  Article,
-  ArticleCategory,
-  PaginatedResponse,
-} from '@/types';
+import type { Article, ArticleCategory } from '@/types';
 
 interface ArticleWithCategory extends Article {
   category_slug: string;
@@ -24,36 +19,32 @@ export async function GET(request: NextRequest) {
     const sortOrder = searchParams.get('sortOrder') || 'desc';
     const limit = searchParams.get('limit');
 
-    let whereClause = 'WHERE a.published = 1';
+    let whereClause = 'WHERE a.published = true';
     const params: unknown[] = [];
-    let paramIndex = 1;
 
     // Filter by category slug
     if (category) {
-      whereClause += ` AND ac.slug = $${paramIndex}`;
+      whereClause += ' AND ac.slug = ?';
       params.push(category);
-      paramIndex++;
     }
 
     // Filter featured only
     if (featured === 'true') {
-      whereClause += ' AND a.featured = 1';
+      whereClause += ' AND a.featured = true';
     }
 
     // Search in title, excerpt, and content
     if (search) {
-      whereClause += ` AND (a.title ILIKE $${paramIndex} OR a.excerpt ILIKE $${
-        paramIndex + 1
-      } OR a.content ILIKE $${paramIndex + 2})`;
+      whereClause +=
+        ' AND (LOWER(a.title) LIKE LOWER(?) OR LOWER(a.excerpt) LIKE LOWER(?) OR LOWER(a.content) LIKE LOWER(?))';
       params.push(`%${search}%`, `%${search}%`, `%${search}%`);
-      paramIndex += 3;
     }
 
     // Get total count
     const countSql = `
       SELECT COUNT(*) as total
       FROM articles a
-      JOIN categories ac ON a.category_id = ac.id
+      JOIN article_categories ac ON a.category_id = ac.id
       ${whereClause}
     `;
 
@@ -96,7 +87,7 @@ export async function GET(request: NextRequest) {
         a.created_at,
         a.updated_at
       FROM articles a
-      JOIN categories ac ON a.category_id = ac.id
+      JOIN article_categories ac ON a.category_id = ac.id
       ${whereClause}
       ORDER BY a.featured DESC, a.${sortColumn} ${order}
       LIMIT ? OFFSET ?
@@ -106,10 +97,7 @@ export async function GET(request: NextRequest) {
     const articlesParams = [...params, finalLimit, offset];
 
     // Update SQL to use PostgreSQL parameter syntax
-    const finalArticlesSql = articlesSql.replace(
-      /LIMIT \? OFFSET \?/,
-      `LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`
-    );
+    const finalArticlesSql = articlesSql;
 
     const articles = await query<ArticleWithCategory>(
       finalArticlesSql,
@@ -165,7 +153,7 @@ export async function OPTIONS() {
         ac.color,
         COUNT(a.id) as articles_count
       FROM article_categories ac
-      LEFT JOIN articles a ON ac.id = a.category_id AND a.published = 1
+      LEFT JOIN articles a ON ac.id = a.category_id AND a.published = true
       GROUP BY ac.id, ac.name, ac.slug, ac.description, ac.color
       ORDER BY ac.name ASC
     `);
