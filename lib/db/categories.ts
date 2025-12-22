@@ -160,12 +160,21 @@ export async function createCategory(input: CategoryInput): Promise<number> {
   const color = input.color || '#6366f1';
   const icon = input.icon || '';
 
+  console.log('📝 Creating category:', {
+    name,
+    slug,
+    description,
+    color,
+    icon,
+    sortOrder,
+  });
+
   try {
-    // محاولة PostgreSQL مع RETURNING
+    // محاولة PostgreSQL مع RETURNING - بدون عمود active (له قيمة افتراضية)
     const row = await queryOne<{ id: number }>(
       `INSERT INTO ${ARTICLE_CATEGORIES_TABLE} (
-        name, slug, description, color, icon, sort_order, active, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, true, ?, ?) RETURNING id`,
+        name, slug, description, color, icon, sort_order, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING id`,
       [name, slug, description, color, icon, sortOrder, now, now]
     );
 
@@ -174,14 +183,14 @@ export async function createCategory(input: CategoryInput): Promise<number> {
       return Number(row.id);
     }
   } catch (err) {
-    console.error('Error creating category with RETURNING:', err);
+    console.error('❌ Error creating category with RETURNING:', err);
 
     // محاولة بديلة - بدون RETURNING (للـ SQLite)
     try {
       const result = await execute(
         `INSERT INTO ${ARTICLE_CATEGORIES_TABLE} (
-          name, slug, description, color, icon, sort_order, active, created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?)`,
+          name, slug, description, color, icon, sort_order, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
         [name, slug, description, color, icon, sortOrder, now, now]
       );
 
@@ -193,7 +202,7 @@ export async function createCategory(input: CategoryInput): Promise<number> {
         return Number(result.lastInsertRowid);
       }
     } catch (fallbackErr) {
-      console.error('Error in fallback insert:', fallbackErr);
+      console.error('❌ Error in fallback insert:', fallbackErr);
       throw fallbackErr;
     }
   }
