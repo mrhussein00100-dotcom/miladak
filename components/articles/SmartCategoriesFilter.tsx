@@ -88,7 +88,10 @@ export function SmartCategoriesFilter({
   }, []);
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div
+      className="flex flex-wrap items-center gap-2 relative"
+      style={{ zIndex: 100 }}
+    >
       {/* زر جميع المقالات */}
       <CategoryChip
         name="جميع المقالات"
@@ -123,7 +126,7 @@ export function SmartCategoriesFilter({
 
       {/* زر المزيد مع القائمة المنسدلة */}
       {overflowCategories.length > 0 && (
-        <div className="relative z-50" ref={dropdownRef}>
+        <div className="relative" ref={dropdownRef} style={{ zIndex: 9999 }}>
           <Button
             variant="outline"
             size="sm"
@@ -296,7 +299,8 @@ function OverflowDropdown({
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
-      className="absolute top-full right-0 mt-2 w-64 bg-white dark:bg-gray-900 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 z-50 overflow-hidden"
+      className="absolute top-full right-0 mt-2 w-64 bg-white dark:bg-gray-900 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden"
+      style={{ zIndex: 99999 }}
     >
       <div className="p-2 max-h-64 overflow-y-auto">
         {categories.map((category) => (

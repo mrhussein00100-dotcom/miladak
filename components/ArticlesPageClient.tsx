@@ -374,7 +374,7 @@ export function ArticlesPageClient({
         </div>
 
         {/* Smart Category Filters */}
-        <div className="mt-4">
+        <div className="mt-4 relative" style={{ zIndex: 100 }}>
           <SmartCategoriesFilter
             categories={categories.map((cat) => ({
               id: cat.id,
@@ -394,7 +394,7 @@ export function ArticlesPageClient({
 
       {/* Featured Articles */}
       {!selectedCategory && !searchQuery && featuredArticles.length > 0 && (
-        <section>
+        <section className="relative" style={{ zIndex: 1 }}>
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-xl flex items-center justify-center">
               <Star className="text-white" size={20} />
@@ -421,7 +421,7 @@ export function ArticlesPageClient({
       )}
 
       {/* All Articles */}
-      <section>
+      <section className="relative" style={{ zIndex: 1 }}>
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold">
             {selectedCategory
