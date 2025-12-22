@@ -151,14 +151,17 @@ export async function createCategory(input: CategoryInput): Promise<number> {
   );
   const sortOrder = input.sort_order ?? (maxOrder?.max_order || 0) + 1;
 
+  // توليد slug إذا لم يتم تقديمه
+  const slug = input.slug || generateSlug(input.name);
+
   try {
     const row = await queryOne<{ id: number }>(
       `INSERT INTO ${ARTICLE_CATEGORIES_TABLE} (
-        name, title, description, color, icon, sort_order, is_active, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?) RETURNING id`,
+        name, slug, description, color, icon, sort_order, active, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, true, ?, ?) RETURNING id`,
       [
         input.name,
-        input.title || input.name,
+        slug,
         input.description || '',
         input.color || '#6366f1',
         input.icon || '',
@@ -175,11 +178,11 @@ export async function createCategory(input: CategoryInput): Promise<number> {
 
   const result = await execute(
     `INSERT INTO ${ARTICLE_CATEGORIES_TABLE} (
-      name, title, description, color, icon, sort_order, is_active, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?)`,
+      name, slug, description, color, icon, sort_order, active, created_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, true, ?, ?)`,
     [
       input.name,
-      input.title || input.name,
+      slug,
       input.description || '',
       input.color || '#6366f1',
       input.icon || '',
