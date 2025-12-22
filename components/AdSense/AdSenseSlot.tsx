@@ -27,7 +27,7 @@ export function AdSenseSlot({
   const adRef = useRef<HTMLModElement>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const uniqueId = useId();
-  const client = process.env.NEXT_PUBLIC_ADSENSE_CLIENT;
+  const client = process.env.NEXT_PUBLIC_ADSENSE_CLIENT?.trim();
 
   useEffect(() => {
     if (!client || !adRef.current || isLoaded) return;
