@@ -171,12 +171,13 @@ export function ArticlesPageClient({
         let url = `/api/articles?page=1&pageSize=${ARTICLES_PER_PAGE}`;
 
         if (categoryId) {
-          // البحث عن slug التصنيف
+          // البحث عن اسم التصنيف
           const category = categories.find(
             (c) => c.id.toString() === categoryId
           );
           if (category) {
-            url += `&category=${category.slug}`;
+            // إرسال اسم التصنيف مع encoding للأحرف العربية
+            url += `&category=${encodeURIComponent(category.name)}`;
           }
         }
 
@@ -223,7 +224,7 @@ export function ArticlesPageClient({
           (c) => c.id.toString() === selectedCategory
         );
         if (category) {
-          url += `&category=${category.slug}`;
+          url += `&category=${encodeURIComponent(category.name)}`;
         }
       }
 

@@ -123,7 +123,7 @@ export function SmartCategoriesFilter({
 
       {/* زر المزيد مع القائمة المنسدلة */}
       {overflowCategories.length > 0 && (
-        <div className="relative" ref={dropdownRef}>
+        <div className="relative z-50" ref={dropdownRef}>
           <Button
             variant="outline"
             size="sm"
