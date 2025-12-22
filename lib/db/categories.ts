@@ -63,17 +63,6 @@ export async function getCategories(
     parentId?: number | null;
   } = {}
 ): Promise<Category[]> {
-  // تحديد نوع قاعدة البيانات
-  const isPostgres =
-    !!process.env.POSTGRES_URL ||
-    process.env.DATABASE_URL?.startsWith('postgres') ||
-    (process.env.VERCEL_URL && process.env.NODE_ENV === 'production');
-
-  // استعلام مختلف حسب نوع قاعدة البيانات
-  const articleCountSubquery = isPostgres
-    ? `(SELECT COUNT(*) FROM articles a WHERE CAST(NULLIF(a.category_id, '') AS INTEGER) = c.id AND (a.published = true OR a.published = 1 OR CAST(a.published AS TEXT) = '1'))`
-    : `(SELECT COUNT(*) FROM articles a WHERE CAST(a.category_id AS INTEGER) = c.id AND a.published = 1)`;
-
   const sql = `
     SELECT 
       c.id,
@@ -87,7 +76,7 @@ export async function getCategories(
       1 as is_active,
       c.created_at,
       COALESCE(c.updated_at, c.created_at) as updated_at,
-      COALESCE(${articleCountSubquery}, 0) as article_count
+      (SELECT COUNT(*) FROM articles a WHERE a.category_id = CAST(c.id AS TEXT) AND a.published = 1) as article_count
     FROM ${ARTICLE_CATEGORIES_TABLE} c
     ORDER BY COALESCE(c.sort_order, 0) ASC, c.name ASC
   `;
@@ -108,16 +97,6 @@ export async function getCategoriesTree(): Promise<CategoryTree[]> {
 export async function getCategoryById(
   id: number
 ): Promise<Category | undefined> {
-  // تحديد نوع قاعدة البيانات
-  const isPostgres =
-    !!process.env.POSTGRES_URL ||
-    process.env.DATABASE_URL?.startsWith('postgres') ||
-    (process.env.VERCEL_URL && process.env.NODE_ENV === 'production');
-
-  const articleCountSubquery = isPostgres
-    ? `(SELECT COUNT(*) FROM articles a WHERE CAST(NULLIF(a.category_id, '') AS INTEGER) = c.id AND (a.published = true OR a.published = 1 OR CAST(a.published AS TEXT) = '1'))`
-    : `(SELECT COUNT(*) FROM articles a WHERE CAST(a.category_id AS INTEGER) = c.id AND a.published = 1)`;
-
   return await queryOne<Category>(
     `SELECT 
       c.id,
@@ -131,7 +110,7 @@ export async function getCategoryById(
       1 as is_active,
       c.created_at,
       COALESCE(c.updated_at, c.created_at) as updated_at,
-      COALESCE(${articleCountSubquery}, 0) as article_count
+      (SELECT COUNT(*) FROM articles a WHERE a.category_id = CAST(c.id AS TEXT) AND a.published = 1) as article_count
     FROM ${ARTICLE_CATEGORIES_TABLE} c
     WHERE c.id = ?`,
     [id]
@@ -142,16 +121,6 @@ export async function getCategoryById(
 export async function getCategoryBySlug(
   slug: string
 ): Promise<Category | undefined> {
-  // تحديد نوع قاعدة البيانات
-  const isPostgres =
-    !!process.env.POSTGRES_URL ||
-    process.env.DATABASE_URL?.startsWith('postgres') ||
-    (process.env.VERCEL_URL && process.env.NODE_ENV === 'production');
-
-  const articleCountSubquery = isPostgres
-    ? `(SELECT COUNT(*) FROM articles a WHERE CAST(NULLIF(a.category_id, '') AS INTEGER) = c.id AND (a.published = true OR a.published = 1 OR CAST(a.published AS TEXT) = '1'))`
-    : `(SELECT COUNT(*) FROM articles a WHERE CAST(a.category_id AS INTEGER) = c.id AND a.published = 1)`;
-
   return await queryOne<Category>(
     `SELECT 
       c.id,
@@ -165,7 +134,7 @@ export async function getCategoryBySlug(
       1 as is_active,
       c.created_at,
       COALESCE(c.updated_at, c.created_at) as updated_at,
-      COALESCE(${articleCountSubquery}, 0) as article_count
+      (SELECT COUNT(*) FROM articles a WHERE a.category_id = CAST(c.id AS TEXT) AND a.published = 1) as article_count
     FROM ${ARTICLE_CATEGORIES_TABLE} c
     WHERE LOWER(c.slug) = LOWER(?) OR LOWER(c.name) = LOWER(?)`,
     [slug, slug.replace(/-/g, ' ')]
