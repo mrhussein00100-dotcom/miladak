@@ -318,8 +318,7 @@ export function ArticlesPageClient({
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="glass rounded-2xl p-6 border border-white/20 relative overflow-visible"
-        style={{ zIndex: 50 }}
+        className="glass rounded-2xl p-6 border border-white/20"
       >
         <div className="flex flex-col lg:flex-row gap-4">
           {/* Search */}
