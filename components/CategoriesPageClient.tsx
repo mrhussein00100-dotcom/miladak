@@ -45,17 +45,30 @@ export function CategoriesPageClient({
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
-  const filteredCategories = categories.filter(
+  // تنظيف البيانات - التأكد من أن article_count رقم صحيح ومعقول
+  const sanitizedCategories = categories.map((cat) => ({
+    ...cat,
+    article_count:
+      typeof cat.article_count === 'number' &&
+      cat.article_count >= 0 &&
+      cat.article_count < 1000000
+        ? Math.floor(cat.article_count)
+        : 0,
+  }));
+
+  const filteredCategories = sanitizedCategories.filter(
     (category) =>
       category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       category.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const totalArticles = categories.reduce(
+  const totalArticles = sanitizedCategories.reduce(
     (sum, cat) => sum + cat.article_count,
     0
   );
-  const popularCategories = categories.filter((cat) => cat.article_count > 5);
+  const popularCategories = sanitizedCategories.filter(
+    (cat) => cat.article_count > 5
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-pink-900/20">
