@@ -158,7 +158,7 @@ export async function createCategory(input: CategoryInput): Promise<number> {
     const row = await queryOne<{ id: number }>(
       `INSERT INTO ${ARTICLE_CATEGORIES_TABLE} (
         name, slug, description, color, icon, sort_order, active, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, true, ?, ?) RETURNING id`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id`,
       [
         input.name,
         slug,
@@ -166,20 +166,22 @@ export async function createCategory(input: CategoryInput): Promise<number> {
         input.color || '#6366f1',
         input.icon || '',
         sortOrder,
+        true,
         now,
         now,
       ]
     );
 
     if (row?.id !== undefined) return Number(row.id);
-  } catch {
-    // تجاهل
+  } catch (err) {
+    console.error('Error creating category with RETURNING:', err);
   }
 
+  // Fallback للـ SQLite
   const result = await execute(
     `INSERT INTO ${ARTICLE_CATEGORIES_TABLE} (
       name, slug, description, color, icon, sort_order, active, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, true, ?, ?)`,
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       input.name,
       slug,
@@ -187,6 +189,7 @@ export async function createCategory(input: CategoryInput): Promise<number> {
       input.color || '#6366f1',
       input.icon || '',
       sortOrder,
+      true,
       now,
       now,
     ]
