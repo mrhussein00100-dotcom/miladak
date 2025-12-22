@@ -151,7 +151,7 @@ export async function getArticles(
 
   // فلترة حسب التصنيف
   if (categoryId) {
-    whereClause += ' AND a.category_id = ?';
+    whereClause += ' AND CAST(a.category_id AS INTEGER) = ?';
     params.push(categoryId);
   }
 
@@ -185,10 +185,10 @@ export async function getArticles(
     `SELECT 
       a.*,
       c.name as category_name,
-      c.slug as category_slug,
+      LOWER(REPLACE(c.name, ' ', '-')) as category_slug,
       c.color as category_color
     FROM articles a
-    LEFT JOIN article_categories c ON a.category_id = c.id
+    LEFT JOIN article_categories c ON CAST(a.category_id AS INTEGER) = c.id
     WHERE ${whereClause}
     ORDER BY a.${sortColumn} ${order}
     LIMIT ? OFFSET ?`,
@@ -206,10 +206,10 @@ export async function getArticleById(id: number): Promise<Article | undefined> {
     `SELECT 
       a.*,
       c.name as category_name,
-      c.slug as category_slug,
+      LOWER(REPLACE(c.name, ' ', '-')) as category_slug,
       c.color as category_color
     FROM articles a
-    LEFT JOIN article_categories c ON a.category_id = c.id
+    LEFT JOIN article_categories c ON CAST(a.category_id AS INTEGER) = c.id
     WHERE a.id = ?`,
     [id]
   );
@@ -225,10 +225,10 @@ export async function getArticleBySlug(
     `SELECT 
       a.*,
       c.name as category_name,
-      c.slug as category_slug,
+      LOWER(REPLACE(c.name, ' ', '-')) as category_slug,
       c.color as category_color
     FROM articles a
-    LEFT JOIN article_categories c ON a.category_id = c.id
+    LEFT JOIN article_categories c ON CAST(a.category_id AS INTEGER) = c.id
     WHERE a.slug = ?`,
     [slug]
   );
@@ -267,14 +267,6 @@ export async function createArticle(input: ArticleInput): Promise<number> {
       now,
       now,
     ]
-  );
-
-  // تحديث عدد المقالات في التصنيف
-  await execute(
-    `UPDATE article_categories SET article_count = (
-      SELECT COUNT(*) FROM articles WHERE category_id = ?
-    ) WHERE id = ?`,
-    [input.category_id, input.category_id]
   );
 
   return result.lastInsertRowid as number;
@@ -364,19 +356,6 @@ export async function updateArticle(
     params
   );
 
-  // تحديث عدد المقالات في التصنيفات
-  if (
-    input.category_id !== undefined &&
-    input.category_id !== article.category_id
-  ) {
-    await execute(
-      `UPDATE article_categories SET article_count = (
-        SELECT COUNT(*) FROM articles WHERE category_id = article_categories.id
-      ) WHERE id IN (?, ?)`,
-      [article.category_id, input.category_id]
-    );
-  }
-
   return true;
 }
 
@@ -386,14 +365,6 @@ export async function deleteArticle(id: number): Promise<boolean> {
   if (!article) return false;
 
   await execute('DELETE FROM articles WHERE id = ?', [id]);
-
-  // تحديث عدد المقالات في التصنيف
-  await execute(
-    `UPDATE article_categories SET article_count = (
-      SELECT COUNT(*) FROM articles WHERE category_id = ?
-    ) WHERE id = ?`,
-    [article.category_id, article.category_id]
-  );
 
   return true;
 }

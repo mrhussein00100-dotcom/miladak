@@ -1,6 +1,6 @@
 /**
  * عمليات التصنيفات - يستخدم قاعدة البيانات الموحدة الموجودة
- * لا ينشئ جداول جديدة - يعمل مع الجداول الموجودة
+ * متوافق مع PostgreSQL
  */
 
 import { execute, query, queryOne } from './database';
@@ -11,13 +11,13 @@ const ARTICLE_CATEGORIES_TABLE = 'article_categories';
 export interface Category {
   id: number;
   name: string;
+  title: string;
   slug: string;
   description: string;
   color: string;
   icon: string;
-  image?: string;
-  parent_id: number | null;
   sort_order: number;
+  is_active: number;
   article_count: number;
   created_at: string;
   updated_at: string;
@@ -25,11 +25,11 @@ export interface Category {
 
 export interface CategoryInput {
   name: string;
+  title?: string;
   slug?: string;
   description?: string;
   color?: string;
   icon?: string;
-  parent_id?: number | null;
   sort_order?: number;
 }
 
@@ -53,7 +53,6 @@ export async function ensureCategoryColumns(): Promise<void> {
   if (process.env.NEXT_PHASE === 'phase-production-build') {
     return;
   }
-
   return;
 }
 
@@ -64,96 +63,90 @@ export async function getCategories(
     parentId?: number | null;
   } = {}
 ): Promise<Category[]> {
-  await ensureCategoryColumns();
-
-  const { includeCount = true, parentId } = options;
-
-  let sql = `
+  const sql = `
     SELECT 
       c.id,
       c.name,
-      c.slug,
+      COALESCE(c.title, c.name) as title,
+      LOWER(REPLACE(c.name, ' ', '-')) as slug,
       COALESCE(c.description, '') as description,
       COALESCE(c.color, '#6366f1') as color,
       COALESCE(c.icon, '') as icon,
-      COALESCE(c.image, '') as image,
-      c.parent_id,
       COALESCE(c.sort_order, 0) as sort_order,
+      COALESCE(c.is_active, 1) as is_active,
       c.created_at,
       COALESCE(c.updated_at, c.created_at) as updated_at,
-      COALESCE(c.article_count, 0) as article_count
+      (SELECT COUNT(*) FROM articles a WHERE CAST(a.category_id AS INTEGER) = c.id AND a.published = 1) as article_count
+    FROM ${ARTICLE_CATEGORIES_TABLE} c
+    WHERE COALESCE(c.is_active, 1) = 1
+    ORDER BY COALESCE(c.sort_order, 0) ASC, c.name ASC
   `;
 
-  sql += ` FROM ${ARTICLE_CATEGORIES_TABLE} c`;
-
-  const params: any[] = [];
-  if (parentId !== undefined) {
-    if (parentId === null) {
-      sql += ` WHERE c.parent_id IS NULL`;
-    } else {
-      sql += ` WHERE c.parent_id = ?`;
-      params.push(parentId);
-    }
-  }
-
-  sql += ` ORDER BY COALESCE(c.sort_order, 0) ASC, c.name ASC`;
-
-  return await query<Category>(sql, params);
+  return await query<Category>(sql);
 }
 
-// جلب التصنيفات كشجرة
+// جلب التصنيفات كشجرة (بدون parent_id، نرجع قائمة مسطحة)
 export async function getCategoriesTree(): Promise<CategoryTree[]> {
   const categories = await getCategories();
-
-  const buildTree = (parentId: number | null): CategoryTree[] => {
-    return categories
-      .filter((c) => c.parent_id === parentId)
-      .map((c) => ({
-        ...c,
-        children: buildTree(c.id),
-      }));
-  };
-
-  return buildTree(null);
+  return categories.map((c) => ({
+    ...c,
+    children: [],
+  }));
 }
 
 // جلب تصنيف واحد
 export async function getCategoryById(
   id: number
 ): Promise<Category | undefined> {
-  await ensureCategoryColumns();
-
   return await queryOne<Category>(
     `SELECT 
-      c.*,
-      COALESCE(c.article_count, 0) as article_count
+      c.id,
+      c.name,
+      COALESCE(c.title, c.name) as title,
+      LOWER(REPLACE(c.name, ' ', '-')) as slug,
+      COALESCE(c.description, '') as description,
+      COALESCE(c.color, '#6366f1') as color,
+      COALESCE(c.icon, '') as icon,
+      COALESCE(c.sort_order, 0) as sort_order,
+      COALESCE(c.is_active, 1) as is_active,
+      c.created_at,
+      COALESCE(c.updated_at, c.created_at) as updated_at,
+      (SELECT COUNT(*) FROM articles a WHERE CAST(a.category_id AS INTEGER) = c.id AND a.published = 1) as article_count
     FROM ${ARTICLE_CATEGORIES_TABLE} c
     WHERE c.id = ?`,
     [id]
   );
 }
 
-// جلب تصنيف بالـ slug
+// جلب تصنيف بالـ slug (نستخدم name)
 export async function getCategoryBySlug(
   slug: string
 ): Promise<Category | undefined> {
-  await ensureCategoryColumns();
+  // تحويل slug إلى name (استبدال - بمسافة)
+  const nameFromSlug = slug.replace(/-/g, ' ');
 
   return await queryOne<Category>(
     `SELECT 
-      c.*,
-      COALESCE(c.article_count, 0) as article_count
+      c.id,
+      c.name,
+      COALESCE(c.title, c.name) as title,
+      LOWER(REPLACE(c.name, ' ', '-')) as slug,
+      COALESCE(c.description, '') as description,
+      COALESCE(c.color, '#6366f1') as color,
+      COALESCE(c.icon, '') as icon,
+      COALESCE(c.sort_order, 0) as sort_order,
+      COALESCE(c.is_active, 1) as is_active,
+      c.created_at,
+      COALESCE(c.updated_at, c.created_at) as updated_at,
+      (SELECT COUNT(*) FROM articles a WHERE CAST(a.category_id AS INTEGER) = c.id AND a.published = 1) as article_count
     FROM ${ARTICLE_CATEGORIES_TABLE} c
-    WHERE c.slug = ?`,
-    [slug]
+    WHERE LOWER(c.name) = LOWER(?) OR LOWER(REPLACE(c.name, ' ', '-')) = LOWER(?)`,
+    [nameFromSlug, slug]
   );
 }
 
 // إنشاء تصنيف جديد
 export async function createCategory(input: CategoryInput): Promise<number> {
-  await ensureCategoryColumns();
-
-  const slug = input.slug || generateSlug(input.name);
   const now = new Date().toISOString();
 
   // الحصول على أعلى sort_order
@@ -165,15 +158,14 @@ export async function createCategory(input: CategoryInput): Promise<number> {
   try {
     const row = await queryOne<{ id: number }>(
       `INSERT INTO ${ARTICLE_CATEGORIES_TABLE} (
-        name, slug, description, color, icon, parent_id, sort_order, article_count, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?, ?) RETURNING id`,
+        name, title, description, color, icon, sort_order, is_active, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?) RETURNING id`,
       [
         input.name,
-        slug,
+        input.title || input.name,
         input.description || '',
         input.color || '#6366f1',
         input.icon || '',
-        input.parent_id || null,
         sortOrder,
         now,
         now,
@@ -187,15 +179,14 @@ export async function createCategory(input: CategoryInput): Promise<number> {
 
   const result = await execute(
     `INSERT INTO ${ARTICLE_CATEGORIES_TABLE} (
-      name, slug, description, color, icon, parent_id, sort_order, article_count, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?, ?)`,
+      name, title, description, color, icon, sort_order, is_active, created_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?)`,
     [
       input.name,
-      slug,
+      input.title || input.name,
       input.description || '',
       input.color || '#6366f1',
       input.icon || '',
-      input.parent_id || null,
       sortOrder,
       now,
       now,
@@ -210,8 +201,6 @@ export async function updateCategory(
   id: number,
   input: Partial<CategoryInput>
 ): Promise<boolean> {
-  await ensureCategoryColumns();
-
   const category = await getCategoryById(id);
   if (!category) return false;
 
@@ -222,9 +211,9 @@ export async function updateCategory(
     updates.push('name = ?');
     params.push(input.name);
   }
-  if (input.slug !== undefined) {
-    updates.push('slug = ?');
-    params.push(input.slug);
+  if (input.title !== undefined) {
+    updates.push('title = ?');
+    params.push(input.title);
   }
   if (input.description !== undefined) {
     updates.push('description = ?');
@@ -237,10 +226,6 @@ export async function updateCategory(
   if (input.icon !== undefined) {
     updates.push('icon = ?');
     params.push(input.icon);
-  }
-  if (input.parent_id !== undefined) {
-    updates.push('parent_id = ?');
-    params.push(input.parent_id);
   }
   if (input.sort_order !== undefined) {
     updates.push('sort_order = ?');
@@ -272,23 +257,10 @@ export async function deleteCategory(
   // نقل المقالات إلى تصنيف آخر إذا تم تحديده
   if (reassignTo) {
     await execute('UPDATE articles SET category_id = ? WHERE category_id = ?', [
-      reassignTo,
-      id,
+      String(reassignTo),
+      String(id),
     ]);
-    // تحديث عدد المقالات
-    await execute(
-      `UPDATE ${ARTICLE_CATEGORIES_TABLE} SET article_count = (
-        SELECT COUNT(*) FROM articles WHERE category_id = ?
-      ) WHERE id = ?`,
-      [reassignTo, reassignTo]
-    );
   }
-
-  // نقل التصنيفات الفرعية للمستوى الأعلى
-  await execute(
-    `UPDATE ${ARTICLE_CATEGORIES_TABLE} SET parent_id = ? WHERE parent_id = ?`,
-    [category.parent_id, id]
-  );
 
   // حذف التصنيف
   await execute(`DELETE FROM ${ARTICLE_CATEGORIES_TABLE} WHERE id = ?`, [id]);
@@ -310,13 +282,10 @@ export async function reorderCategories(
   return true;
 }
 
-// تحديث عدد المقالات لجميع التصنيفات
+// تحديث عدد المقالات لجميع التصنيفات (لا حاجة لها - نحسب ديناميكياً)
 export async function updateAllArticleCounts(): Promise<void> {
-  await execute(`
-    UPDATE ${ARTICLE_CATEGORIES_TABLE} SET article_count = (
-      SELECT COUNT(*) FROM articles WHERE articles.category_id = ${ARTICLE_CATEGORIES_TABLE}.id
-    )
-  `);
+  // لا حاجة - نحسب article_count ديناميكياً في الاستعلامات
+  return;
 }
 
 // إحصائيات التصنيفات
@@ -325,8 +294,6 @@ export async function getCategoryStats(): Promise<{
   withArticles: number;
   empty: number;
 }> {
-  await ensureCategoryColumns();
-
   const stats = await queryOne<{
     total: number;
     withArticles: number;
@@ -334,9 +301,9 @@ export async function getCategoryStats(): Promise<{
   }>(`
     SELECT 
       COUNT(*) as total,
-      SUM(CASE WHEN article_count > 0 THEN 1 ELSE 0 END) as withArticles,
-      SUM(CASE WHEN article_count = 0 THEN 1 ELSE 0 END) as empty
-    FROM ${ARTICLE_CATEGORIES_TABLE}
+      SUM(CASE WHEN (SELECT COUNT(*) FROM articles a WHERE CAST(a.category_id AS INTEGER) = c.id) > 0 THEN 1 ELSE 0 END) as "withArticles",
+      SUM(CASE WHEN (SELECT COUNT(*) FROM articles a WHERE CAST(a.category_id AS INTEGER) = c.id) = 0 THEN 1 ELSE 0 END) as empty
+    FROM ${ARTICLE_CATEGORIES_TABLE} c
   `);
 
   return stats || { total: 0, withArticles: 0, empty: 0 };
