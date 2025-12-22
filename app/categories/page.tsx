@@ -2,6 +2,10 @@ import { Metadata } from 'next';
 import { CategoriesPageClient } from '@/components/CategoriesPageClient';
 import { getCategories as getArticleCategories } from '@/lib/db/categories';
 
+// جعل الصفحة ديناميكية لجلب البيانات في كل طلب
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export const metadata: Metadata = {
   title: 'تصنيفات المقالات - ميلادك',
   description:

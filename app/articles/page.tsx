@@ -5,6 +5,10 @@ import { StructuredData } from '@/components/SEO/StructuredData';
 import { InContentAd, FooterAd } from '@/components/AdSense/AdSenseSlot';
 import type { Article, ArticleCategory } from '@/types';
 
+// جعل الصفحة ديناميكية لجلب البيانات في كل طلب
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export const metadata: Metadata = {
   title:
     'مكتبة مقالات ميلادك - نصائح صحية ومعلومات مفيدة عن العمر والصحة والحياة | ميلادك',
@@ -172,27 +176,34 @@ export default async function ArticlesPage() {
         a.slug,
         a.excerpt,
         a.category_id,
+        c.name as category_name,
+        c.color as category_color,
         a.author,
         a.read_time,
         a.views,
+        a.featured,
         a.featured_image,
+        a.image,
         a.created_at,
         a.updated_at
       FROM articles a
-      ORDER BY a.created_at DESC
+      LEFT JOIN article_categories c ON CAST(a.category_id AS INTEGER) = c.id
+      WHERE a.published = 1
+      ORDER BY a.featured DESC, a.created_at DESC
       LIMIT 20
     `);
 
-    // جلب التصنيفات
+    // جلب التصنيفات مع عدد المقالات
     categories = await query<ArticleCategory>(`
       SELECT 
         c.id,
         c.name,
-        c.slug,
+        COALESCE(c.slug, LOWER(REPLACE(c.name, ' ', '-'))) as slug,
         c.description,
-        c.color
+        c.color,
+        (SELECT COUNT(*) FROM articles a WHERE CAST(a.category_id AS INTEGER) = c.id AND a.published = 1) as article_count
       FROM article_categories c
-      ORDER BY c.name ASC
+      ORDER BY c.sort_order ASC, c.name ASC
     `);
   } catch (error) {
     console.log('Database not available during build:', error);
