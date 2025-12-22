@@ -19,15 +19,20 @@ interface ArticlePageProps {
 
 async function getArticle(slug: string): Promise<Article | null> {
   try {
+    // Debug: Log the slug being searched
+    console.log('🔍 Searching for article with slug:', slug);
+
     const article = await queryOne<Article>(
       `
         SELECT a.*, c.name as category_name, c.color as category_color
         FROM articles a
-        LEFT JOIN article_categories c ON a.category_id = c.id
-        WHERE a.slug = ? AND CAST(a.published AS TEXT) IN ('1', 'true', 't')
+        LEFT JOIN article_categories c ON CAST(a.category_id AS INTEGER) = c.id
+        WHERE a.slug = ? AND (a.published = 1 OR a.published = '1' OR a.published = true)
       `,
       [slug]
     );
+
+    console.log('📄 Article found:', article ? 'Yes' : 'No');
 
     if (article) {
       try {
@@ -56,8 +61,8 @@ async function getRelatedArticles(
         SELECT a.id, a.title, a.slug, a.excerpt, a.image, a.featured_image, a.read_time, a.category_id,
                c.name as category_name, c.color as category_color
         FROM articles a
-        LEFT JOIN article_categories c ON a.category_id = c.id
-        WHERE a.category_id = ? AND a.id != ? AND CAST(a.published AS TEXT) IN ('1', 'true', 't')
+        LEFT JOIN article_categories c ON CAST(a.category_id AS INTEGER) = c.id
+        WHERE CAST(a.category_id AS INTEGER) = ? AND a.id != ? AND (a.published = 1 OR a.published = '1' OR a.published = true)
         ORDER BY a.created_at DESC
         LIMIT 3
       `,

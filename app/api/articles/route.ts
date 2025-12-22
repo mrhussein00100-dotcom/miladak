@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
     const sortOrder = searchParams.get('sortOrder') || 'desc';
     const limit = searchParams.get('limit');
 
-    let whereClause = 'WHERE a.published = 1';
+    let whereClause = 'WHERE (a.published = 1 OR a.published = true)';
     const params: unknown[] = [];
 
     // Filter by category
@@ -166,7 +166,7 @@ export async function OPTIONS() {
         ac.color,
         COUNT(a.id) as articles_count
       FROM article_categories ac
-      LEFT JOIN articles a ON CAST(a.category_id AS INTEGER) = ac.id AND a.published = 1
+      LEFT JOIN articles a ON CAST(a.category_id AS INTEGER) = ac.id AND (a.published = 1 OR a.published = true)
       GROUP BY ac.id, ac.name, ac.description, ac.color
       ORDER BY ac.name ASC
     `);
