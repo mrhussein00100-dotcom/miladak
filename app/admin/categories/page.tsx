@@ -16,6 +16,7 @@ import {
   Search,
   Link as LinkIcon,
   Loader2,
+  Upload,
 } from 'lucide-react';
 
 interface Category {
@@ -45,11 +46,14 @@ export default function CategoriesPage() {
   const [parentId, setParentId] = useState<number | null>(null);
 
   // حالة اختيار الصورة
-  const [imageMode, setImageMode] = useState<'url' | 'search'>('url');
+  const [imageMode, setImageMode] = useState<'url' | 'search' | 'upload'>(
+    'url'
+  );
   const [imageUrl, setImageUrl] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<string[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
+  const [uploadLoading, setUploadLoading] = useState(false);
 
   // الألوان المتاحة
   const colors = [
@@ -147,6 +151,47 @@ export default function CategoriesPage() {
   const removeImage = () => {
     setIcon('');
     setImageUrl('');
+  };
+
+  // رفع صورة من الجهاز
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // التحقق من نوع الملف
+    if (!file.type.startsWith('image/')) {
+      alert('يرجى اختيار ملف صورة');
+      return;
+    }
+
+    // التحقق من حجم الملف (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('حجم الصورة يجب أن يكون أقل من 5 ميجابايت');
+      return;
+    }
+
+    setUploadLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await fetch('/api/admin/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (data.success && data.url) {
+        setIcon(data.url);
+        setImageUrl(data.url);
+      } else {
+        alert(data.error || 'فشل في رفع الصورة');
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      alert('حدث خطأ أثناء رفع الصورة');
+    }
+    setUploadLoading(false);
   };
 
   // حفظ التصنيف
@@ -256,10 +301,11 @@ export default function CategoriesPage() {
 
         {/* Form Modal */}
         {showForm && (
-          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-            <div className="bg-gray-900 rounded-2xl p-6 w-full max-w-md border border-gray-800">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-white">
+          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-2 sm:p-4">
+            <div className="bg-gray-900 rounded-2xl w-full max-w-md border border-gray-800 max-h-[95vh] flex flex-col">
+              {/* Header - ثابت */}
+              <div className="flex items-center justify-between p-4 sm:p-6 pb-4 border-b border-gray-800 shrink-0">
+                <h2 className="text-lg sm:text-xl font-bold text-white">
                   {editingId ? 'تعديل التصنيف' : 'تصنيف جديد'}
                 </h2>
                 <button
@@ -270,7 +316,8 @@ export default function CategoriesPage() {
                 </button>
               </div>
 
-              <div className="space-y-4">
+              {/* Content - قابل للتمرير */}
+              <div className="flex-1 overflow-y-auto p-4 sm:p-6 pt-4 space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-400 mb-2">
                     الاسم *
@@ -319,7 +366,7 @@ export default function CategoriesPage() {
                       <button
                         key={c}
                         onClick={() => setColor(c)}
-                        className={`w-8 h-8 rounded-lg transition-transform ${
+                        className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg transition-transform ${
                           color === c
                             ? 'ring-2 ring-offset-2 ring-offset-gray-900 ring-gray-400 scale-110'
                             : ''
@@ -357,30 +404,42 @@ export default function CategoriesPage() {
                   )}
 
                   {/* أزرار التبديل */}
-                  <div className="flex gap-2 mb-3">
+                  <div className="grid grid-cols-3 gap-1 sm:gap-2 mb-3">
                     <button
                       type="button"
                       onClick={() => setImageMode('url')}
-                      className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm ${
+                      className={`flex items-center justify-center gap-1 px-2 py-2 rounded-lg text-xs sm:text-sm ${
                         imageMode === 'url'
                           ? 'bg-blue-500 text-white'
                           : 'bg-gray-800 text-gray-300 border border-gray-700'
                       }`}
                     >
-                      <LinkIcon className="w-4 h-4" />
-                      رابط
+                      <LinkIcon className="w-3 h-3 sm:w-4 sm:h-4" />
+                      <span className="hidden sm:inline">رابط</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => setImageMode('search')}
-                      className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm ${
+                      className={`flex items-center justify-center gap-1 px-2 py-2 rounded-lg text-xs sm:text-sm ${
                         imageMode === 'search'
                           ? 'bg-blue-500 text-white'
                           : 'bg-gray-800 text-gray-300 border border-gray-700'
                       }`}
                     >
-                      <Search className="w-4 h-4" />
-                      بحث Pexels
+                      <Search className="w-3 h-3 sm:w-4 sm:h-4" />
+                      <span className="hidden sm:inline">Pexels</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setImageMode('upload')}
+                      className={`flex items-center justify-center gap-1 px-2 py-2 rounded-lg text-xs sm:text-sm ${
+                        imageMode === 'upload'
+                          ? 'bg-blue-500 text-white'
+                          : 'bg-gray-800 text-gray-300 border border-gray-700'
+                      }`}
+                    >
+                      <Upload className="w-3 h-3 sm:w-4 sm:h-4" />
+                      <span className="hidden sm:inline">رفع</span>
                     </button>
                   </div>
 
@@ -430,7 +489,7 @@ export default function CategoriesPage() {
 
                       {/* نتائج البحث */}
                       {searchResults.length > 0 && (
-                        <div className="grid grid-cols-3 gap-2 max-h-36 overflow-auto">
+                        <div className="grid grid-cols-3 gap-2 max-h-32 overflow-auto">
                           {searchResults.map((url, idx) => (
                             <button
                               key={idx}
@@ -451,6 +510,34 @@ export default function CategoriesPage() {
                           ))}
                         </div>
                       )}
+                    </div>
+                  )}
+
+                  {/* رفع من الجهاز */}
+                  {imageMode === 'upload' && (
+                    <div className="space-y-2">
+                      <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-gray-700 rounded-xl cursor-pointer hover:border-blue-500 hover:bg-gray-800/50 transition-all">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleFileUpload}
+                          className="hidden"
+                          disabled={uploadLoading}
+                        />
+                        {uploadLoading ? (
+                          <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+                        ) : (
+                          <>
+                            <Upload className="w-8 h-8 text-gray-400 mb-2" />
+                            <span className="text-sm text-gray-400">
+                              اضغط لاختيار صورة
+                            </span>
+                            <span className="text-xs text-gray-500 mt-1">
+                              PNG, JPG حتى 5MB
+                            </span>
+                          </>
+                        )}
+                      </label>
                     </div>
                   )}
                 </div>
@@ -478,18 +565,21 @@ export default function CategoriesPage() {
                       ))}
                   </select>
                 </div>
+              </div>
 
-                <div className="flex gap-3 pt-4">
+              {/* Footer - ثابت */}
+              <div className="p-4 sm:p-6 pt-4 border-t border-gray-800 shrink-0">
+                <div className="flex gap-3">
                   <button
                     onClick={handleSave}
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600"
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 font-medium"
                   >
                     <Save className="w-5 h-5" />
                     حفظ
                   </button>
                   <button
                     onClick={resetForm}
-                    className="px-4 py-2 bg-gray-800 text-gray-300 rounded-xl hover:bg-gray-700 border border-gray-700"
+                    className="px-4 py-3 bg-gray-800 text-gray-300 rounded-xl hover:bg-gray-700 border border-gray-700"
                   >
                     إلغاء
                   </button>
