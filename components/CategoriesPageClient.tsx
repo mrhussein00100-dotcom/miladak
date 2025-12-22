@@ -46,15 +46,20 @@ export function CategoriesPageClient({
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   // تنظيف البيانات - التأكد من أن article_count رقم صحيح ومعقول
-  const sanitizedCategories = categories.map((cat) => ({
-    ...cat,
-    article_count:
-      typeof cat.article_count === 'number' &&
-      cat.article_count >= 0 &&
-      cat.article_count < 1000000
-        ? Math.floor(cat.article_count)
-        : 0,
-  }));
+  const sanitizedCategories = categories.map((cat) => {
+    // تحويل article_count إلى رقم (قد يأتي كـ string أو bigint من PostgreSQL)
+    let count = 0;
+    if (cat.article_count !== null && cat.article_count !== undefined) {
+      const parsed = Number(cat.article_count);
+      if (!isNaN(parsed) && parsed >= 0 && parsed < 1000000) {
+        count = Math.floor(parsed);
+      }
+    }
+    return {
+      ...cat,
+      article_count: count,
+    };
+  });
 
   const filteredCategories = sanitizedCategories.filter(
     (category) =>
