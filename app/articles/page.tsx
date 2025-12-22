@@ -188,7 +188,7 @@ export default async function ArticlesPage() {
         a.updated_at
       FROM articles a
       LEFT JOIN article_categories c ON CAST(a.category_id AS INTEGER) = c.id
-      WHERE a.published = 1
+      WHERE CAST(a.published AS TEXT) IN ('1', 'true')
       ORDER BY a.featured DESC, a.created_at DESC
       LIMIT 20
     `);
@@ -201,7 +201,7 @@ export default async function ArticlesPage() {
         COALESCE(c.slug, LOWER(REPLACE(c.name, ' ', '-'))) as slug,
         c.description,
         c.color,
-        (SELECT COUNT(*) FROM articles a WHERE CAST(a.category_id AS INTEGER) = c.id AND a.published = 1) as article_count
+        (SELECT COUNT(*) FROM articles a WHERE CAST(a.category_id AS INTEGER) = c.id AND CAST(a.published AS TEXT) IN ('1', 'true')) as articles_count
       FROM article_categories c
       ORDER BY c.sort_order ASC, c.name ASC
     `);
