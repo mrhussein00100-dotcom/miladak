@@ -5,7 +5,7 @@
 
 import { execute, query, queryOne } from './database';
 
-const ARTICLE_CATEGORIES_TABLE = 'article_categories';
+const ARTICLE_CATEGORIES_TABLE = 'categories';
 
 // أنواع البيانات
 export interface Category {
@@ -68,7 +68,7 @@ export async function getCategories(
       c.id,
       c.name,
       c.name as title,
-      COALESCE(c.slug, LOWER(REPLACE(c.name, ' ', '-'))) as slug,
+      c.slug,
       COALESCE(c.description, '') as description,
       COALESCE(c.color, '#6366f1') as color,
       COALESCE(c.icon, '') as icon,
@@ -76,7 +76,7 @@ export async function getCategories(
       1 as is_active,
       c.created_at,
       COALESCE(c.updated_at, c.created_at) as updated_at,
-      (SELECT COUNT(*) FROM articles a WHERE a.category_id = CAST(c.id AS TEXT) AND a.published = 1) as article_count
+      COALESCE(c.article_count, 0) as article_count
     FROM ${ARTICLE_CATEGORIES_TABLE} c
     ORDER BY COALESCE(c.sort_order, 0) ASC, c.name ASC
   `;
@@ -102,7 +102,7 @@ export async function getCategoryById(
       c.id,
       c.name,
       c.name as title,
-      COALESCE(c.slug, LOWER(REPLACE(c.name, ' ', '-'))) as slug,
+      c.slug,
       COALESCE(c.description, '') as description,
       COALESCE(c.color, '#6366f1') as color,
       COALESCE(c.icon, '') as icon,
@@ -110,14 +110,14 @@ export async function getCategoryById(
       1 as is_active,
       c.created_at,
       COALESCE(c.updated_at, c.created_at) as updated_at,
-      (SELECT COUNT(*) FROM articles a WHERE a.category_id = CAST(c.id AS TEXT) AND a.published = 1) as article_count
+      COALESCE(c.article_count, 0) as article_count
     FROM ${ARTICLE_CATEGORIES_TABLE} c
     WHERE c.id = ?`,
     [id]
   );
 }
 
-// جلب تصنيف بالـ slug (نستخدم name)
+// جلب تصنيف بالـ slug
 export async function getCategoryBySlug(
   slug: string
 ): Promise<Category | undefined> {
@@ -126,7 +126,7 @@ export async function getCategoryBySlug(
       c.id,
       c.name,
       c.name as title,
-      COALESCE(c.slug, LOWER(REPLACE(c.name, ' ', '-'))) as slug,
+      c.slug,
       COALESCE(c.description, '') as description,
       COALESCE(c.color, '#6366f1') as color,
       COALESCE(c.icon, '') as icon,
@@ -134,7 +134,7 @@ export async function getCategoryBySlug(
       1 as is_active,
       c.created_at,
       COALESCE(c.updated_at, c.created_at) as updated_at,
-      (SELECT COUNT(*) FROM articles a WHERE a.category_id = CAST(c.id AS TEXT) AND a.published = 1) as article_count
+      COALESCE(c.article_count, 0) as article_count
     FROM ${ARTICLE_CATEGORIES_TABLE} c
     WHERE LOWER(c.slug) = LOWER(?) OR LOWER(c.name) = LOWER(?)`,
     [slug, slug.replace(/-/g, ' ')]
@@ -151,14 +151,17 @@ export async function createCategory(input: CategoryInput): Promise<number> {
   );
   const sortOrder = input.sort_order ?? (maxOrder?.max_order || 0) + 1;
 
+  // توليد slug إذا لم يتم تقديمه
+  const slug = input.slug || generateSlug(input.name);
+
   try {
     const row = await queryOne<{ id: number }>(
       `INSERT INTO ${ARTICLE_CATEGORIES_TABLE} (
-        name, title, description, color, icon, sort_order, is_active, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?) RETURNING id`,
+        name, slug, description, color, icon, sort_order, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING id`,
       [
         input.name,
-        input.title || input.name,
+        slug,
         input.description || '',
         input.color || '#6366f1',
         input.icon || '',
@@ -175,11 +178,11 @@ export async function createCategory(input: CategoryInput): Promise<number> {
 
   const result = await execute(
     `INSERT INTO ${ARTICLE_CATEGORIES_TABLE} (
-      name, title, description, color, icon, sort_order, is_active, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?)`,
+      name, slug, description, color, icon, sort_order, created_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       input.name,
-      input.title || input.name,
+      slug,
       input.description || '',
       input.color || '#6366f1',
       input.icon || '',
@@ -297,8 +300,8 @@ export async function getCategoryStats(): Promise<{
   }>(`
     SELECT 
       COUNT(*) as total,
-      SUM(CASE WHEN (SELECT COUNT(*) FROM articles a WHERE CAST(a.category_id AS INTEGER) = c.id) > 0 THEN 1 ELSE 0 END) as "withArticles",
-      SUM(CASE WHEN (SELECT COUNT(*) FROM articles a WHERE CAST(a.category_id AS INTEGER) = c.id) = 0 THEN 1 ELSE 0 END) as empty
+      SUM(CASE WHEN COALESCE(c.article_count, 0) > 0 THEN 1 ELSE 0 END) as "withArticles",
+      SUM(CASE WHEN COALESCE(c.article_count, 0) = 0 THEN 1 ELSE 0 END) as empty
     FROM ${ARTICLE_CATEGORIES_TABLE} c
   `);
 
