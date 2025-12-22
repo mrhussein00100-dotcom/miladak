@@ -76,7 +76,7 @@ export async function getCategories(
       1 as is_active,
       c.created_at,
       COALESCE(c.updated_at, c.created_at) as updated_at,
-      (SELECT COUNT(*) FROM articles a WHERE a.category_id = CAST(c.id AS TEXT) AND a.published = 1) as article_count
+      COALESCE((SELECT COUNT(*) FROM articles a WHERE CAST(a.category_id AS INTEGER) = c.id AND (a.published = true OR a.published = 1 OR CAST(a.published AS TEXT) = '1' OR CAST(a.published AS TEXT) = 'true')), 0) as article_count
     FROM ${ARTICLE_CATEGORIES_TABLE} c
     ORDER BY COALESCE(c.sort_order, 0) ASC, c.name ASC
   `;
@@ -110,7 +110,7 @@ export async function getCategoryById(
       1 as is_active,
       c.created_at,
       COALESCE(c.updated_at, c.created_at) as updated_at,
-      (SELECT COUNT(*) FROM articles a WHERE a.category_id = CAST(c.id AS TEXT) AND a.published = 1) as article_count
+      COALESCE((SELECT COUNT(*) FROM articles a WHERE CAST(a.category_id AS INTEGER) = c.id AND (a.published = true OR a.published = 1 OR CAST(a.published AS TEXT) = '1' OR CAST(a.published AS TEXT) = 'true')), 0) as article_count
     FROM ${ARTICLE_CATEGORIES_TABLE} c
     WHERE c.id = ?`,
     [id]
@@ -134,7 +134,7 @@ export async function getCategoryBySlug(
       1 as is_active,
       c.created_at,
       COALESCE(c.updated_at, c.created_at) as updated_at,
-      (SELECT COUNT(*) FROM articles a WHERE a.category_id = CAST(c.id AS TEXT) AND a.published = 1) as article_count
+      COALESCE((SELECT COUNT(*) FROM articles a WHERE CAST(a.category_id AS INTEGER) = c.id AND (a.published = true OR a.published = 1 OR CAST(a.published AS TEXT) = '1' OR CAST(a.published AS TEXT) = 'true')), 0) as article_count
     FROM ${ARTICLE_CATEGORIES_TABLE} c
     WHERE LOWER(c.slug) = LOWER(?) OR LOWER(c.name) = LOWER(?)`,
     [slug, slug.replace(/-/g, ' ')]
