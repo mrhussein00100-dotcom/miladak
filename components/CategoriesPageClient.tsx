@@ -72,7 +72,7 @@ export function CategoriesPageClient({
     0
   );
   const popularCategories = sanitizedCategories.filter(
-    (cat) => cat.article_count > 5
+    (cat) => cat.article_count >= 1
   );
 
   return (
@@ -263,7 +263,7 @@ export function CategoriesPageClient({
                           {formatArabicNumber(category.article_count)} مقال
                         </span>
                       </div>
-                      {category.article_count > 10 && (
+                      {category.article_count >= 1 && (
                         <span className="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs rounded-full font-medium">
                           شائع
                         </span>
