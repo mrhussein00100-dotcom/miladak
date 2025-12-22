@@ -38,7 +38,13 @@ export async function GET() {
     // اختبار استعلام التصنيفات
     let categoriesTest = null;
     let categoriesError = null;
+    let categoriesCount = 0;
     try {
+      const countResult = await query<{ count: number }>(
+        `SELECT COUNT(*) as count FROM article_categories`
+      );
+      categoriesCount = countResult[0]?.count || 0;
+
       categoriesTest = await query(`
         SELECT 
           c.id,
@@ -57,12 +63,26 @@ export async function GET() {
     // اختبار استعلام المقالات
     let articlesTest = null;
     let articlesError = null;
+    let articlesCount = 0;
+    let sampleCategoryId = null;
     try {
+      const countResult = await query<{ count: number }>(
+        `SELECT COUNT(*) as count FROM articles`
+      );
+      articlesCount = countResult[0]?.count || 0;
+
+      // جلب category_id من أول مقال
+      const sampleArticle = await query<{ category_id: string }>(
+        `SELECT category_id FROM articles LIMIT 1`
+      );
+      sampleCategoryId = sampleArticle[0]?.category_id;
+
       articlesTest = await query(`
         SELECT 
           a.id,
           a.title,
           a.slug,
+          a.category_id,
           c.name as category_name
         FROM articles a
         LEFT JOIN article_categories c ON a.category_id = CAST(c.id AS TEXT)
@@ -78,8 +98,11 @@ export async function GET() {
       categoriesColumns,
       articlesColumns,
       articleCategoriesColumns,
+      categoriesCount,
       categoriesTest,
       categoriesError,
+      articlesCount,
+      sampleCategoryId,
       articlesTest,
       articlesError,
     });
