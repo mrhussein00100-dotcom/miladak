@@ -12,6 +12,10 @@ import {
   Save,
   X,
   FileText,
+  Image as ImageIcon,
+  Search,
+  Link as LinkIcon,
+  Loader2,
 } from 'lucide-react';
 
 interface Category {
@@ -20,7 +24,7 @@ interface Category {
   slug: string;
   description: string;
   color: string;
-  icon: string;
+  icon: string; // يُستخدم لتخزين رابط الصورة
   parent_id: number | null;
   sort_order: number;
   article_count: number;
@@ -37,8 +41,15 @@ export default function CategoriesPage() {
   const [slug, setSlug] = useState('');
   const [description, setDescription] = useState('');
   const [color, setColor] = useState('#6366f1');
-  const [icon, setIcon] = useState('');
+  const [icon, setIcon] = useState(''); // رابط صورة التصنيف
   const [parentId, setParentId] = useState<number | null>(null);
+
+  // حالة اختيار الصورة
+  const [imageMode, setImageMode] = useState<'url' | 'search'>('url');
+  const [imageUrl, setImageUrl] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<string[]>([]);
+  const [searchLoading, setSearchLoading] = useState(false);
 
   // الألوان المتاحة
   const colors = [
@@ -90,6 +101,9 @@ export default function CategoriesPage() {
     setParentId(null);
     setEditingId(null);
     setShowForm(false);
+    setImageUrl('');
+    setSearchQuery('');
+    setSearchResults([]);
   };
 
   // فتح نموذج التعديل
@@ -99,9 +113,40 @@ export default function CategoriesPage() {
     setDescription(category.description || '');
     setColor(category.color || '#6366f1');
     setIcon(category.icon || '');
+    setImageUrl(category.icon || '');
     setParentId(category.parent_id);
     setEditingId(category.id);
     setShowForm(true);
+  };
+
+  // البحث عن صور من Pexels
+  const handleImageSearch = async () => {
+    if (!searchQuery.trim()) return;
+    setSearchLoading(true);
+    try {
+      const res = await fetch(
+        `/api/images/search?q=${encodeURIComponent(searchQuery)}`
+      );
+      const data = await res.json();
+      if (data.success) {
+        setSearchResults(data.images || []);
+      }
+    } catch (error) {
+      console.error('Search error:', error);
+    }
+    setSearchLoading(false);
+  };
+
+  // اختيار صورة
+  const selectImage = (url: string) => {
+    setIcon(url);
+    setImageUrl(url);
+  };
+
+  // حذف الصورة
+  const removeImage = () => {
+    setIcon('');
+    setImageUrl('');
   };
 
   // حفظ التصنيف
@@ -285,6 +330,131 @@ export default function CategoriesPage() {
                   </div>
                 </div>
 
+                {/* قسم صورة التصنيف */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-400 mb-2">
+                    <ImageIcon className="w-4 h-4 inline ml-1" />
+                    صورة التصنيف (اختياري)
+                  </label>
+
+                  {/* معاينة الصورة الحالية */}
+                  {icon && (
+                    <div className="relative mb-3">
+                      <img
+                        src={icon}
+                        alt="صورة التصنيف"
+                        className="w-full h-24 object-cover rounded-lg"
+                        onError={() => setIcon('')}
+                      />
+                      <button
+                        type="button"
+                        onClick={removeImage}
+                        className="absolute top-2 left-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  )}
+
+                  {/* أزرار التبديل */}
+                  <div className="flex gap-2 mb-3">
+                    <button
+                      type="button"
+                      onClick={() => setImageMode('url')}
+                      className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm ${
+                        imageMode === 'url'
+                          ? 'bg-blue-500 text-white'
+                          : 'bg-gray-800 text-gray-300 border border-gray-700'
+                      }`}
+                    >
+                      <LinkIcon className="w-4 h-4" />
+                      رابط
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setImageMode('search')}
+                      className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm ${
+                        imageMode === 'search'
+                          ? 'bg-blue-500 text-white'
+                          : 'bg-gray-800 text-gray-300 border border-gray-700'
+                      }`}
+                    >
+                      <Search className="w-4 h-4" />
+                      بحث Pexels
+                    </button>
+                  </div>
+
+                  {/* إدخال الرابط */}
+                  {imageMode === 'url' && (
+                    <div className="space-y-2">
+                      <input
+                        type="url"
+                        value={imageUrl}
+                        onChange={(e) => {
+                          setImageUrl(e.target.value);
+                          setIcon(e.target.value);
+                        }}
+                        placeholder="https://example.com/image.jpg"
+                        className="w-full px-4 py-2 rounded-xl border border-gray-700 bg-gray-800 text-white placeholder-gray-500 text-sm"
+                      />
+                    </div>
+                  )}
+
+                  {/* البحث عن صور */}
+                  {imageMode === 'search' && (
+                    <div className="space-y-3">
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          onKeyDown={(e) =>
+                            e.key === 'Enter' && handleImageSearch()
+                          }
+                          placeholder="ابحث عن صور..."
+                          className="flex-1 px-3 py-2 rounded-lg border border-gray-700 bg-gray-800 text-white placeholder-gray-500 text-sm"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleImageSearch}
+                          disabled={searchLoading}
+                          className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50"
+                        >
+                          {searchLoading ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <Search className="w-4 h-4" />
+                          )}
+                        </button>
+                      </div>
+
+                      {/* نتائج البحث */}
+                      {searchResults.length > 0 && (
+                        <div className="grid grid-cols-3 gap-2 max-h-36 overflow-auto">
+                          {searchResults.map((url, idx) => (
+                            <button
+                              key={idx}
+                              type="button"
+                              onClick={() => selectImage(url)}
+                              className={`aspect-square rounded-lg overflow-hidden border-2 ${
+                                icon === url
+                                  ? 'border-blue-500'
+                                  : 'border-transparent'
+                              }`}
+                            >
+                              <img
+                                src={url}
+                                alt=""
+                                className="w-full h-full object-cover"
+                              />
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
                 <div>
                   <label className="block text-sm font-medium text-gray-400 mb-2">
                     التصنيف الأب
@@ -356,15 +526,31 @@ export default function CategoriesPage() {
                   className="flex items-center justify-between p-4 hover:bg-gray-800/50"
                 >
                   <div className="flex items-center gap-4">
-                    <div
-                      className="w-10 h-10 rounded-xl flex items-center justify-center"
-                      style={{ backgroundColor: `${category.color}20` }}
-                    >
-                      <FolderTree
-                        className="w-5 h-5"
-                        style={{ color: category.color }}
-                      />
-                    </div>
+                    {/* عرض الصورة إذا وجدت، وإلا عرض اللون والأيقونة */}
+                    {category.icon && category.icon.startsWith('http') ? (
+                      <div className="w-10 h-10 rounded-xl overflow-hidden">
+                        <img
+                          src={category.icon}
+                          alt={category.name}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            // في حالة فشل تحميل الصورة، إخفاءها
+                            (e.target as HTMLImageElement).style.display =
+                              'none';
+                          }}
+                        />
+                      </div>
+                    ) : (
+                      <div
+                        className="w-10 h-10 rounded-xl flex items-center justify-center"
+                        style={{ backgroundColor: `${category.color}20` }}
+                      >
+                        <FolderTree
+                          className="w-5 h-5"
+                          style={{ color: category.color }}
+                        />
+                      </div>
+                    )}
                     <div>
                       <h3 className="font-medium text-white">
                         {category.name}

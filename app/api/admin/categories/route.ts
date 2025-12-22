@@ -91,7 +91,6 @@ export async function POST(request: NextRequest) {
       description: body.description,
       color: body.color,
       icon: body.icon,
-      parent_id: body.parent_id,
       sort_order: body.sort_order,
     };
 

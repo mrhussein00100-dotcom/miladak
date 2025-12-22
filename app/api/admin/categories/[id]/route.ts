@@ -76,7 +76,6 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     if (body.description !== undefined) input.description = body.description;
     if (body.color !== undefined) input.color = body.color;
     if (body.icon !== undefined) input.icon = body.icon;
-    if (body.parent_id !== undefined) input.parent_id = body.parent_id;
     if (body.sort_order !== undefined) input.sort_order = body.sort_order;
 
     const success = await updateCategory(categoryId, input);
