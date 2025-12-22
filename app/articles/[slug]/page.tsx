@@ -22,17 +22,39 @@ async function getArticle(slug: string): Promise<Article | null> {
     // Debug: Log the slug being searched
     console.log('🔍 Searching for article with slug:', slug);
 
-    const article = await queryOne<Article>(
+    // Try multiple query approaches for compatibility
+    let article = await queryOne<Article>(
       `
         SELECT a.*, c.name as category_name, c.color as category_color
         FROM articles a
         LEFT JOIN article_categories c ON CAST(a.category_id AS INTEGER) = c.id
-        WHERE a.slug = ? AND CAST(a.published AS TEXT) IN ('1', 'true')
+        WHERE a.slug = ?
       `,
       [slug]
     );
 
+    // If not found, try without category join
+    if (!article) {
+      console.log('📄 Trying without category join...');
+      article = await queryOne<Article>(
+        `SELECT * FROM articles WHERE slug = ?`,
+        [slug]
+      );
+    }
+
     console.log('📄 Article found:', article ? 'Yes' : 'No');
+    if (article) {
+      console.log('📄 Article published status:', article.published);
+
+      // Check if published - convert to string for comparison
+      const pubValue = String(article.published);
+      const isPublished = pubValue === '1' || pubValue === 'true';
+
+      if (!isPublished) {
+        console.log('📄 Article is not published');
+        return null;
+      }
+    }
 
     if (article) {
       try {
