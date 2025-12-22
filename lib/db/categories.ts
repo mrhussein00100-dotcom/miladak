@@ -154,48 +154,51 @@ export async function createCategory(input: CategoryInput): Promise<number> {
   // توليد slug إذا لم يتم تقديمه
   const slug = input.slug || generateSlug(input.name);
 
+  // القيم للإدراج
+  const name = input.name;
+  const description = input.description || '';
+  const color = input.color || '#6366f1';
+  const icon = input.icon || '';
+
   try {
+    // محاولة PostgreSQL مع RETURNING
     const row = await queryOne<{ id: number }>(
       `INSERT INTO ${ARTICLE_CATEGORIES_TABLE} (
         name, slug, description, color, icon, sort_order, active, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id`,
-      [
-        input.name,
-        slug,
-        input.description || '',
-        input.color || '#6366f1',
-        input.icon || '',
-        sortOrder,
-        true,
-        now,
-        now,
-      ]
+      ) VALUES (?, ?, ?, ?, ?, ?, true, ?, ?) RETURNING id`,
+      [name, slug, description, color, icon, sortOrder, now, now]
     );
 
-    if (row?.id !== undefined) return Number(row.id);
+    if (row?.id !== undefined) {
+      console.log('✅ Category created with id:', row.id);
+      return Number(row.id);
+    }
   } catch (err) {
     console.error('Error creating category with RETURNING:', err);
+
+    // محاولة بديلة - بدون RETURNING (للـ SQLite)
+    try {
+      const result = await execute(
+        `INSERT INTO ${ARTICLE_CATEGORIES_TABLE} (
+          name, slug, description, color, icon, sort_order, active, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?)`,
+        [name, slug, description, color, icon, sortOrder, now, now]
+      );
+
+      if (result.lastInsertRowid) {
+        console.log(
+          '✅ Category created (fallback) with id:',
+          result.lastInsertRowid
+        );
+        return Number(result.lastInsertRowid);
+      }
+    } catch (fallbackErr) {
+      console.error('Error in fallback insert:', fallbackErr);
+      throw fallbackErr;
+    }
   }
 
-  // Fallback للـ SQLite
-  const result = await execute(
-    `INSERT INTO ${ARTICLE_CATEGORIES_TABLE} (
-      name, slug, description, color, icon, sort_order, active, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [
-      input.name,
-      slug,
-      input.description || '',
-      input.color || '#6366f1',
-      input.icon || '',
-      sortOrder,
-      true,
-      now,
-      now,
-    ]
-  );
-
-  return result.lastInsertRowid as number;
+  throw new Error('Failed to create category');
 }
 
 // تحديث تصنيف
