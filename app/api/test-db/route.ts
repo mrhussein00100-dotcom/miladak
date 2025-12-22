@@ -43,8 +43,8 @@ export async function GET() {
         SELECT 
           c.id,
           c.name,
-          COALESCE(c.title, c.name) as title,
-          LOWER(REPLACE(c.name, ' ', '-')) as slug,
+          c.name as title,
+          COALESCE(c.slug, LOWER(REPLACE(c.name, ' ', '-'))) as slug,
           COALESCE(c.description, '') as description,
           COALESCE(c.color, '#6366f1') as color
         FROM article_categories c
@@ -65,7 +65,7 @@ export async function GET() {
           a.slug,
           c.name as category_name
         FROM articles a
-        LEFT JOIN article_categories c ON CAST(a.category_id AS INTEGER) = c.id
+        LEFT JOIN article_categories c ON a.category_id = CAST(c.id AS TEXT)
         LIMIT 5
       `);
     } catch (e: any) {

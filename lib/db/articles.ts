@@ -151,8 +151,8 @@ export async function getArticles(
 
   // فلترة حسب التصنيف
   if (categoryId) {
-    whereClause += ' AND CAST(a.category_id AS INTEGER) = ?';
-    params.push(categoryId);
+    whereClause += ' AND a.category_id = ?';
+    params.push(String(categoryId));
   }
 
   // البحث
@@ -185,10 +185,10 @@ export async function getArticles(
     `SELECT 
       a.*,
       c.name as category_name,
-      LOWER(REPLACE(c.name, ' ', '-')) as category_slug,
+      COALESCE(c.slug, LOWER(REPLACE(c.name, ' ', '-'))) as category_slug,
       c.color as category_color
     FROM articles a
-    LEFT JOIN article_categories c ON CAST(a.category_id AS INTEGER) = c.id
+    LEFT JOIN article_categories c ON a.category_id = CAST(c.id AS TEXT)
     WHERE ${whereClause}
     ORDER BY a.${sortColumn} ${order}
     LIMIT ? OFFSET ?`,
@@ -206,10 +206,10 @@ export async function getArticleById(id: number): Promise<Article | undefined> {
     `SELECT 
       a.*,
       c.name as category_name,
-      LOWER(REPLACE(c.name, ' ', '-')) as category_slug,
+      COALESCE(c.slug, LOWER(REPLACE(c.name, ' ', '-'))) as category_slug,
       c.color as category_color
     FROM articles a
-    LEFT JOIN article_categories c ON CAST(a.category_id AS INTEGER) = c.id
+    LEFT JOIN article_categories c ON a.category_id = CAST(c.id AS TEXT)
     WHERE a.id = ?`,
     [id]
   );
@@ -225,10 +225,10 @@ export async function getArticleBySlug(
     `SELECT 
       a.*,
       c.name as category_name,
-      LOWER(REPLACE(c.name, ' ', '-')) as category_slug,
+      COALESCE(c.slug, LOWER(REPLACE(c.name, ' ', '-'))) as category_slug,
       c.color as category_color
     FROM articles a
-    LEFT JOIN article_categories c ON CAST(a.category_id AS INTEGER) = c.id
+    LEFT JOIN article_categories c ON a.category_id = CAST(c.id AS TEXT)
     WHERE a.slug = ?`,
     [slug]
   );

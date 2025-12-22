@@ -67,18 +67,17 @@ export async function getCategories(
     SELECT 
       c.id,
       c.name,
-      COALESCE(c.title, c.name) as title,
-      LOWER(REPLACE(c.name, ' ', '-')) as slug,
+      c.name as title,
+      COALESCE(c.slug, LOWER(REPLACE(c.name, ' ', '-'))) as slug,
       COALESCE(c.description, '') as description,
       COALESCE(c.color, '#6366f1') as color,
       COALESCE(c.icon, '') as icon,
       COALESCE(c.sort_order, 0) as sort_order,
-      COALESCE(c.is_active, 1) as is_active,
+      1 as is_active,
       c.created_at,
       COALESCE(c.updated_at, c.created_at) as updated_at,
-      (SELECT COUNT(*) FROM articles a WHERE CAST(a.category_id AS INTEGER) = c.id AND a.published = 1) as article_count
+      (SELECT COUNT(*) FROM articles a WHERE a.category_id = CAST(c.id AS TEXT) AND a.published = 1) as article_count
     FROM ${ARTICLE_CATEGORIES_TABLE} c
-    WHERE COALESCE(c.is_active, 1) = 1
     ORDER BY COALESCE(c.sort_order, 0) ASC, c.name ASC
   `;
 
@@ -102,16 +101,16 @@ export async function getCategoryById(
     `SELECT 
       c.id,
       c.name,
-      COALESCE(c.title, c.name) as title,
-      LOWER(REPLACE(c.name, ' ', '-')) as slug,
+      c.name as title,
+      COALESCE(c.slug, LOWER(REPLACE(c.name, ' ', '-'))) as slug,
       COALESCE(c.description, '') as description,
       COALESCE(c.color, '#6366f1') as color,
       COALESCE(c.icon, '') as icon,
       COALESCE(c.sort_order, 0) as sort_order,
-      COALESCE(c.is_active, 1) as is_active,
+      1 as is_active,
       c.created_at,
       COALESCE(c.updated_at, c.created_at) as updated_at,
-      (SELECT COUNT(*) FROM articles a WHERE CAST(a.category_id AS INTEGER) = c.id AND a.published = 1) as article_count
+      (SELECT COUNT(*) FROM articles a WHERE a.category_id = CAST(c.id AS TEXT) AND a.published = 1) as article_count
     FROM ${ARTICLE_CATEGORIES_TABLE} c
     WHERE c.id = ?`,
     [id]
@@ -122,26 +121,23 @@ export async function getCategoryById(
 export async function getCategoryBySlug(
   slug: string
 ): Promise<Category | undefined> {
-  // تحويل slug إلى name (استبدال - بمسافة)
-  const nameFromSlug = slug.replace(/-/g, ' ');
-
   return await queryOne<Category>(
     `SELECT 
       c.id,
       c.name,
-      COALESCE(c.title, c.name) as title,
-      LOWER(REPLACE(c.name, ' ', '-')) as slug,
+      c.name as title,
+      COALESCE(c.slug, LOWER(REPLACE(c.name, ' ', '-'))) as slug,
       COALESCE(c.description, '') as description,
       COALESCE(c.color, '#6366f1') as color,
       COALESCE(c.icon, '') as icon,
       COALESCE(c.sort_order, 0) as sort_order,
-      COALESCE(c.is_active, 1) as is_active,
+      1 as is_active,
       c.created_at,
       COALESCE(c.updated_at, c.created_at) as updated_at,
-      (SELECT COUNT(*) FROM articles a WHERE CAST(a.category_id AS INTEGER) = c.id AND a.published = 1) as article_count
+      (SELECT COUNT(*) FROM articles a WHERE a.category_id = CAST(c.id AS TEXT) AND a.published = 1) as article_count
     FROM ${ARTICLE_CATEGORIES_TABLE} c
-    WHERE LOWER(c.name) = LOWER(?) OR LOWER(REPLACE(c.name, ' ', '-')) = LOWER(?)`,
-    [nameFromSlug, slug]
+    WHERE LOWER(c.slug) = LOWER(?) OR LOWER(c.name) = LOWER(?)`,
+    [slug, slug.replace(/-/g, ' ')]
   );
 }
 
