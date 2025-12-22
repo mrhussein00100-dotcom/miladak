@@ -27,11 +27,61 @@ export async function GET() {
       ORDER BY ordinal_position
     `);
 
+    // فحص هيكل جدول article_categories
+    const articleCategoriesColumns = await query(`
+      SELECT column_name, data_type 
+      FROM information_schema.columns 
+      WHERE table_name = 'article_categories'
+      ORDER BY ordinal_position
+    `);
+
+    // اختبار استعلام التصنيفات
+    let categoriesTest = null;
+    let categoriesError = null;
+    try {
+      categoriesTest = await query(`
+        SELECT 
+          c.id,
+          c.name,
+          COALESCE(c.title, c.name) as title,
+          LOWER(REPLACE(c.name, ' ', '-')) as slug,
+          COALESCE(c.description, '') as description,
+          COALESCE(c.color, '#6366f1') as color
+        FROM article_categories c
+        LIMIT 5
+      `);
+    } catch (e: any) {
+      categoriesError = e.message;
+    }
+
+    // اختبار استعلام المقالات
+    let articlesTest = null;
+    let articlesError = null;
+    try {
+      articlesTest = await query(`
+        SELECT 
+          a.id,
+          a.title,
+          a.slug,
+          c.name as category_name
+        FROM articles a
+        LEFT JOIN article_categories c ON CAST(a.category_id AS INTEGER) = c.id
+        LIMIT 5
+      `);
+    } catch (e: any) {
+      articlesError = e.message;
+    }
+
     return NextResponse.json({
       success: true,
       toolsColumns,
       categoriesColumns,
       articlesColumns,
+      articleCategoriesColumns,
+      categoriesTest,
+      categoriesError,
+      articlesTest,
+      articlesError,
     });
   } catch (error: any) {
     return NextResponse.json(
