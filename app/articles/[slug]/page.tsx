@@ -27,7 +27,7 @@ async function getArticle(slug: string): Promise<Article | null> {
         SELECT a.*, c.name as category_name, c.color as category_color
         FROM articles a
         LEFT JOIN article_categories c ON CAST(a.category_id AS INTEGER) = c.id
-        WHERE a.slug = ? AND (a.published = 1 OR a.published = '1' OR a.published = true)
+        WHERE a.slug = ? AND CAST(a.published AS TEXT) IN ('1', 'true')
       `,
       [slug]
     );
@@ -62,7 +62,7 @@ async function getRelatedArticles(
                c.name as category_name, c.color as category_color
         FROM articles a
         LEFT JOIN article_categories c ON CAST(a.category_id AS INTEGER) = c.id
-        WHERE CAST(a.category_id AS INTEGER) = ? AND a.id != ? AND (a.published = 1 OR a.published = '1' OR a.published = true)
+        WHERE CAST(a.category_id AS INTEGER) = ? AND a.id != ? AND CAST(a.published AS TEXT) IN ('1', 'true')
         ORDER BY a.created_at DESC
         LIMIT 3
       `,
