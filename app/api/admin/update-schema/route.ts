@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { sql } from '@vercel/postgres';
+import { executePostgresCommand } from '@/lib/db/postgres';
 
 async function updateSchema() {
   const results: string[] = [];
@@ -7,10 +7,16 @@ async function updateSchema() {
 
   // تحديث عمود icon في article_categories
   try {
-    await sql`ALTER TABLE article_categories ALTER COLUMN icon TYPE TEXT`;
+    await executePostgresCommand(
+      'ALTER TABLE article_categories ALTER COLUMN icon TYPE TEXT'
+    );
     results.push('✅ article_categories.icon → TEXT');
   } catch (e: any) {
-    if (e.message?.includes('already') || e.message?.includes('text')) {
+    if (
+      e.message?.includes('already') ||
+      e.message?.includes('text') ||
+      e.code === '42804'
+    ) {
       results.push('ℹ️ article_categories.icon already TEXT');
     } else {
       errors.push(`article_categories: ${e.message}`);
@@ -19,10 +25,16 @@ async function updateSchema() {
 
   // تحديث عمود icon في tool_categories
   try {
-    await sql`ALTER TABLE tool_categories ALTER COLUMN icon TYPE TEXT`;
+    await executePostgresCommand(
+      'ALTER TABLE tool_categories ALTER COLUMN icon TYPE TEXT'
+    );
     results.push('✅ tool_categories.icon → TEXT');
   } catch (e: any) {
-    if (e.message?.includes('already') || e.message?.includes('text')) {
+    if (
+      e.message?.includes('already') ||
+      e.message?.includes('text') ||
+      e.code === '42804'
+    ) {
       results.push('ℹ️ tool_categories.icon already TEXT');
     } else {
       errors.push(`tool_categories: ${e.message}`);
@@ -31,10 +43,16 @@ async function updateSchema() {
 
   // تحديث عمود icon في tools
   try {
-    await sql`ALTER TABLE tools ALTER COLUMN icon TYPE TEXT`;
+    await executePostgresCommand(
+      'ALTER TABLE tools ALTER COLUMN icon TYPE TEXT'
+    );
     results.push('✅ tools.icon → TEXT');
   } catch (e: any) {
-    if (e.message?.includes('already') || e.message?.includes('text')) {
+    if (
+      e.message?.includes('already') ||
+      e.message?.includes('text') ||
+      e.code === '42804'
+    ) {
       results.push('ℹ️ tools.icon already TEXT');
     } else {
       errors.push(`tools: ${e.message}`);
