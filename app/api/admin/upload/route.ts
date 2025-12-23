@@ -1,7 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { writeFile, mkdir } from 'fs/promises';
-import path from 'path';
-import { existsSync } from 'fs';
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,39 +20,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // التحقق من حجم الملف (5MB max)
-    if (file.size > 5 * 1024 * 1024) {
+    // التحقق من حجم الملف (2MB max للـ Base64)
+    if (file.size > 2 * 1024 * 1024) {
       return NextResponse.json(
-        { success: false, error: 'حجم الصورة يجب أن يكون أقل من 5 ميجابايت' },
+        { success: false, error: 'حجم الصورة يجب أن يكون أقل من 2 ميجابايت' },
         { status: 400 }
       );
     }
 
-    // إنشاء مجلد الرفع إذا لم يكن موجوداً
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads');
-    if (!existsSync(uploadDir)) {
-      await mkdir(uploadDir, { recursive: true });
-    }
-
-    // إنشاء اسم فريد للملف
-    const timestamp = Date.now();
-    const randomStr = Math.random().toString(36).substring(2, 8);
-    const ext = file.name.split('.').pop() || 'jpg';
-    const fileName = `${timestamp}-${randomStr}.${ext}`;
-    const filePath = path.join(uploadDir, fileName);
-
-    // تحويل الملف إلى Buffer وحفظه
+    // تحويل الصورة إلى Base64 Data URL
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    await writeFile(filePath, buffer);
-
-    // إرجاع رابط الصورة
-    const url = `/uploads/${fileName}`;
+    const base64 = buffer.toString('base64');
+    const mimeType = file.type;
+    const dataUrl = `data:${mimeType};base64,${base64}`;
 
     return NextResponse.json({
       success: true,
-      url,
-      fileName,
+      url: dataUrl,
+      fileName: file.name,
+      size: file.size,
     });
   } catch (error) {
     console.error('Upload error:', error);

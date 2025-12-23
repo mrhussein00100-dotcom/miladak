@@ -201,14 +201,17 @@ export function CategoriesPageClient({
                         viewMode === 'list' ? 'w-16 h-16' : 'w-20 h-20 mb-4'
                       } rounded-2xl overflow-hidden group-hover:scale-110 transition-transform relative`}
                     >
-                      {/* عرض الصورة من icon إذا كانت رابط URL */}
-                      {category.icon && category.icon.startsWith('http') ? (
+                      {/* عرض الصورة من icon إذا كانت رابط URL أو Base64 */}
+                      {category.icon &&
+                      (category.icon.startsWith('http') ||
+                        category.icon.startsWith('data:')) ? (
                         <Image
                           src={category.icon}
                           alt={category.name}
                           fill
                           className="object-cover"
                           sizes="(max-width: 768px) 64px, 80px"
+                          unoptimized={category.icon.startsWith('data:')}
                         />
                       ) : category.image ? (
                         <Image

@@ -16,6 +16,7 @@ import {
   Search,
   Link as LinkIcon,
   Loader2,
+  Upload,
 } from 'lucide-react';
 
 interface Category {
@@ -45,11 +46,14 @@ export default function CategoriesPage() {
   const [parentId, setParentId] = useState<number | null>(null);
 
   // حالة اختيار الصورة
-  const [imageMode, setImageMode] = useState<'url' | 'search'>('url');
+  const [imageMode, setImageMode] = useState<'url' | 'search' | 'upload'>(
+    'url'
+  );
   const [imageUrl, setImageUrl] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<string[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
+  const [uploadLoading, setUploadLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
   // الألوان المتاحة
@@ -157,6 +161,49 @@ export default function CategoriesPage() {
   const removeImage = () => {
     setIcon('');
     setImageUrl('');
+  };
+
+  // رفع صورة من الجهاز (تحويل إلى Base64)
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // التحقق من نوع الملف
+    if (!file.type.startsWith('image/')) {
+      alert('يرجى اختيار ملف صورة');
+      return;
+    }
+
+    // التحقق من حجم الملف (2MB max للـ Base64)
+    if (file.size > 2 * 1024 * 1024) {
+      alert('حجم الصورة يجب أن يكون أقل من 2 ميجابايت');
+      return;
+    }
+
+    setUploadLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await fetch('/api/admin/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (data.success && data.url) {
+        setIcon(data.url);
+        setImageUrl(data.url);
+      } else {
+        alert(data.error || 'فشل في رفع الصورة');
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      alert('حدث خطأ أثناء رفع الصورة');
+    }
+    setUploadLoading(false);
+    // إعادة تعيين input الملف
+    e.target.value = '';
   };
 
   // حفظ التصنيف
@@ -371,30 +418,42 @@ export default function CategoriesPage() {
                   )}
 
                   {/* أزرار التبديل */}
-                  <div className="grid grid-cols-2 gap-2 mb-3">
+                  <div className="grid grid-cols-3 gap-1 sm:gap-2 mb-3">
                     <button
                       type="button"
                       onClick={() => setImageMode('url')}
-                      className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm ${
+                      className={`flex items-center justify-center gap-1 px-2 py-2 rounded-lg text-xs sm:text-sm ${
                         imageMode === 'url'
                           ? 'bg-blue-500 text-white'
                           : 'bg-gray-800 text-gray-300 border border-gray-700'
                       }`}
                     >
-                      <LinkIcon className="w-4 h-4" />
-                      رابط
+                      <LinkIcon className="w-3 h-3 sm:w-4 sm:h-4" />
+                      <span>رابط</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => setImageMode('search')}
-                      className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm ${
+                      className={`flex items-center justify-center gap-1 px-2 py-2 rounded-lg text-xs sm:text-sm ${
                         imageMode === 'search'
                           ? 'bg-blue-500 text-white'
                           : 'bg-gray-800 text-gray-300 border border-gray-700'
                       }`}
                     >
-                      <Search className="w-4 h-4" />
-                      Pexels
+                      <Search className="w-3 h-3 sm:w-4 sm:h-4" />
+                      <span>Pexels</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setImageMode('upload')}
+                      className={`flex items-center justify-center gap-1 px-2 py-2 rounded-lg text-xs sm:text-sm ${
+                        imageMode === 'upload'
+                          ? 'bg-blue-500 text-white'
+                          : 'bg-gray-800 text-gray-300 border border-gray-700'
+                      }`}
+                    >
+                      <Upload className="w-3 h-3 sm:w-4 sm:h-4" />
+                      <span>رفع</span>
                     </button>
                   </div>
 
@@ -465,6 +524,34 @@ export default function CategoriesPage() {
                           ))}
                         </div>
                       )}
+                    </div>
+                  )}
+
+                  {/* رفع من الجهاز */}
+                  {imageMode === 'upload' && (
+                    <div className="space-y-2">
+                      <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-gray-700 rounded-xl cursor-pointer hover:border-blue-500 hover:bg-gray-800/50 transition-all">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleFileUpload}
+                          className="hidden"
+                          disabled={uploadLoading}
+                        />
+                        {uploadLoading ? (
+                          <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+                        ) : (
+                          <>
+                            <Upload className="w-8 h-8 text-gray-400 mb-2" />
+                            <span className="text-sm text-gray-400">
+                              اضغط لاختيار صورة
+                            </span>
+                            <span className="text-xs text-gray-500 mt-1">
+                              PNG, JPG حتى 2MB
+                            </span>
+                          </>
+                        )}
+                      </label>
                     </div>
                   )}
                 </div>
@@ -549,8 +636,10 @@ export default function CategoriesPage() {
                   className="flex items-center justify-between p-4 hover:bg-gray-800/50"
                 >
                   <div className="flex items-center gap-4">
-                    {/* عرض الصورة إذا وجدت، وإلا عرض اللون والأيقونة */}
-                    {category.icon && category.icon.startsWith('http') ? (
+                    {/* عرض الصورة إذا وجدت (رابط أو Base64)، وإلا عرض اللون والأيقونة */}
+                    {category.icon &&
+                    (category.icon.startsWith('http') ||
+                      category.icon.startsWith('data:')) ? (
                       <div className="w-10 h-10 rounded-xl overflow-hidden">
                         <img
                           src={category.icon}
