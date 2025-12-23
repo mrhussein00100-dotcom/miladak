@@ -156,7 +156,8 @@ export async function GET(request: NextRequest) {
     }
 
     const data = await response.json();
-    const images = data.photos?.map((photo: any) => photo.src.large) || [];
+    // استخدام medium بدلاً من large للحصول على روابط أقصر
+    const images = data.photos?.map((photo: any) => photo.src.medium) || [];
 
     // إذا لم نجد صور، نبحث بكلمات عامة
     if (images.length === 0) {
@@ -173,7 +174,7 @@ export async function GET(request: NextRequest) {
       if (fallbackResponse.ok) {
         const fallbackData = await fallbackResponse.json();
         const fallbackImages =
-          fallbackData.photos?.map((photo: any) => photo.src.large) || [];
+          fallbackData.photos?.map((photo: any) => photo.src.medium) || [];
 
         return NextResponse.json({
           success: true,
