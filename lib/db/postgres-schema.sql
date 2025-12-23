@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS tool_categories (
     slug VARCHAR(255) UNIQUE NOT NULL,
     title VARCHAR(255),
     description TEXT,
-    icon VARCHAR(100),
+    icon TEXT, -- تم تغييره من VARCHAR(100) لدعم Base64
     sort_order INTEGER DEFAULT 0,
     active BOOLEAN DEFAULT true,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS tools (
     slug VARCHAR(255) UNIQUE NOT NULL,
     title VARCHAR(255) NOT NULL,
     description TEXT,
-    icon VARCHAR(100),
+    icon TEXT, -- تم تغييره من VARCHAR(100) لدعم Base64
     category_id INTEGER REFERENCES tool_categories(id) ON DELETE SET NULL,
     href VARCHAR(500) NOT NULL,
     featured BOOLEAN DEFAULT false,
@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS article_categories (
     slug VARCHAR(255) UNIQUE NOT NULL,
     description TEXT,
     color VARCHAR(7), -- HEX color code
-    icon VARCHAR(100),
+    icon TEXT, -- تم تغييره من VARCHAR(100) لدعم Base64 والروابط الطويلة
     sort_order INTEGER DEFAULT 0,
     active BOOLEAN DEFAULT true,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
