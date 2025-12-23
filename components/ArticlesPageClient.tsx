@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { SafeImage } from './ui/SafeImage';
@@ -145,6 +146,7 @@ export function ArticlesPageClient({
   categories,
   totalArticles = 0,
 }: ArticlesPageClientProps) {
+  const searchParams = useSearchParams();
   const [articles, setArticles] = useState<Article[]>(
     initialArticles.slice(0, ARTICLES_PER_PAGE)
   );
@@ -162,21 +164,30 @@ export function ArticlesPageClient({
   const [showAllKeywords, setShowAllKeywords] = useState(false);
   const [categoryArticlesCount, setCategoryArticlesCount] =
     useState(totalArticles);
+  const [initialCategoryLoaded, setInitialCategoryLoaded] = useState(false);
 
   // جلب مقالات التصنيف من الـ API
   const fetchCategoryArticles = useCallback(
-    async (categoryId: string | null) => {
+    async (categoryId: string | null, categorySlug?: string) => {
       setLoading(true);
       try {
         let url = `/api/articles?page=1&pageSize=${ARTICLES_PER_PAGE}`;
 
         if (categoryId) {
-          // البحث عن اسم التصنيف
+          // البحث عن اسم التصنيف بالـ ID
           const category = categories.find(
             (c) => c.id.toString() === categoryId
           );
           if (category) {
             // إرسال اسم التصنيف مع encoding للأحرف العربية
+            url += `&category=${encodeURIComponent(category.name)}`;
+          }
+        } else if (categorySlug) {
+          // البحث عن التصنيف بالـ slug
+          const category = categories.find(
+            (c) => c.slug === categorySlug || c.name === categorySlug
+          );
+          if (category) {
             url += `&category=${encodeURIComponent(category.name)}`;
           }
         }
@@ -198,6 +209,24 @@ export function ArticlesPageClient({
     },
     [categories]
   );
+
+  // قراءة التصنيف من الـ URL عند تحميل الصفحة
+  useEffect(() => {
+    if (initialCategoryLoaded) return;
+
+    const categoryParam = searchParams?.get('category');
+    if (categoryParam && categories.length > 0) {
+      // البحث عن التصنيف بالـ slug أو الاسم
+      const category = categories.find(
+        (c) => c.slug === categoryParam || c.name === categoryParam
+      );
+      if (category) {
+        setSelectedCategory(category.id.toString());
+        fetchCategoryArticles(null, categoryParam);
+      }
+    }
+    setInitialCategoryLoaded(true);
+  }, [searchParams, categories, fetchCategoryArticles, initialCategoryLoaded]);
 
   // معالجة تغيير التصنيف
   const handleCategorySelect = useCallback(

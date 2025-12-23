@@ -38,10 +38,12 @@ export async function GET(request: NextRequest) {
     let whereClause = "WHERE CAST(a.published AS TEXT) IN ('1', 'true')";
     const params: unknown[] = [];
 
-    // Filter by category
+    // Filter by category (support both name and slug)
     if (category) {
-      whereClause += ' AND ac.name = ?';
-      params.push(category);
+      // البحث بالاسم أو الـ slug
+      whereClause +=
+        " AND (ac.name = ? OR LOWER(ac.slug) = LOWER(?) OR LOWER(REPLACE(ac.name, ' ', '-')) = LOWER(?))";
+      params.push(category, category, category);
     }
 
     // Filter featured only
