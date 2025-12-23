@@ -1,39 +1,60 @@
 import { NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 
+async function updateSchema() {
+  const results: string[] = [];
+  const errors: string[] = [];
+
+  // تحديث عمود icon في article_categories
+  try {
+    await sql`ALTER TABLE article_categories ALTER COLUMN icon TYPE TEXT`;
+    results.push('✅ article_categories.icon → TEXT');
+  } catch (e: any) {
+    if (e.message?.includes('already') || e.message?.includes('text')) {
+      results.push('ℹ️ article_categories.icon already TEXT');
+    } else {
+      errors.push(`article_categories: ${e.message}`);
+    }
+  }
+
+  // تحديث عمود icon في tool_categories
+  try {
+    await sql`ALTER TABLE tool_categories ALTER COLUMN icon TYPE TEXT`;
+    results.push('✅ tool_categories.icon → TEXT');
+  } catch (e: any) {
+    if (e.message?.includes('already') || e.message?.includes('text')) {
+      results.push('ℹ️ tool_categories.icon already TEXT');
+    } else {
+      errors.push(`tool_categories: ${e.message}`);
+    }
+  }
+
+  // تحديث عمود icon في tools
+  try {
+    await sql`ALTER TABLE tools ALTER COLUMN icon TYPE TEXT`;
+    results.push('✅ tools.icon → TEXT');
+  } catch (e: any) {
+    if (e.message?.includes('already') || e.message?.includes('text')) {
+      results.push('ℹ️ tools.icon already TEXT');
+    } else {
+      errors.push(`tools: ${e.message}`);
+    }
+  }
+
+  return { results, errors };
+}
+
 export async function POST() {
   try {
-    // تحديث عمود icon في article_categories
-    await sql`
-      ALTER TABLE article_categories 
-      ALTER COLUMN icon TYPE TEXT
-    `;
-
-    // تحديث عمود icon في tool_categories
-    await sql`
-      ALTER TABLE tool_categories 
-      ALTER COLUMN icon TYPE TEXT
-    `;
-
-    // تحديث عمود icon في tools
-    await sql`
-      ALTER TABLE tools 
-      ALTER COLUMN icon TYPE TEXT
-    `;
+    const { results, errors } = await updateSchema();
 
     return NextResponse.json({
-      success: true,
-      message: 'تم تحديث أعمدة icon إلى TEXT بنجاح',
+      success: errors.length === 0,
+      message: 'تم تحديث أعمدة icon',
+      results,
+      errors: errors.length > 0 ? errors : undefined,
     });
   } catch (error: any) {
-    // إذا كان العمود بالفعل TEXT، تجاهل الخطأ
-    if (error.message?.includes('already')) {
-      return NextResponse.json({
-        success: true,
-        message: 'الأعمدة محدثة بالفعل',
-      });
-    }
-
     return NextResponse.json(
       {
         success: false,
@@ -45,7 +66,22 @@ export async function POST() {
 }
 
 export async function GET() {
-  return NextResponse.json({
-    message: 'استخدم POST لتحديث schema',
-  });
+  try {
+    const { results, errors } = await updateSchema();
+
+    return NextResponse.json({
+      success: errors.length === 0,
+      message: 'تم تحديث أعمدة icon',
+      results,
+      errors: errors.length > 0 ? errors : undefined,
+    });
+  } catch (error: any) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: error.message,
+      },
+      { status: 500 }
+    );
+  }
 }
