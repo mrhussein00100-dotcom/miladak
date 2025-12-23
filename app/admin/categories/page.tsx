@@ -45,7 +45,9 @@ export default function CategoriesPage() {
   const [parentId, setParentId] = useState<number | null>(null);
 
   // حالة اختيار الصورة
-  const [imageMode, setImageMode] = useState<'url' | 'search'>('url');
+  const [imageMode, setImageMode] = useState<'url' | 'search' | 'upload'>(
+    'url'
+  );
   const [imageUrl, setImageUrl] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<string[]>([]);
@@ -371,7 +373,7 @@ export default function CategoriesPage() {
                   )}
 
                   {/* أزرار التبديل */}
-                  <div className="grid grid-cols-2 gap-2 mb-3">
+                  <div className="grid grid-cols-3 gap-2 mb-3">
                     <button
                       type="button"
                       onClick={() => setImageMode('url')}
@@ -395,6 +397,18 @@ export default function CategoriesPage() {
                     >
                       <Search className="w-4 h-4" />
                       <span>Pexels</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setImageMode('upload')}
+                      className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm ${
+                        imageMode === 'upload'
+                          ? 'bg-blue-500 text-white'
+                          : 'bg-gray-800 text-gray-300 border border-gray-700'
+                      }`}
+                    >
+                      <ImageIcon className="w-4 h-4" />
+                      <span>رفع</span>
                     </button>
                   </div>
 
@@ -465,6 +479,37 @@ export default function CategoriesPage() {
                           ))}
                         </div>
                       )}
+                    </div>
+                  )}
+
+                  {/* رفع صورة من الجهاز */}
+                  {imageMode === 'upload' && (
+                    <div className="space-y-3">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            // التحقق من حجم الملف (2MB كحد أقصى)
+                            if (file.size > 2 * 1024 * 1024) {
+                              alert('حجم الصورة يجب أن يكون أقل من 2MB');
+                              return;
+                            }
+                            const reader = new FileReader();
+                            reader.onload = (event) => {
+                              const base64 = event.target?.result as string;
+                              setIcon(base64);
+                              setImageUrl(base64);
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                        className="w-full px-3 py-2 rounded-lg border border-gray-700 bg-gray-800 text-white text-sm file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:bg-blue-500 file:text-white file:cursor-pointer"
+                      />
+                      <p className="text-xs text-gray-500">
+                        الحد الأقصى: 2MB - الصيغ المدعومة: JPG, PNG, GIF, WebP
+                      </p>
                     </div>
                   )}
                 </div>
