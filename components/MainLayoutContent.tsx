@@ -6,6 +6,7 @@ import { Footer } from '@/components/Footer';
 import ScrollToTop from '@/components/ScrollToTop';
 import FloatingActions from '@/components/FloatingActions';
 import WelcomeScreen from '@/components/WelcomeScreen';
+import CookieConsent from '@/components/CookieConsent';
 import { LoadingBar } from '@/components/ui/LoadingBar';
 
 export default function MainLayoutContent({
@@ -28,6 +29,7 @@ export default function MainLayoutContent({
     <>
       <LoadingBar />
       <WelcomeScreen />
+      <CookieConsent />
       <FinalNavbar />
       <main className="flex-1 pb-16 md:pb-0">{children}</main>
       <Footer />
