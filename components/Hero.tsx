@@ -64,16 +64,12 @@ export default function Hero() {
           <span>🎂</span>
         </motion.div>
 
-        {/* Main Title */}
-        <motion.h1
-          {...fadeIn}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="text-4xl sm:text-5xl lg:text-7xl font-black mb-6 leading-tight"
-        >
+        {/* Main Title - يظهر فوراً بدون animation لتحسين LCP */}
+        <h1 className="text-4xl sm:text-5xl lg:text-7xl font-black mb-6 leading-tight">
           <span className="text-gradient">اكتشف عمرك</span>
           <br />
           <span className="text-foreground">بطريقة لم تراها من قبل!</span>
-        </motion.h1>
+        </h1>
 
         {/* Subtitle */}
         <motion.p

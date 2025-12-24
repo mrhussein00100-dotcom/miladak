@@ -1,0 +1,16 @@
+# استهداف متصفحات حديثة فقط لتقليل حجم JavaScript
+# وإزالة polyfills غير ضرورية
+
+# المتصفحات المدعومة
+last 2 Chrome versions
+last 2 Firefox versions
+last 2 Safari versions
+last 2 Edge versions
+
+# استثناء المتصفحات القديمة
+not IE 11
+not dead
+not op_mini all
+
+# دعم ES2020+
+supports es6-module

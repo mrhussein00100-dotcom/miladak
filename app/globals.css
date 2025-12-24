@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=IBM+Plex+Arabic:wght@400;500;600;700&display=swap');
+/* الخطوط تُحمّل من next/font في layout.tsx - لا حاجة لـ @import هنا */
 
 @tailwind base;
 @tailwind components;

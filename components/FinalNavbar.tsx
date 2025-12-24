@@ -442,12 +442,15 @@ export function FinalNavbar() {
                 <button
                   onClick={() => setIsSearchOpen(!isSearchOpen)}
                   className="w-10 h-10 rounded-lg hover:bg-muted flex items-center justify-center transition-colors text-foreground hover:text-primary"
+                  aria-label="فتح البحث"
+                  aria-expanded={isSearchOpen}
                 >
                   <svg
                     className="w-5 h-5"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
+                    aria-hidden="true"
                   >
                     <path
                       strokeLinecap="round"
@@ -477,12 +480,14 @@ export function FinalNavbar() {
                       <button
                         type="submit"
                         className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg bg-primary hover:bg-primary-hover text-white flex items-center justify-center transition-colors"
+                        aria-label="بحث"
                       >
                         <svg
                           className="w-4 h-4"
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"
+                          aria-hidden="true"
                         >
                           <path
                             strokeLinecap="round"
@@ -510,7 +515,9 @@ export function FinalNavbar() {
                   }
                   onMouseEnter={() => setOpenDropdown('theme')}
                   className="px-3 py-2 rounded-lg hover:bg-muted flex items-center gap-1 transition-colors text-foreground hover:text-primary"
-                  title="تغيير المظهر"
+                  aria-label="تغيير المظهر"
+                  aria-expanded={openDropdown === 'theme'}
+                  aria-haspopup="true"
                 >
                   <span className="text-base">
                     {themes.find((t) => t.value === theme)?.icon || '✨'}

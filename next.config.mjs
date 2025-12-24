@@ -31,6 +31,16 @@ const nextConfig = {
       },
     ],
   },
+  // تحسينات الأداء - تقليل حجم JavaScript
+  experimental: {
+    optimizePackageImports: ['framer-motion', 'lucide-react', 'date-fns'],
+  },
+  // تحسين تقسيم الكود
+  modularizeImports: {
+    'lucide-react': {
+      transform: 'lucide-react/dist/esm/icons/{{member}}',
+    },
+  },
 };
 
 export default nextConfig;

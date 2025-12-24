@@ -3,6 +3,7 @@ import { Cairo } from 'next/font/google';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import MainLayoutContent from '@/components/MainLayoutContent';
 import { JsonLd } from '@/components/SEO/JsonLd';
+import AdSenseLoader from '@/components/AdSense/AdSenseLoader';
 import {
   generateOrganizationSchema,
   generateWebSiteSchema,
@@ -10,12 +11,15 @@ import {
 import './globals.css';
 import '../styles/enhanced-buttons.css';
 
-// تحميل خط Cairo العربي
+// تحميل خط Cairo العربي - محسّن للأداء
 const cairo = Cairo({
-  subsets: ['arabic', 'latin'],
-  weight: ['400', '500', '600', '700', '800'],
+  subsets: ['arabic'],
+  weight: ['400', '600', '700'], // تقليل الأوزان من 5 إلى 3
   variable: '--font-cairo',
   display: 'swap',
+  fallback: ['system-ui', '-apple-system', 'Arial', 'sans-serif'],
+  adjustFontFallback: true, // يمنع CLS
+  preload: true,
 });
 
 export const metadata: Metadata = {
@@ -212,27 +216,21 @@ export default function RootLayout({
         <meta name="msapplication-TileImage" content="/icon.svg" />
         <meta name="msapplication-config" content="/browserconfig.xml" />
 
-        {/* Preconnect to Google Fonts */}
+        {/* Preconnect to Google Fonts - للخطوط الإضافية في صفحة البطاقات */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
           href="https://fonts.gstatic.com"
           crossOrigin="anonymous"
         />
-        {/* Arabic Fonts - Optimized: Only load essential fonts, others loaded on-demand in Cards page */}
-        <link
-          href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Tajawal:wght@400;700&display=swap"
-          rel="stylesheet"
-          crossOrigin="anonymous"
-        />
-        {/* Google AdSense Script */}
-        {process.env.NEXT_PUBLIC_ADSENSE_CLIENT && (
-          <script
-            async
-            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.NEXT_PUBLIC_ADSENSE_CLIENT.trim()}`}
-            crossOrigin="anonymous"
-          />
-        )}
+        {/* 
+          ملاحظة: خط Cairo يُحمّل من next/font أعلاه
+          الخطوط الإضافية (Amiri, Tajawal, etc.) تُحمّل بشكل كسول في صفحة البطاقات فقط
+        */}
+        {/* 
+          AdSense يُحمّل بشكل كسول عبر مكون AdSenseLoader
+          لتحسين الأداء وتقليل Render Blocking
+        */}
         {/* JSON-LD Structured Data */}
         <JsonLd
           data={[generateOrganizationSchema(), generateWebSiteSchema()]}
@@ -242,6 +240,8 @@ export default function RootLayout({
         className={`${cairo.className} font-arabic antialiased min-h-screen flex flex-col transition-colors duration-300`}
       >
         <ThemeProvider>
+          {/* تحميل AdSense بشكل كسول */}
+          <AdSenseLoader />
           <MainLayoutWrapper>{children}</MainLayoutWrapper>
         </ThemeProvider>
       </body>
