@@ -127,7 +127,7 @@
     - **Property 3: Select elements have labels**
     - **Validates: Requirements 8.1, 8.2**
 
-- [ ] 8. تحسين LCP
+- [x] 8. تحسين LCP
 
   - [x] 8.1 إضافة priority للخطوط الحرجة
 
