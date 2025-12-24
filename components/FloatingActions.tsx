@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Zap,
@@ -115,39 +115,40 @@ export default function FloatingActions({ quickTools }: FloatingActionsProps) {
   const [tools, setTools] = useState<QuickTool[]>(
     quickTools || DEFAULT_QUICK_TOOLS
   );
+  const [isMobile, setIsMobile] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
 
   useEffect(() => {
+    // Check if mobile
+    setIsMobile(window.innerWidth < 768);
+
     const handleScroll = () => {
       setShowScrollTop(window.scrollY > 300);
     };
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // تحميل الأدوات من API
-  useEffect(() => {
-    if (!quickTools) {
-      fetchQuickTools();
-    }
-  }, [quickTools]);
-
-  const fetchQuickTools = async () => {
+  // تحميل الأدوات من API - مرة واحدة فقط
+  const fetchQuickTools = useCallback(async () => {
     try {
       const response = await fetch('/api/quick-tools');
       const data = await response.json();
       if (data.success && data.tools && data.tools.length > 0) {
         setTools(data.tools);
-      } else {
-        setTools(DEFAULT_QUICK_TOOLS);
       }
     } catch (error) {
-      console.error('Error fetching quick tools:', error);
-      setTools(DEFAULT_QUICK_TOOLS);
+      // استخدام الأدوات الافتراضية في حالة الخطأ
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (!quickTools) {
+      fetchQuickTools();
+    }
+  }, [quickTools, fetchQuickTools]);
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -158,14 +159,12 @@ export default function FloatingActions({ quickTools }: FloatingActionsProps) {
     if (tool.isScroll) {
       const elementId = tool.href.replace('#', '');
 
-      // إذا كنا في الصفحة الرئيسية، نتمرر مباشرة
       if (pathname === '/') {
         const element = document.getElementById(elementId);
         if (element) {
           element.scrollIntoView({ behavior: 'smooth' });
         }
       } else {
-        // إذا كنا في صفحة أخرى، نذهب للصفحة الرئيسية مع الـ hash
         router.push(`/${tool.href}`);
       }
       setIsOpen(false);
@@ -191,7 +190,7 @@ export default function FloatingActions({ quickTools }: FloatingActionsProps) {
         )}
       </AnimatePresence>
 
-      {/* Floating Menu Container - Right Side - فوق BottomNav على الموبايل */}
+      {/* Floating Menu Container */}
       <div
         className="fixed bottom-[88px] md:bottom-6 right-4 md:right-6 z-50 flex flex-col items-end gap-3"
         dir="rtl"
@@ -207,16 +206,12 @@ export default function FloatingActions({ quickTools }: FloatingActionsProps) {
               className="flex flex-col gap-2 mb-2"
             >
               {/* عنوان القائمة */}
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="bg-white dark:bg-gray-800 px-4 py-2 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700"
-              >
+              <div className="bg-white dark:bg-gray-800 px-4 py-2 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700">
                 <span className="text-sm font-bold text-gray-700 dark:text-gray-200 flex items-center gap-2">
                   <Sparkles className="w-4 h-4 text-yellow-500" />
                   أدوات سريعة
                 </span>
-              </motion.div>
+              </div>
 
               {/* الأدوات */}
               {sortedTools.map((tool, index) => {
@@ -232,7 +227,7 @@ export default function FloatingActions({ quickTools }: FloatingActionsProps) {
                     {tool.isScroll ? (
                       <button
                         onClick={() => handleToolClick(tool)}
-                        className={`group flex items-center gap-3 bg-gradient-to-l ${tool.color} text-white px-4 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 hover:-translate-y-0.5 w-full`}
+                        className={`group flex items-center gap-3 bg-gradient-to-l ${tool.color} text-white px-4 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 w-full`}
                       >
                         <span className="text-lg">{tool.emoji}</span>
                         <span className="text-sm font-bold flex-1 text-right">
@@ -246,7 +241,7 @@ export default function FloatingActions({ quickTools }: FloatingActionsProps) {
                       <Link
                         href={tool.href}
                         onClick={() => setIsOpen(false)}
-                        className={`group flex items-center gap-3 bg-gradient-to-l ${tool.color} text-white px-4 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 hover:-translate-y-0.5`}
+                        className={`group flex items-center gap-3 bg-gradient-to-l ${tool.color} text-white px-4 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105`}
                       >
                         <span className="text-lg">{tool.emoji}</span>
                         <span className="text-sm font-bold flex-1 text-right">
@@ -283,7 +278,7 @@ export default function FloatingActions({ quickTools }: FloatingActionsProps) {
           )}
         </AnimatePresence>
 
-        {/* Main Floating Button - Always Visible */}
+        {/* Main Floating Button - Simplified for performance */}
         <motion.button
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
@@ -296,22 +291,6 @@ export default function FloatingActions({ quickTools }: FloatingActionsProps) {
           }`}
           aria-label={isOpen ? 'إغلاق الأدوات السريعة' : 'فتح الأدوات السريعة'}
         >
-          {/* Animated Background */}
-          {!isOpen && (
-            <motion.div
-              className="absolute inset-0 bg-gradient-to-br from-orange-500 via-pink-500 to-purple-600"
-              animate={{
-                backgroundPosition: ['0% 0%', '100% 100%', '0% 0%'],
-              }}
-              transition={{
-                duration: 4,
-                repeat: Infinity,
-                ease: 'linear',
-              }}
-              style={{ backgroundSize: '200% 200%' }}
-            />
-          )}
-
           {/* Icon */}
           <motion.div
             animate={{ rotate: isOpen ? 180 : 0 }}
@@ -325,53 +304,12 @@ export default function FloatingActions({ quickTools }: FloatingActionsProps) {
             )}
           </motion.div>
 
-          {/* Pulse Animation */}
-          {!isOpen && (
-            <>
-              <motion.div
-                className="absolute inset-0 rounded-xl md:rounded-2xl border-2 border-white/40"
-                animate={{
-                  scale: [1, 1.2, 1.2],
-                  opacity: [0.6, 0, 0],
-                }}
-                transition={{
-                  duration: 1.5,
-                  repeat: Infinity,
-                  ease: 'easeOut',
-                }}
-              />
-              <motion.div
-                className="absolute inset-0 rounded-xl md:rounded-2xl border-2 border-white/20"
-                animate={{
-                  scale: [1, 1.4, 1.4],
-                  opacity: [0.4, 0, 0],
-                }}
-                transition={{
-                  duration: 1.5,
-                  repeat: Infinity,
-                  ease: 'easeOut',
-                  delay: 0.2,
-                }}
-              />
-            </>
-          )}
-
-          {/* Sparkle */}
-          {!isOpen && (
-            <motion.div
-              className="absolute -top-1 -left-1 z-20"
-              animate={{
-                scale: [1, 1.2, 1],
-                rotate: [0, 180, 360],
-              }}
-              transition={{
-                duration: 2,
-                repeat: Infinity,
-                ease: 'linear',
-              }}
-            >
-              <Sparkles className="w-4 h-4 text-yellow-300 drop-shadow-lg" />
-            </motion.div>
+          {/* Simple pulse ring - only on desktop */}
+          {!isOpen && !isMobile && (
+            <div
+              className="absolute inset-0 rounded-xl md:rounded-2xl border-2 border-white/30 animate-ping"
+              style={{ animationDuration: '2s' }}
+            />
           )}
 
           {/* Hover Effect */}
