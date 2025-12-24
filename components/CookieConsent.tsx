@@ -105,15 +105,15 @@ export default function CookieConsent() {
                 </p>
 
                 {/* Extra Info */}
-                <div className="mt-3 flex flex-wrap gap-2 text-xs text-gray-500 dark:text-gray-400">
-                  <span className="flex items-center gap-1 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gray-800">
+                <div className="mt-3 flex flex-wrap gap-2 text-xs">
+                  <span className="flex items-center gap-1 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
                     <Cookie className="w-3 h-3" />
                     ملفات أساسية
                   </span>
-                  <span className="flex items-center gap-1 px-2 py-1 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
+                  <span className="flex items-center gap-1 px-2 py-1 rounded-lg bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300">
                     📊 تحليلات
                   </span>
-                  <span className="flex items-center gap-1 px-2 py-1 rounded-lg bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400">
+                  <span className="flex items-center gap-1 px-2 py-1 rounded-lg bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300">
                     📢 إعلانات مخصصة
                   </span>
                 </div>
