@@ -361,6 +361,7 @@ const ArabicDatePicker = React.memo(function ArabicDatePicker({
             onChange={(e) => setSimpleDay(e.target.value)}
             className="h-12 px-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all text-base cursor-pointer"
             dir="rtl"
+            aria-label="اختر اليوم"
           >
             <option value="">اليوم</option>
             {days.map((opt) => (
@@ -374,6 +375,7 @@ const ArabicDatePicker = React.memo(function ArabicDatePicker({
             onChange={(e) => setSimpleMonth(e.target.value)}
             className="h-12 px-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all text-base cursor-pointer"
             dir="rtl"
+            aria-label="اختر الشهر"
           >
             <option value="">الشهر</option>
             {months.map((opt) => (
@@ -387,6 +389,7 @@ const ArabicDatePicker = React.memo(function ArabicDatePicker({
             onChange={(e) => setSimpleYear(e.target.value)}
             className="h-12 px-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all text-base cursor-pointer"
             dir="rtl"
+            aria-label="اختر السنة"
           >
             <option value="">السنة</option>
             {years.map((opt) => (

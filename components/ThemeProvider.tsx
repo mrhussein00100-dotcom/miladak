@@ -1,6 +1,12 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+} from 'react';
 import type { ThemeMode } from '@/types';
 
 interface ThemeContextType {
@@ -18,35 +24,45 @@ const THEMES: ThemeMode[] = ['system', 'light', 'dark', 'miladak'];
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<ThemeMode>('system');
-  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark' | 'miladak'>('light');
+  const [resolvedTheme, setResolvedTheme] = useState<
+    'light' | 'dark' | 'miladak'
+  >('light');
   const [mounted, setMounted] = useState(false);
 
   // Get system preference
   const getSystemTheme = useCallback((): 'light' | 'dark' => {
     if (typeof window === 'undefined') return 'light';
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    return window.matchMedia('(prefers-color-scheme: dark)').matches
+      ? 'dark'
+      : 'light';
   }, []);
 
   // Resolve theme
-  const resolveTheme = useCallback((themeMode: ThemeMode): 'light' | 'dark' | 'miladak' => {
-    if (themeMode === 'system') {
-      return getSystemTheme();
-    }
-    return themeMode;
-  }, [getSystemTheme]);
+  const resolveTheme = useCallback(
+    (themeMode: ThemeMode): 'light' | 'dark' | 'miladak' => {
+      if (themeMode === 'system') {
+        return getSystemTheme();
+      }
+      return themeMode;
+    },
+    [getSystemTheme]
+  );
 
-  // Apply theme to DOM
+  // Apply theme to DOM - تحسين لمنع CLS
   const applyTheme = useCallback((resolved: 'light' | 'dark' | 'miladak') => {
     const root = document.documentElement;
-    root.classList.remove('light', 'dark', 'miladak');
-    root.classList.add(resolved);
-    
+    // فقط أضف الـ class إذا لم يكن موجوداً
+    if (!root.classList.contains(resolved)) {
+      root.classList.remove('light', 'dark', 'miladak');
+      root.classList.add(resolved);
+    }
+
     // Update meta theme-color
     const metaThemeColor = document.querySelector('meta[name="theme-color"]');
     const colors = {
       light: '#FFF5F5',
       dark: '#0D0D1A',
-      miladak: '#1A0A2E'
+      miladak: '#1A0A2E',
     };
     if (metaThemeColor) {
       metaThemeColor.setAttribute('content', colors[resolved]);
@@ -54,18 +70,21 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   // Set theme
-  const setTheme = useCallback((newTheme: ThemeMode) => {
-    setThemeState(newTheme);
-    const resolved = resolveTheme(newTheme);
-    setResolvedTheme(resolved);
-    applyTheme(resolved);
-    
-    try {
-      localStorage.setItem(THEME_KEY, newTheme);
-    } catch {
-      console.warn('Failed to save theme preference');
-    }
-  }, [resolveTheme, applyTheme]);
+  const setTheme = useCallback(
+    (newTheme: ThemeMode) => {
+      setThemeState(newTheme);
+      const resolved = resolveTheme(newTheme);
+      setResolvedTheme(resolved);
+      applyTheme(resolved);
+
+      try {
+        localStorage.setItem(THEME_KEY, newTheme);
+      } catch {
+        console.warn('Failed to save theme preference');
+      }
+    },
+    [resolveTheme, applyTheme]
+  );
 
   // Toggle through themes
   const toggleTheme = useCallback(() => {
@@ -77,7 +96,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   // Initialize
   useEffect(() => {
     setMounted(true);
-    
+
     // Load saved theme
     try {
       const stored = localStorage.getItem(THEME_KEY) as ThemeMode;
@@ -124,16 +143,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   // Prevent flash
   if (!mounted) {
     return (
-      <ThemeContext.Provider value={value}>
-        {children}
-      </ThemeContext.Provider>
+      <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
     );
   }
 
   return (
-    <ThemeContext.Provider value={value}>
-      {children}
-    </ThemeContext.Provider>
+    <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
   );
 }
 

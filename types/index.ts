@@ -13,6 +13,9 @@ export interface Tool {
   sort_order?: number;
 }
 
+// Theme Types
+export type ThemeMode = 'system' | 'light' | 'dark' | 'miladak';
+
 export interface ToolCategory {
   id: number;
   name: string;

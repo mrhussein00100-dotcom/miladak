@@ -571,12 +571,15 @@ export function FinalNavbar() {
               <button
                 onClick={() => setIsMobileOpen(true)}
                 className="lg:hidden w-10 h-10 rounded-lg hover:bg-muted flex items-center justify-center text-foreground hover:text-primary transition-colors"
+                aria-label="فتح القائمة"
+                aria-expanded={isMobileOpen}
               >
                 <svg
                   className="w-6 h-6"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
+                  aria-hidden="true"
                 >
                   <path
                     strokeLinecap="round"
