@@ -10,16 +10,16 @@ export interface NavbarConfig {
 }
 
 export const defaultNavbar: NavbarConfig = {
-  siteName: "ميلادك",
-  logo: "/logo.png",
+  siteName: 'ميلادك',
+  logo: '/logo.png',
   links: [
-    { href: "/", label: "الرئيسية" },
-    { href: "/#calculator", label: "احسب عمرك" },
-    { href: "/friends", label: "الأصدقاء" },
-    { href: "/cards", label: "بطاقات التهنئة" },
-    { href: "/pregnancy-calculator", label: "حاسبة الولادة" },
-    { href: "/date-converter", label: "تحويل التاريخ" },
-    { href: "/articles", label: "المقالات" },
-    { href: "/contact", label: "اتصل بنا" }
-  ]
+    { href: '/', label: 'الرئيسية' },
+    { href: '/#calculator', label: 'احسب عمرك' },
+    { href: '/friends', label: 'الأصدقاء' },
+    { href: '/cards', label: 'بطاقات التهنئة' },
+    { href: '/pregnancy-calculator', label: 'حاسبة الولادة' },
+    { href: '/tools/date-converter', label: 'تحويل التاريخ' },
+    { href: '/articles', label: 'المقالات' },
+    { href: '/contact', label: 'اتصل بنا' },
+  ],
 };

@@ -88,7 +88,7 @@ const megaMenuData = {
     items: [
       {
         name: 'تحويل التاريخ',
-        href: '/date-converter',
+        href: '/tools/date-converter',
         icon: '🔄',
         desc: 'هجري ↔ ميلادي',
       },
@@ -638,7 +638,11 @@ function MobileDrawer({
             </h3>
             <div className="grid grid-cols-2 gap-2">
               {[
-                { name: 'تحويل التاريخ', href: '/date-converter', icon: '🔄' },
+                {
+                  name: 'تحويل التاريخ',
+                  href: '/tools/date-converter',
+                  icon: '🔄',
+                },
                 {
                   name: 'حاسبة BMI',
                   href: '/tools/bmi-calculator',

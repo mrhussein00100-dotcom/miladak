@@ -22,7 +22,7 @@ const exploreLinks = [
     href: '/tools/birthday-countdown',
     icon: '⏰',
   },
-  { name: 'تحويل التاريخ', href: '/date-converter', icon: '📅' },
+  { name: 'تحويل التاريخ', href: '/tools/date-converter', icon: '📅' },
   { name: 'بطاقات التهنئة', href: '/cards', icon: '🎉' },
   { name: 'أحجار وزهور الميلاد', href: '/birthstones-flowers', icon: '💎' },
   { name: 'مشاهير', href: '/celebrities', icon: '⭐' },

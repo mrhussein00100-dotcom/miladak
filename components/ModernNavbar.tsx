@@ -33,7 +33,7 @@ const quickTools = [
         href: '/tools/birthday-countdown',
         icon: '🎉',
       },
-      { name: 'تحويل التاريخ', href: '/date-converter', icon: '🔄' },
+      { name: 'تحويل التاريخ', href: '/tools/date-converter', icon: '🔄' },
       { name: 'يوم الأسبوع', href: '/tools/day-of-week', icon: '📆' },
       { name: 'الأيام بين التواريخ', href: '/tools/days-between', icon: '📏' },
     ],
