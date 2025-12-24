@@ -72,3 +72,6 @@ api-keys-local.txt
 VERCEL_ENV_VARS.txt
 # API Keys Reference (local only)
 API_KEYS_REFERENCE.txt
+
+# دليل المشروع الشامل (معلومات حساسة)
+دليل_المشروع_الشامل.md

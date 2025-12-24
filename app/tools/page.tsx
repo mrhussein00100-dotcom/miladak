@@ -250,7 +250,7 @@ export default async function ToolsPage() {
             COALESCE(t.description, '') as description,
             COALESCE(t.icon, '') as icon,
             t.category_id,
-            tc.name as category_name,
+            COALESCE(tc.title, tc.name) as category_name,
             t.href,
             t.is_featured as featured,
             t.is_active as active
@@ -271,7 +271,7 @@ export default async function ToolsPage() {
               COALESCE(t.description, '') as description,
               COALESCE(t.icon, '') as icon,
               t.category_id,
-              tc.name as category_name,
+              COALESCE(tc.title, tc.name) as category_name,
               t.href,
               t.featured as featured,
               t.active as active
@@ -296,7 +296,7 @@ export default async function ToolsPage() {
         categories = await query<ToolCategory>(`
           SELECT 
             id,
-            name,
+            COALESCE(title, name) as name,
             name as slug,
             COALESCE(title, name) as title,
             icon,
@@ -310,7 +310,7 @@ export default async function ToolsPage() {
           categories = await query<ToolCategory>(`
             SELECT 
               id,
-              name,
+              COALESCE(title, name) as name,
               slug,
               COALESCE(title, name) as title,
               icon,
