@@ -1,53 +1,62 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Cake, Calendar, Calculator, Sparkles, Gift, PartyPopper } from "lucide-react";
-import Link from "next/link";
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  Cake,
+  Calendar,
+  Calculator,
+  Sparkles,
+  Gift,
+  PartyPopper,
+} from 'lucide-react';
+import Link from 'next/link';
 
 // Confetti configuration - deterministic for consistent rendering
 const CONFETTI_CONFIG = Array.from({ length: 20 }).map((_, i) => {
   const idx = i + 1;
   const x = (idx * 37) % 100;
-  const duration = 2 + (((idx * 17) % 30) / 10);
-  const delay = (((idx * 13) % 20) / 10);
+  const duration = 2 + ((idx * 17) % 30) / 10;
+  const delay = ((idx * 13) % 20) / 10;
   const initialRotate = (idx * 53) % 360;
   const animateRotate = (idx * 97) % 720;
   return { x, duration, delay, initialRotate, animateRotate };
 });
 
 export default function WelcomeScreen() {
-  const [show, setShow] = useState(true);
+  const [show, setShow] = useState(false); // Start hidden
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    // Check if user has visited before in this session
-    const hasVisited = sessionStorage.getItem('hasVisitedSite');
-    
-    if (hasVisited) {
-      setShow(false);
-      return;
-    }
+    // تأخير قبل ظهور الشاشة الترحيبية (300ms)
+    const showTimer = setTimeout(() => {
+      setShow(true);
+    }, 300);
 
-    // Progress bar animation
-    const progressInterval = setInterval(() => {
-      setProgress(prev => {
-        if (prev >= 100) {
-          clearInterval(progressInterval);
-          return 100;
-        }
-        return prev + 2;
-      });
-    }, 30);
+    // Progress bar animation - starts after showing
+    const progressTimer = setTimeout(() => {
+      const progressInterval = setInterval(() => {
+        setProgress((prev) => {
+          if (prev >= 100) {
+            clearInterval(progressInterval);
+            return 100;
+          }
+          return prev + 2;
+        });
+      }, 35); // أبطأ قليلاً
 
-    // Hide screen after 3 seconds
+      // Cleanup progress interval
+      setTimeout(() => clearInterval(progressInterval), 2500);
+    }, 400);
+
+    // Hide screen after 3.5 seconds total
     const hideTimer = setTimeout(() => {
       setShow(false);
-      sessionStorage.setItem('hasVisitedSite', 'true');
-    }, 3000);
+    }, 3500);
 
     return () => {
-      clearInterval(progressInterval);
+      clearTimeout(showTimer);
+      clearTimeout(progressTimer);
       clearTimeout(hideTimer);
     };
   }, []);
@@ -68,24 +77,28 @@ export default function WelcomeScreen() {
             {CONFETTI_CONFIG.map((cfg, i) => (
               <motion.div
                 key={i}
-                initial={{ 
-                  y: -100, 
+                initial={{
+                  y: -100,
                   x: `${cfg.x}vw`,
-                  rotate: cfg.initialRotate
+                  rotate: cfg.initialRotate,
                 }}
-                animate={{ 
+                animate={{
                   y: '110vh',
-                  rotate: cfg.animateRotate
+                  rotate: cfg.animateRotate,
                 }}
-                transition={{ 
+                transition={{
                   duration: cfg.duration,
                   repeat: Infinity,
-                  delay: cfg.delay
+                  delay: cfg.delay,
                 }}
                 className={`absolute w-3 h-3 rounded-full ${
-                  i % 4 === 0 ? 'bg-pink-400' :
-                  i % 4 === 1 ? 'bg-blue-400' :
-                  i % 4 === 2 ? 'bg-yellow-400' : 'bg-purple-400'
+                  i % 4 === 0
+                    ? 'bg-pink-400'
+                    : i % 4 === 1
+                    ? 'bg-blue-400'
+                    : i % 4 === 2
+                    ? 'bg-yellow-400'
+                    : 'bg-purple-400'
                 }`}
               />
             ))}
@@ -96,54 +109,64 @@ export default function WelcomeScreen() {
             <motion.div
               initial={{ scale: 0, rotate: -180 }}
               animate={{ scale: 1, rotate: 0 }}
-              transition={{ 
-                type: "spring", 
-                stiffness: 200, 
+              transition={{
+                type: 'spring',
+                stiffness: 200,
                 damping: 15,
-                duration: 0.8 
+                duration: 0.8,
               }}
               className="relative mb-8"
             >
               <motion.div
-                animate={{ 
+                animate={{
                   y: [0, -15, 0],
-                  rotate: [0, 5, -5, 0]
+                  rotate: [0, 5, -5, 0],
                 }}
-                transition={{ 
-                  duration: 2, 
+                transition={{
+                  duration: 2,
                   repeat: Infinity,
-                  ease: "easeInOut" 
+                  ease: 'easeInOut',
                 }}
                 className="relative inline-block"
               >
                 {/* Glow Effect */}
                 <div className="absolute inset-0 rounded-full blur-3xl bg-gradient-to-r from-purple-400 to-blue-400 opacity-30 animate-pulse" />
-                
+
                 {/* Main Circle */}
                 <div className="relative w-32 h-32 rounded-full bg-gradient-to-br from-purple-500 via-blue-500 to-purple-600 flex items-center justify-center shadow-2xl">
                   <Cake className="w-16 h-16 text-white" />
                 </div>
-                
+
                 {/* Floating Sparkles */}
                 <motion.div
                   animate={{ rotate: 360, scale: [1, 1.3, 1] }}
-                  transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                  transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
                   className="absolute -top-3 -right-3"
                 >
                   <Sparkles className="w-7 h-7 text-yellow-400 drop-shadow-lg" />
                 </motion.div>
-                
+
                 <motion.div
                   animate={{ rotate: 360, scale: [1, 1.3, 1] }}
-                  transition={{ duration: 3, repeat: Infinity, ease: "linear", delay: 0.5 }}
+                  transition={{
+                    duration: 3,
+                    repeat: Infinity,
+                    ease: 'linear',
+                    delay: 0.5,
+                  }}
                   className="absolute -bottom-3 -left-3"
                 >
                   <Gift className="w-7 h-7 text-pink-400 drop-shadow-lg" />
                 </motion.div>
-                
+
                 <motion.div
                   animate={{ rotate: 360, scale: [1, 1.3, 1] }}
-                  transition={{ duration: 3, repeat: Infinity, ease: "linear", delay: 1 }}
+                  transition={{
+                    duration: 3,
+                    repeat: Infinity,
+                    ease: 'linear',
+                    delay: 1,
+                  }}
                   className="absolute -top-3 -left-3"
                 >
                   <PartyPopper className="w-7 h-7 text-blue-400 drop-shadow-lg" />
@@ -161,7 +184,10 @@ export default function WelcomeScreen() {
                 مرحباً بك
               </h1>
               <h2 className="text-2xl md:text-3xl font-bold text-gray-700 dark:text-gray-300 mb-2">
-                في <Link href="/" className="gradient-text">ميلادك</Link>
+                في{' '}
+                <Link href="/" className="gradient-text">
+                  ميلادك
+                </Link>
               </h2>
               <p className="text-lg text-gray-600 dark:text-gray-400 max-w-md mx-auto">
                 اكتشف عمرك بدقة مع معلومات وإحصائيات ممتعة
@@ -176,21 +202,33 @@ export default function WelcomeScreen() {
               className="flex items-center justify-center gap-4 mt-8 mb-8"
             >
               {[
-                { icon: Calendar, color: "text-blue-500", bg: "bg-blue-100 dark:bg-blue-900/30" },
-                { icon: Calculator, color: "text-purple-500", bg: "bg-purple-100 dark:bg-purple-900/30" },
-                { icon: Sparkles, color: "text-yellow-500", bg: "bg-yellow-100 dark:bg-yellow-900/30" }
+                {
+                  icon: Calendar,
+                  color: 'text-blue-500',
+                  bg: 'bg-blue-100 dark:bg-blue-900/30',
+                },
+                {
+                  icon: Calculator,
+                  color: 'text-purple-500',
+                  bg: 'bg-purple-100 dark:bg-purple-900/30',
+                },
+                {
+                  icon: Sparkles,
+                  color: 'text-yellow-500',
+                  bg: 'bg-yellow-100 dark:bg-yellow-900/30',
+                },
               ].map((item, index) => (
                 <motion.div
                   key={index}
-                  animate={{ 
+                  animate={{
                     y: [0, -10, 0],
-                    rotate: [0, 10, -10, 0]
+                    rotate: [0, 10, -10, 0],
                   }}
-                  transition={{ 
+                  transition={{
                     duration: 2,
                     repeat: Infinity,
                     delay: index * 0.3,
-                    ease: "easeInOut"
+                    ease: 'easeInOut',
                   }}
                   className={`${item.bg} rounded-2xl p-4 shadow-lg`}
                 >
@@ -208,7 +246,7 @@ export default function WelcomeScreen() {
             >
               <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden shadow-inner">
                 <motion.div
-                  initial={{ width: "0%" }}
+                  initial={{ width: '0%' }}
                   animate={{ width: `${progress}%` }}
                   transition={{ duration: 0.3 }}
                   className="h-full bg-gradient-to-r from-purple-500 via-blue-500 to-purple-500 rounded-full"
