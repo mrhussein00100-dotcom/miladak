@@ -344,76 +344,78 @@ export default function NewArticlePage() {
   const headingsCount = extractHeadings(content).length;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-3 sm:p-4 md:p-6">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
+        <div className="flex flex-col gap-4 mb-6 sm:mb-8">
+          <div className="flex items-center gap-3 sm:gap-4">
             <Link
               href="/admin/articles"
               className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700"
             >
-              <ArrowLeft className="w-5 h-5" />
+              <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
             </Link>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              <FileText className="w-7 h-7 text-purple-500" />
+            <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+              <FileText className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-purple-500" />
               مقال جديد
             </h1>
           </div>
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-2 sm:gap-3">
             <Link
               href="/admin/rewriter"
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 hover:bg-pink-200 dark:hover:bg-pink-900/50 transition-all"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 rounded-xl bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 hover:bg-pink-200 dark:hover:bg-pink-900/50 transition-all text-sm"
             >
-              ✨ إعادة الصياغة
+              ✨ <span className="hidden xs:inline">إعادة الصياغة</span>
+              <span className="xs:hidden">صياغة</span>
             </Link>
             <button
               onClick={() => setShowAIPanel(!showAIPanel)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all ${
+              className={`flex-1 sm:flex-none flex items-center justify-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 rounded-xl transition-all text-sm ${
                 showAIPanel
                   ? 'bg-purple-500 text-white'
                   : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
               }`}
             >
-              <Sparkles className="w-5 h-5" />
-              توليد AI
+              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="hidden xs:inline">توليد AI</span>
+              <span className="xs:hidden">AI</span>
             </button>
             <button
               onClick={() => setShowPreview(!showPreview)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all ${
+              className={`flex-1 sm:flex-none flex items-center justify-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 rounded-xl transition-all text-sm ${
                 showPreview
                   ? 'bg-green-500 text-white'
                   : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
               }`}
             >
-              <Eye className="w-5 h-5" />
-              معاينة
+              <Eye className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="hidden xs:inline">معاينة</span>
             </button>
             <button
               onClick={handleSave}
               disabled={loading}
-              className="flex items-center gap-2 px-6 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 disabled:opacity-50"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-1 sm:gap-2 px-4 sm:px-6 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 disabled:opacity-50 text-sm"
             >
               {loading ? (
-                <RefreshCw className="w-5 h-5 animate-spin" />
+                <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
               ) : (
-                <Save className="w-5 h-5" />
+                <Save className="w-4 h-4 sm:w-5 sm:h-5" />
               )}
               حفظ
             </button>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
           {/* AI Panel */}
           {showAIPanel && (
-            <div className="lg:col-span-3 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-2xl p-6 border border-purple-200 dark:border-purple-800">
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                <Wand2 className="w-5 h-5 text-purple-500" />
+            <div className="lg:col-span-3 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-purple-200 dark:border-purple-800">
+              <h2 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-3 sm:mb-4 flex items-center gap-2">
+                <Wand2 className="w-4 h-4 sm:w-5 sm:h-5 text-purple-500" />
                 توليد المقال بالذكاء الاصطناعي
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="lg:col-span-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                <div className="sm:col-span-2 lg:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     موضوع المقال
                   </label>

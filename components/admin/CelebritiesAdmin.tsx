@@ -123,14 +123,20 @@ export default function CelebritiesAdmin() {
   return (
     <div className="space-y-6">
       {/* العنوان */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-white">⭐ إدارة المشاهير</h1>
-          <p className="text-gray-400 mt-2">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-white">
+            ⭐ إدارة المشاهير
+          </h1>
+          <p className="text-gray-400 mt-1 sm:mt-2 text-sm sm:text-base">
             إدارة قاعدة بيانات المشاهير وتواريخ ميلادهم
           </p>
         </div>
-        <Button onClick={fetchCelebrities} variant="outline">
+        <Button
+          onClick={fetchCelebrities}
+          variant="outline"
+          className="w-full sm:w-auto"
+        >
           🔄 تحديث البيانات
         </Button>
       </div>
@@ -311,9 +317,9 @@ export default function CelebritiesAdmin() {
               {celebrities.map((celebrity) => (
                 <div
                   key={celebrity.id}
-                  className="border border-gray-700 rounded-lg p-4 bg-gray-800/50"
+                  className="border border-gray-700 rounded-lg p-3 sm:p-4 bg-gray-800/50"
                 >
-                  <div className="flex justify-between items-start">
+                  <div className="flex flex-col sm:flex-row justify-between items-start">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
                         <Badge variant="secondary">
@@ -328,11 +334,12 @@ export default function CelebritiesAdmin() {
                         {celebrity.profession} • ولد في {celebrity.birth_year}
                       </p>
                     </div>
-                    <div className="flex gap-2 ml-4">
+                    <div className="flex gap-2 mt-3 sm:mt-0 sm:mr-4 w-full sm:w-auto">
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => setEditingCelebrity(celebrity)}
+                        className="flex-1 sm:flex-none"
                       >
                         ✏️ تعديل
                       </Button>
@@ -342,7 +349,7 @@ export default function CelebritiesAdmin() {
                         onClick={() =>
                           celebrity.id && deleteCelebrity(celebrity.id)
                         }
-                        className="text-red-600 hover:bg-red-50"
+                        className="text-red-600 hover:bg-red-50 flex-1 sm:flex-none"
                       >
                         🗑️ حذف
                       </Button>

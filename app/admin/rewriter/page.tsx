@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+import { ArrowLeft } from 'lucide-react';
 import { useRewriterState } from '@/hooks/useRewriterState';
 import RewriterHeader from '@/components/admin/rewriter/enhanced/RewriterHeader';
 import RewriterTabs from '@/components/admin/rewriter/enhanced/RewriterTabs';
@@ -34,7 +36,19 @@ export default function RewriterPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="container mx-auto px-4 py-6 max-w-7xl">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 max-w-7xl">
+        {/* Back Button */}
+        <div className="mb-4 sm:mb-6">
+          <Link
+            href="/admin"
+            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span className="hidden sm:inline">العودة للوحة التحكم</span>
+            <span className="sm:hidden">رجوع</span>
+          </Link>
+        </div>
+
         {/* Header */}
         <RewriterHeader
           sourceWordCount={state.sourceWordCount}
@@ -126,53 +140,53 @@ export default function RewriterPage() {
         </div>
 
         {/* Feature Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mt-8">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 text-center">
-            <div className="text-2xl mb-2">🎯</div>
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4 mt-6 sm:mt-8">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-3 sm:p-4 text-center">
+            <div className="text-xl sm:text-2xl mb-1 sm:mb-2">🎯</div>
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-1 text-xs sm:text-sm">
               4 أساليب
             </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <p className="text-xs text-gray-600 dark:text-gray-400 hidden sm:block">
               احترافي، بسيط، إبداعي، أكاديمي
             </p>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 text-center">
-            <div className="text-2xl mb-2">📏</div>
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-3 sm:p-4 text-center">
+            <div className="text-xl sm:text-2xl mb-1 sm:mb-2">📏</div>
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-1 text-xs sm:text-sm">
               محتوى أطول
             </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <p className="text-xs text-gray-600 dark:text-gray-400 hidden sm:block">
               تحسين الجودة وزيادة الطول
             </p>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 text-center">
-            <div className="text-2xl mb-2">✨</div>
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-3 sm:p-4 text-center">
+            <div className="text-xl sm:text-2xl mb-1 sm:mb-2">✨</div>
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-1 text-xs sm:text-sm">
               تنسيق ذكي
             </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <p className="text-xs text-gray-600 dark:text-gray-400 hidden sm:block">
               عناوين وفقرات منظمة تلقائياً
             </p>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 text-center">
-            <div className="text-2xl mb-2">🏷️</div>
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-3 sm:p-4 text-center">
+            <div className="text-xl sm:text-2xl mb-1 sm:mb-2">🏷️</div>
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-1 text-xs sm:text-sm">
               سيو تلقائي
             </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <p className="text-xs text-gray-600 dark:text-gray-400 hidden sm:block">
               توليد الميتا والكلمات المفتاحية
             </p>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 text-center">
-            <div className="text-2xl mb-2">📝</div>
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-3 sm:p-4 text-center col-span-2 sm:col-span-1">
+            <div className="text-xl sm:text-2xl mb-1 sm:mb-2">📝</div>
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-1 text-xs sm:text-sm">
               إضافة مباشرة
             </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <p className="text-xs text-gray-600 dark:text-gray-400 hidden sm:block">
               إنشاء مقال في المحرر فوراً
             </p>
           </div>

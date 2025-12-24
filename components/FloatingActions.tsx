@@ -21,6 +21,7 @@ import {
   Star,
 } from 'lucide-react';
 import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
 
 // الأدوات الافتراضية - يمكن تحميلها من قاعدة البيانات لاحقاً
 const DEFAULT_QUICK_TOOLS = [
@@ -114,6 +115,8 @@ export default function FloatingActions({ quickTools }: FloatingActionsProps) {
   const [tools, setTools] = useState<QuickTool[]>(
     quickTools || DEFAULT_QUICK_TOOLS
   );
+  const pathname = usePathname();
+  const router = useRouter();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -153,8 +156,18 @@ export default function FloatingActions({ quickTools }: FloatingActionsProps) {
 
   const handleToolClick = (tool: QuickTool) => {
     if (tool.isScroll) {
-      const element = document.getElementById(tool.href.replace('#', ''));
-      element?.scrollIntoView({ behavior: 'smooth' });
+      const elementId = tool.href.replace('#', '');
+
+      // إذا كنا في الصفحة الرئيسية، نتمرر مباشرة
+      if (pathname === '/') {
+        const element = document.getElementById(elementId);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      } else {
+        // إذا كنا في صفحة أخرى، نذهب للصفحة الرئيسية مع الـ hash
+        router.push(`/${tool.href}`);
+      }
       setIsOpen(false);
     } else {
       setIsOpen(false);

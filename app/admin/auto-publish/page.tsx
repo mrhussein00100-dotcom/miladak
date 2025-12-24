@@ -164,49 +164,50 @@ export default function AutoPublishPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-3 sm:p-4 md:p-6">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 sm:mb-8">
+          <div className="flex items-center gap-3 sm:gap-4">
             <Link
               href="/admin"
               className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700"
             >
-              <ArrowLeft className="w-5 h-5" />
+              <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
             </Link>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                <Clock className="w-7 h-7 text-green-500" />
+              <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                <Clock className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-green-500" />
                 النشر التلقائي
               </h1>
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="text-gray-600 dark:text-gray-400 text-xs sm:text-sm">
                 إعدادات النشر التلقائي اليومي للمقالات
               </p>
             </div>
           </div>
-          <div className="flex gap-3">
+          <div className="flex gap-2 sm:gap-3 w-full sm:w-auto">
             <button
               onClick={handleRun}
               disabled={running}
-              className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-xl hover:bg-green-600 disabled:opacity-50"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 bg-green-500 text-white rounded-xl hover:bg-green-600 disabled:opacity-50 text-sm"
             >
               {running ? (
-                <RefreshCw className="w-5 h-5 animate-spin" />
+                <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
               ) : (
-                <Play className="w-5 h-5" />
+                <Play className="w-4 h-4 sm:w-5 sm:h-5" />
               )}
-              تشغيل الآن
+              <span className="hidden xs:inline">تشغيل الآن</span>
+              <span className="xs:hidden">تشغيل</span>
             </button>
             <button
               onClick={handleSave}
               disabled={saving}
-              className="flex items-center gap-2 px-6 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 disabled:opacity-50"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-1 sm:gap-2 px-4 sm:px-6 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 disabled:opacity-50 text-sm"
             >
               {saving ? (
-                <RefreshCw className="w-5 h-5 animate-spin" />
+                <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
               ) : (
-                <Save className="w-5 h-5" />
+                <Save className="w-4 h-4 sm:w-5 sm:h-5" />
               )}
               حفظ
             </button>

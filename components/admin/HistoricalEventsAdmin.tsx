@@ -137,16 +137,20 @@ export default function HistoricalEventsAdmin() {
   return (
     <div className="space-y-6">
       {/* العنوان */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-white">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-white">
             📜 إدارة الأحداث التاريخية
           </h1>
-          <p className="text-gray-400 mt-2">
+          <p className="text-gray-400 mt-1 sm:mt-2 text-sm sm:text-base">
             إدارة الأحداث التاريخية اليومية والسنوية
           </p>
         </div>
-        <Button onClick={fetchEvents} variant="outline">
+        <Button
+          onClick={fetchEvents}
+          variant="outline"
+          className="w-full sm:w-auto"
+        >
           🔄 تحديث البيانات
         </Button>
       </div>
@@ -339,14 +343,14 @@ export default function HistoricalEventsAdmin() {
               {events.map((event) => (
                 <div
                   key={event.id}
-                  className="border border-gray-700 rounded-lg p-4 bg-gray-800/50"
+                  className="border border-gray-700 rounded-lg p-3 sm:p-4 bg-gray-800/50"
                 >
-                  <div className="flex justify-between items-start">
+                  <div className="flex flex-col sm:flex-row justify-between items-start">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
                         <Badge variant="secondary">{event.category}</Badge>
                         {event.year && (
-                          <Badge variant="outline">{event.year}</Badge>
+                          <Badge variant="info">{event.year}</Badge>
                         )}
                       </div>
                       <h3 className="text-lg font-semibold mb-2 text-white">
@@ -356,11 +360,12 @@ export default function HistoricalEventsAdmin() {
                         {event.description}
                       </p>
                     </div>
-                    <div className="flex gap-2 ml-4">
+                    <div className="flex gap-2 mt-3 sm:mt-0 sm:mr-4 w-full sm:w-auto">
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => setEditingEvent(event)}
+                        className="flex-1 sm:flex-none"
                       >
                         ✏️ تعديل
                       </Button>
@@ -368,7 +373,7 @@ export default function HistoricalEventsAdmin() {
                         size="sm"
                         variant="outline"
                         onClick={() => event.id && deleteEvent(event.id)}
-                        className="text-red-600 hover:bg-red-50"
+                        className="text-red-600 hover:bg-red-50 flex-1 sm:flex-none"
                       >
                         🗑️ حذف
                       </Button>

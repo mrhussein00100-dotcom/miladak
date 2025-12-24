@@ -240,30 +240,32 @@ export default function CategoriesPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
+        <div className="flex flex-col gap-4 mb-6 sm:mb-8">
+          <div className="flex items-center gap-3 sm:gap-4">
             <Link
               href="/admin"
-              className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300"
+              className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 shrink-0"
             >
               <ArrowLeft className="w-5 h-5" />
             </Link>
-            <div>
-              <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-                <FolderTree className="w-7 h-7 text-blue-500" />
-                إدارة التصنيفات
+            <div className="min-w-0 flex-1">
+              <h1 className="text-lg sm:text-2xl font-bold text-white flex items-center gap-2">
+                <FolderTree className="w-5 h-5 sm:w-7 sm:h-7 text-blue-500 shrink-0" />
+                <span className="truncate">إدارة التصنيفات</span>
               </h1>
-              <p className="text-gray-400">{categories.length} تصنيف</p>
+              <p className="text-gray-400 text-xs sm:text-sm">
+                {categories.length} تصنيف
+              </p>
             </div>
           </div>
           <button
             onClick={() => setShowForm(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-all"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-all text-sm font-medium"
           >
-            <Plus className="w-5 h-5" />
+            <Plus className="w-4 h-4" />
             تصنيف جديد
           </button>
         </div>
@@ -568,7 +570,7 @@ export default function CategoriesPage() {
         )}
 
         {/* Categories List */}
-        <div className="bg-gray-900 rounded-2xl border border-gray-800 overflow-hidden">
+        <div className="bg-gray-900 rounded-xl sm:rounded-2xl border border-gray-800 overflow-hidden">
           {loading ? (
             <div className="p-8 text-center">
               <RefreshCw className="w-8 h-8 animate-spin mx-auto text-blue-500" />
@@ -591,14 +593,14 @@ export default function CategoriesPage() {
               {categories.map((category) => (
                 <div
                   key={category.id}
-                  className="flex items-center justify-between p-4 hover:bg-gray-800/50"
+                  className="flex items-center justify-between p-3 sm:p-4 hover:bg-gray-800/50 gap-3"
                 >
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
                     {/* عرض الصورة إذا وجدت (رابط أو Base64)، وإلا عرض اللون والأيقونة */}
                     {category.icon &&
                     (category.icon.startsWith('http') ||
                       category.icon.startsWith('data:')) ? (
-                      <div className="w-10 h-10 rounded-xl overflow-hidden">
+                      <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl overflow-hidden shrink-0">
                         <img
                           src={category.icon}
                           alt={category.name}
@@ -612,26 +614,26 @@ export default function CategoriesPage() {
                       </div>
                     ) : (
                       <div
-                        className="w-10 h-10 rounded-xl flex items-center justify-center"
+                        className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0"
                         style={{ backgroundColor: `${category.color}20` }}
                       >
                         <FolderTree
-                          className="w-5 h-5"
+                          className="w-4 h-4 sm:w-5 sm:h-5"
                           style={{ color: category.color }}
                         />
                       </div>
                     )}
-                    <div>
-                      <h3 className="font-medium text-white">
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-medium text-white text-sm sm:text-base truncate">
                         {category.name}
                       </h3>
-                      <p className="text-sm text-gray-500 flex items-center gap-2">
-                        <FileText className="w-4 h-4" />
+                      <p className="text-xs sm:text-sm text-gray-500 flex items-center gap-1">
+                        <FileText className="w-3 h-3 sm:w-4 sm:h-4" />
                         {category.article_count} مقال
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1 sm:gap-2 shrink-0">
                     <button
                       onClick={() => handleEdit(category)}
                       className="p-2 rounded-lg hover:bg-blue-900/30 text-blue-400"

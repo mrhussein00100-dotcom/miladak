@@ -113,42 +113,44 @@ const adminLinks = [
 
 export default function AdminPage() {
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       {/* Header */}
-      <div className="flex items-center gap-4">
-        <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/20">
-          <Settings className="w-7 h-7 text-white" />
+      <div className="flex items-center gap-3 sm:gap-4">
+        <div className="w-10 h-10 sm:w-14 sm:h-14 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/20 shrink-0">
+          <Settings className="w-5 h-5 sm:w-7 sm:h-7 text-white" />
         </div>
-        <div>
-          <h1 className="text-3xl font-bold text-white">لوحة التحكم</h1>
-          <p className="text-gray-400">إدارة موقع ميلادك</p>
+        <div className="min-w-0">
+          <h1 className="text-xl sm:text-3xl font-bold text-white truncate">
+            لوحة التحكم
+          </h1>
+          <p className="text-gray-400 text-sm">إدارة موقع ميلادك</p>
         </div>
       </div>
 
       {/* Content Management Section */}
       <div>
-        <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-purple-400" />
+        <h2 className="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4 flex items-center gap-2">
+          <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" />
           إدارة المحتوى
         </h2>
-        <div className="grid md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           {adminLinks.slice(0, 4).map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="group bg-gray-900 rounded-2xl p-5 hover:bg-gray-800 transition-all duration-300 border border-gray-800 hover:border-gray-700"
+              className="group bg-gray-900 rounded-xl sm:rounded-2xl p-4 sm:p-5 hover:bg-gray-800 transition-all duration-300 border border-gray-800 hover:border-gray-700"
             >
-              <div className="flex items-start gap-4">
+              <div className="flex items-start gap-3 sm:gap-4">
                 <div
-                  className={`w-12 h-12 bg-gradient-to-br ${link.color} rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg`}
+                  className={`w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br ${link.color} rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg shrink-0`}
                 >
-                  <link.icon className="w-6 h-6 text-white" />
+                  <link.icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </div>
-                <div className="flex-1">
-                  <h3 className="text-lg font-bold text-white group-hover:text-purple-400 transition-colors">
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-sm sm:text-lg font-bold text-white group-hover:text-purple-400 transition-colors truncate">
                     {link.title}
                   </h3>
-                  <p className="text-gray-400 mt-1 text-sm">
+                  <p className="text-gray-400 mt-0.5 sm:mt-1 text-xs sm:text-sm line-clamp-2">
                     {link.description}
                   </p>
                 </div>
@@ -160,28 +162,28 @@ export default function AdminPage() {
 
       {/* Data Management Section */}
       <div>
-        <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-          <BarChart3 className="w-5 h-5 text-blue-400" />
+        <h2 className="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4 flex items-center gap-2">
+          <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" />
           إدارة البيانات
         </h2>
-        <div className="grid md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           {adminLinks.slice(4, 8).map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="group bg-gray-900 rounded-2xl p-5 hover:bg-gray-800 transition-all duration-300 border border-gray-800 hover:border-gray-700"
+              className="group bg-gray-900 rounded-xl sm:rounded-2xl p-4 sm:p-5 hover:bg-gray-800 transition-all duration-300 border border-gray-800 hover:border-gray-700"
             >
-              <div className="flex items-start gap-4">
+              <div className="flex items-start gap-3 sm:gap-4">
                 <div
-                  className={`w-12 h-12 bg-gradient-to-br ${link.color} rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg`}
+                  className={`w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br ${link.color} rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg shrink-0`}
                 >
-                  <link.icon className="w-6 h-6 text-white" />
+                  <link.icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </div>
-                <div className="flex-1">
-                  <h3 className="text-lg font-bold text-white group-hover:text-purple-400 transition-colors">
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-sm sm:text-lg font-bold text-white group-hover:text-purple-400 transition-colors truncate">
                     {link.title}
                   </h3>
-                  <p className="text-gray-400 mt-1 text-sm">
+                  <p className="text-gray-400 mt-0.5 sm:mt-1 text-xs sm:text-sm line-clamp-2">
                     {link.description}
                   </p>
                 </div>
@@ -193,28 +195,28 @@ export default function AdminPage() {
 
       {/* General Management Section */}
       <div>
-        <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-          <Settings className="w-5 h-5 text-gray-400" />
+        <h2 className="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4 flex items-center gap-2">
+          <Settings className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
           الإدارة العامة
         </h2>
-        <div className="grid md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           {adminLinks.slice(8).map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="group bg-gray-900 rounded-2xl p-5 hover:bg-gray-800 transition-all duration-300 border border-gray-800 hover:border-gray-700"
+              className="group bg-gray-900 rounded-xl sm:rounded-2xl p-4 sm:p-5 hover:bg-gray-800 transition-all duration-300 border border-gray-800 hover:border-gray-700"
             >
-              <div className="flex items-start gap-4">
+              <div className="flex items-start gap-3 sm:gap-4">
                 <div
-                  className={`w-12 h-12 bg-gradient-to-br ${link.color} rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg`}
+                  className={`w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br ${link.color} rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg shrink-0`}
                 >
-                  <link.icon className="w-6 h-6 text-white" />
+                  <link.icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </div>
-                <div className="flex-1">
-                  <h3 className="text-lg font-bold text-white group-hover:text-purple-400 transition-colors">
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-sm sm:text-lg font-bold text-white group-hover:text-purple-400 transition-colors truncate">
                     {link.title}
                   </h3>
-                  <p className="text-gray-400 mt-1 text-sm">
+                  <p className="text-gray-400 mt-0.5 sm:mt-1 text-xs sm:text-sm line-clamp-2">
                     {link.description}
                   </p>
                 </div>
@@ -225,12 +227,12 @@ export default function AdminPage() {
       </div>
 
       {/* Back to Home */}
-      <div className="text-center pt-4">
+      <div className="text-center pt-2 sm:pt-4">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 px-6 py-3 bg-gray-800 text-gray-300 rounded-xl hover:bg-gray-700 hover:text-white transition-colors border border-gray-700"
+          className="inline-flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-gray-800 text-gray-300 rounded-xl hover:bg-gray-700 hover:text-white transition-colors border border-gray-700 text-sm sm:text-base"
         >
-          <Home className="w-5 h-5" />
+          <Home className="w-4 h-4 sm:w-5 sm:h-5" />
           <span>العودة للرئيسية</span>
         </Link>
       </div>
