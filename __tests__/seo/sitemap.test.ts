@@ -11,12 +11,15 @@ import {
   SEO_CONFIG,
 } from '@/lib/seo/config';
 
-// Mock the database module
-vi.mock('@/lib/db/unified-database', () => ({
-  queryAll: vi.fn(),
+// Mock the database module - السايتماب يستخدم unified-connection
+vi.mock('@/lib/db/unified-connection', () => ({
+  default: {
+    initialize: vi.fn().mockResolvedValue(undefined),
+    query: vi.fn().mockResolvedValue([]),
+  },
 }));
 
-import { queryAll } from '@/lib/db/unified-database';
+import unifiedDb from '@/lib/db/unified-connection';
 
 // Helper to generate valid article data
 const articleArbitrary = fc.record({
@@ -43,6 +46,7 @@ const toolArbitrary = fc.record({
 describe('Sitemap Properties', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.resetModules();
   });
 
   /**
@@ -57,8 +61,8 @@ describe('Sitemap Properties', () => {
         fc.array(articleArbitrary, { minLength: 0, maxLength: 20 }),
         async (articles) => {
           // Setup mock
-          const mockedQueryAll = vi.mocked(queryAll);
-          mockedQueryAll.mockImplementation((sql: string) => {
+          const mockedQuery = vi.mocked(unifiedDb.query);
+          mockedQuery.mockImplementation(async (sql: string) => {
             if (sql.includes('articles')) return articles;
             if (sql.includes('tools')) return [];
             if (sql.includes('categories')) return [];
@@ -67,7 +71,7 @@ describe('Sitemap Properties', () => {
 
           // Import sitemap dynamically to use mocked dependencies
           const { default: sitemap } = await import('@/app/sitemap');
-          const result = sitemap();
+          const result = await sitemap();
 
           // Verify all articles are in sitemap
           for (const article of articles) {
@@ -99,8 +103,8 @@ describe('Sitemap Properties', () => {
       fc.asyncProperty(
         fc.array(toolArbitrary, { minLength: 0, maxLength: 20 }),
         async (tools) => {
-          const mockedQueryAll = vi.mocked(queryAll);
-          mockedQueryAll.mockImplementation((sql: string) => {
+          const mockedQuery = vi.mocked(unifiedDb.query);
+          mockedQuery.mockImplementation(async (sql: string) => {
             if (sql.includes('articles')) return [];
             if (sql.includes('tools')) return tools;
             if (sql.includes('categories')) return [];
@@ -108,7 +112,7 @@ describe('Sitemap Properties', () => {
           });
 
           const { default: sitemap } = await import('@/app/sitemap');
-          const result = sitemap();
+          const result = await sitemap();
 
           // Verify all tools are in sitemap with correct priority
           for (const tool of tools) {
@@ -138,8 +142,8 @@ describe('Sitemap Properties', () => {
         fc.array(articleArbitrary, { minLength: 0, maxLength: 10 }),
         fc.array(toolArbitrary, { minLength: 0, maxLength: 10 }),
         async (articles, tools) => {
-          const mockedQueryAll = vi.mocked(queryAll);
-          mockedQueryAll.mockImplementation((sql: string) => {
+          const mockedQuery = vi.mocked(unifiedDb.query);
+          mockedQuery.mockImplementation(async (sql: string) => {
             if (sql.includes('articles')) return articles;
             if (sql.includes('tools')) return tools;
             if (sql.includes('categories')) return [];
@@ -147,7 +151,7 @@ describe('Sitemap Properties', () => {
           });
 
           const { default: sitemap } = await import('@/app/sitemap');
-          const result = sitemap();
+          const result = await sitemap();
 
           // Verify all priorities are within valid range
           for (const entry of result) {
@@ -180,11 +184,11 @@ describe('Sitemap Properties', () => {
    * Static pages should always be present in sitemap
    */
   it('Static pages are always included in sitemap', async () => {
-    const mockedQueryAll = vi.mocked(queryAll);
-    mockedQueryAll.mockReturnValue([]);
+    const mockedQuery = vi.mocked(unifiedDb.query);
+    mockedQuery.mockResolvedValue([]);
 
     const { default: sitemap } = await import('@/app/sitemap');
-    const result = sitemap();
+    const result = await sitemap();
 
     // Check essential static pages
     const essentialPages = ['', '/tools', '/articles', '/about', '/privacy'];
@@ -199,11 +203,11 @@ describe('Sitemap Properties', () => {
    * Home page should have highest priority
    */
   it('Home page has priority 1.0', async () => {
-    const mockedQueryAll = vi.mocked(queryAll);
-    mockedQueryAll.mockReturnValue([]);
+    const mockedQuery = vi.mocked(unifiedDb.query);
+    mockedQuery.mockResolvedValue([]);
 
     const { default: sitemap } = await import('@/app/sitemap');
-    const result = sitemap();
+    const result = await sitemap();
 
     const homePage = result.find((entry) => entry.url === SEO_CONFIG.baseUrl);
     expect(homePage).toBeDefined();

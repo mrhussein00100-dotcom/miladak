@@ -143,6 +143,16 @@ export const STATIC_PAGES = [
     changeFreq: SITEMAP_CHANGE_FREQ.toolPage,
   },
   {
+    path: '/friends',
+    priority: SITEMAP_PRIORITY.toolPage,
+    changeFreq: SITEMAP_CHANGE_FREQ.toolPage,
+  },
+  {
+    path: '/search',
+    priority: 0.5,
+    changeFreq: 'weekly' as const,
+  },
+  {
     path: '/about',
     priority: SITEMAP_PRIORITY.about,
     changeFreq: SITEMAP_CHANGE_FREQ.about,
