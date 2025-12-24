@@ -65,7 +65,7 @@ export function Footer() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Stats Section */}
           <motion.div
-            className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12"
+            className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-8 md:mb-12"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
@@ -74,29 +74,29 @@ export function Footer() {
             {stats.map((stat, index) => (
               <motion.div
                 key={stat.label}
-                className="text-center p-4 rounded-xl bg-gradient-to-br from-primary/5 to-secondary/5 border border-primary/10"
+                className="text-center p-3 md:p-4 rounded-xl bg-gradient-to-br from-primary/5 to-secondary/5 border border-primary/10"
                 initial={{ opacity: 0, scale: 0.8 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 transition={{ delay: index * 0.1, duration: 0.5 }}
                 viewport={{ once: true }}
                 whileHover={{ scale: 1.05 }}
               >
-                <div className="text-2xl mb-1">{stat.icon}</div>
-                <div className="text-xl font-black text-gradient mb-1">
+                <div className="text-xl md:text-2xl mb-1">{stat.icon}</div>
+                <div className="text-lg md:text-xl font-black text-gradient mb-1">
                   {stat.value}
                 </div>
-                <div className="text-xs text-muted-foreground">
+                <div className="text-[10px] md:text-xs text-muted-foreground">
                   {stat.label}
                 </div>
               </motion.div>
             ))}
           </motion.div>
 
-          {/* Links Section */}
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-8 mb-12">
-            {/* Brand */}
+          {/* Links Section - صفين في الموبايل */}
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-6 md:gap-8 mb-8 md:mb-12">
+            {/* Brand - يأخذ عرض كامل في الموبايل */}
             <motion.div
-              className="md:col-span-1"
+              className="col-span-2 md:col-span-1 text-center md:text-right"
               initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6 }}
@@ -104,10 +104,10 @@ export function Footer() {
             >
               <Link
                 href="/"
-                className="flex items-center space-x-2 space-x-reverse mb-4"
+                className="flex items-center justify-center md:justify-start space-x-2 space-x-reverse mb-3 md:mb-4"
               >
                 <motion.div
-                  className="text-3xl"
+                  className="text-2xl md:text-3xl"
                   whileHover={{
                     scale: 1.2,
                     rotate: [0, -15, 15, 0],
@@ -116,18 +116,20 @@ export function Footer() {
                 >
                   🎂
                 </motion.div>
-                <span className="text-xl font-black text-gradient">ميلادك</span>
+                <span className="text-lg md:text-xl font-black text-gradient">
+                  ميلادك
+                </span>
               </Link>
-              <p className="text-muted-foreground text-sm leading-relaxed mb-4">
+              <p className="text-muted-foreground text-xs md:text-sm leading-relaxed mb-3 md:mb-4 max-w-xs mx-auto md:mx-0">
                 موقع حاسبة العمر الأكثر دقة وتفصيلاً. اكتشف رحلة حياتك بأجمل
                 الطرق.
               </p>
-              <div className="flex space-x-2 space-x-reverse">
+              <div className="flex justify-center md:justify-start space-x-2 space-x-reverse">
                 {footerLinks.social.map((link) => (
                   <motion.a
                     key={link.name}
                     href={link.href}
-                    className="w-10 h-10 rounded-full bg-gradient-primary flex items-center justify-center text-white hover:scale-110 transition-transform"
+                    className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-primary flex items-center justify-center text-white hover:scale-110 transition-transform text-sm md:text-base"
                     whileHover={{ scale: 1.1, rotate: 5 }}
                     whileTap={{ scale: 0.95 }}
                     title={link.name}
@@ -145,15 +147,17 @@ export function Footer() {
               transition={{ delay: 0.1, duration: 0.6 }}
               viewport={{ once: true }}
             >
-              <h3 className="font-bold text-lg mb-4 text-gradient">الصفحات</h3>
-              <ul className="space-y-3">
+              <h3 className="font-bold text-sm md:text-lg mb-3 md:mb-4 text-gradient">
+                الصفحات
+              </h3>
+              <ul className="space-y-2 md:space-y-3">
                 {footerLinks.main.map((link) => (
                   <li key={link.name}>
                     <Link
                       href={link.href}
-                      className="text-muted-foreground hover:text-primary transition-colors text-sm flex items-center space-x-2 space-x-reverse group"
+                      className="text-muted-foreground hover:text-primary transition-colors text-xs md:text-sm flex items-center space-x-1.5 md:space-x-2 space-x-reverse group"
                     >
-                      <span className="group-hover:scale-110 transition-transform">
+                      <span className="group-hover:scale-110 transition-transform text-sm md:text-base">
                         {link.icon}
                       </span>
                       <span>{link.name}</span>
@@ -170,15 +174,17 @@ export function Footer() {
               transition={{ delay: 0.2, duration: 0.6 }}
               viewport={{ once: true }}
             >
-              <h3 className="font-bold text-lg mb-4 text-gradient">استكشف</h3>
-              <ul className="space-y-3">
+              <h3 className="font-bold text-sm md:text-lg mb-3 md:mb-4 text-gradient">
+                استكشف
+              </h3>
+              <ul className="space-y-2 md:space-y-3">
                 {footerLinks.explore.map((link) => (
                   <li key={link.name}>
                     <Link
                       href={link.href}
-                      className="text-muted-foreground hover:text-primary transition-colors text-sm flex items-center space-x-2 space-x-reverse group"
+                      className="text-muted-foreground hover:text-primary transition-colors text-xs md:text-sm flex items-center space-x-1.5 md:space-x-2 space-x-reverse group"
                     >
-                      <span className="group-hover:scale-110 transition-transform">
+                      <span className="group-hover:scale-110 transition-transform text-sm md:text-base">
                         {link.icon}
                       </span>
                       <span>{link.name}</span>
@@ -195,15 +201,17 @@ export function Footer() {
               transition={{ delay: 0.25, duration: 0.6 }}
               viewport={{ once: true }}
             >
-              <h3 className="font-bold text-lg mb-4 text-gradient">الأدوات</h3>
-              <ul className="space-y-3">
+              <h3 className="font-bold text-sm md:text-lg mb-3 md:mb-4 text-gradient">
+                الأدوات
+              </h3>
+              <ul className="space-y-2 md:space-y-3">
                 {footerLinks.tools.map((link) => (
                   <li key={link.name}>
                     <Link
                       href={link.href}
-                      className="text-muted-foreground hover:text-primary transition-colors text-sm flex items-center space-x-2 space-x-reverse group"
+                      className="text-muted-foreground hover:text-primary transition-colors text-xs md:text-sm flex items-center space-x-1.5 md:space-x-2 space-x-reverse group"
                     >
-                      <span className="group-hover:scale-110 transition-transform">
+                      <span className="group-hover:scale-110 transition-transform text-sm md:text-base">
                         {link.icon}
                       </span>
                       <span>{link.name}</span>
@@ -220,15 +228,17 @@ export function Footer() {
               transition={{ delay: 0.3, duration: 0.6 }}
               viewport={{ once: true }}
             >
-              <h3 className="font-bold text-lg mb-4 text-gradient">قانوني</h3>
-              <ul className="space-y-3">
+              <h3 className="font-bold text-sm md:text-lg mb-3 md:mb-4 text-gradient">
+                قانوني
+              </h3>
+              <ul className="space-y-2 md:space-y-3">
                 {footerLinks.legal.map((link) => (
                   <li key={link.name}>
                     <Link
                       href={link.href}
-                      className="text-muted-foreground hover:text-primary transition-colors text-sm flex items-center space-x-2 space-x-reverse group"
+                      className="text-muted-foreground hover:text-primary transition-colors text-xs md:text-sm flex items-center space-x-1.5 md:space-x-2 space-x-reverse group"
                     >
-                      <span className="group-hover:scale-110 transition-transform">
+                      <span className="group-hover:scale-110 transition-transform text-sm md:text-base">
                         {link.icon}
                       </span>
                       <span>{link.name}</span>
@@ -241,17 +251,17 @@ export function Footer() {
 
           {/* Bottom Bar */}
           <motion.div
-            className="pt-8 border-t border-border/50"
+            className="pt-6 md:pt-8 border-t border-border/50"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             transition={{ delay: 0.4, duration: 0.6 }}
             viewport={{ once: true }}
           >
-            <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-              <p className="text-muted-foreground text-sm">
+            <div className="flex flex-col md:flex-row justify-between items-center space-y-3 md:space-y-0">
+              <p className="text-muted-foreground text-xs md:text-sm">
                 © {currentYear} ميلادك. جميع الحقوق محفوظة 🎉
               </p>
-              <p className="text-muted-foreground text-sm flex items-center space-x-2 space-x-reverse">
+              <p className="text-muted-foreground text-xs md:text-sm flex items-center space-x-1.5 md:space-x-2 space-x-reverse">
                 <span>صُنع بـ</span>
                 <motion.span
                   animate={{ scale: [1, 1.2, 1] }}
