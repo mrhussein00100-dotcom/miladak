@@ -2322,3 +2322,120 @@ input[type='date'] {
 .admin-layout .shadow-sm {
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.3) !important;
 }
+
+/* ===== 📱 Mobile Performance Optimizations ===== */
+/* تحسينات أداء الموبايل - لتقليل استهلاك البطارية والحرارة */
+
+/* إيقاف الأنيميشن على الموبايل لتوفير البطارية */
+@media (max-width: 768px) {
+  /* إيقاف جميع الأنيميشن المتكررة */
+  .animate-float,
+  .animate-glow-pulse,
+  .animate-sparkle,
+  .animate-confetti,
+  .animate-shimmer,
+  .animate-bounce-subtle,
+  .animate-pulse-slow,
+  .animate-sway,
+  .animate-glow,
+  .animate-spin-slow,
+  .animate-spin-slow-reverse,
+  .logo-pulse,
+  .badge-bounce {
+    animation: none !important;
+  }
+
+  /* تقليل تأثيرات blur المكلفة */
+  .backdrop-blur-xl,
+  .backdrop-blur-lg,
+  .backdrop-blur-md {
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+  }
+
+  /* تقليل الظلال المعقدة */
+  .shadow-xl,
+  .shadow-2xl {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  /* إيقاف تأثيرات hover على الموبايل */
+  .card-festive:hover,
+  .card-glass:hover {
+    transform: none !important;
+    box-shadow: var(--shadow-md) !important;
+  }
+
+  /* تقليل الـ gradients المعقدة */
+  body::before {
+    background: var(--background) !important;
+  }
+
+  /* إيقاف will-change لتوفير الذاكرة */
+  * {
+    will-change: auto !important;
+  }
+
+  /* تقليل الـ transitions */
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.15s !important;
+  }
+
+  /* إخفاء العناصر الزخرفية غير الضرورية */
+  .decorative-element,
+  .floating-element {
+    display: none !important;
+  }
+}
+
+/* تحسينات إضافية للأجهزة منخفضة الأداء */
+@media (max-width: 768px) and (prefers-reduced-motion: no-preference) {
+  /* تقليل تعقيد الـ gradients */
+  .text-gradient,
+  .gradient-text {
+    background: var(--primary) !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+  }
+
+  /* تبسيط الـ glow effects */
+  .dark .card-glow,
+  .miladak .card-glow {
+    box-shadow: 0 0 10px var(--glow-primary) !important;
+  }
+}
+
+/* تحسينات للأجهزة التي تعمل بالبطارية */
+@media (hover: none) and (pointer: coarse) {
+  /* إيقاف جميع الأنيميشن المتكررة */
+  * {
+    animation-iteration-count: 1 !important;
+  }
+
+  /* تقليل الـ blur */
+  .backdrop-blur,
+  [class*='backdrop-blur'] {
+    backdrop-filter: blur(4px) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
+  }
+}
+
+/* تحسين الأداء العام */
+.performance-optimized {
+  contain: layout style paint;
+  content-visibility: auto;
+}
+
+/* تحسين الصور */
+img {
+  content-visibility: auto;
+}
+
+/* تحسين القوائم الطويلة */
+.virtual-list {
+  contain: strict;
+  content-visibility: auto;
+  contain-intrinsic-size: 0 500px;
+}

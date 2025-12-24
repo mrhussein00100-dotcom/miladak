@@ -219,9 +219,9 @@ export default function RootLayout({
           href="https://fonts.gstatic.com"
           crossOrigin="anonymous"
         />
-        {/* Arabic Fonts for Birthday Cards */}
+        {/* Arabic Fonts - Optimized: Only load essential fonts, others loaded on-demand in Cards page */}
         <link
-          href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Tajawal:wght@400;500;700&family=Amiri:wght@400;700&family=Almarai:wght@400;700;800&family=Changa:wght@400;600;700&family=Lateef:wght@400;700&family=Scheherazade+New:wght@400;700&family=Harmattan:wght@400;600;700&subset=arabic&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Tajawal:wght@400;700&display=swap"
           rel="stylesheet"
           crossOrigin="anonymous"
         />
