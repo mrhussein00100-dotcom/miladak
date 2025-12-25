@@ -292,61 +292,61 @@ export default function EditArticlePage({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-3 sm:p-4 md:p-6">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
+        <div className="flex flex-col gap-4 mb-6 sm:mb-8">
+          <div className="flex items-center gap-3 sm:gap-4">
             <Link
               href="/admin/articles"
               className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700"
             >
-              <ArrowLeft className="w-5 h-5" />
+              <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
             </Link>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              <FileText className="w-7 h-7 text-purple-500" />
+            <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+              <FileText className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-purple-500" />
               تعديل المقال
             </h1>
           </div>
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-2 sm:gap-3">
             <button
               onClick={handleDelete}
-              className="flex items-center gap-2 px-4 py-2 bg-red-100 dark:bg-red-900/30 text-red-600 rounded-xl hover:bg-red-200"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 bg-red-100 dark:bg-red-900/30 text-red-600 rounded-xl hover:bg-red-200 text-sm"
             >
-              <Trash2 className="w-5 h-5" />
-              حذف
+              <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="hidden xs:inline">حذف</span>
             </button>
             <button
               onClick={() => setShowPreview(!showPreview)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all ${
+              className={`flex-1 sm:flex-none flex items-center justify-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 rounded-xl transition-all text-sm ${
                 showPreview
                   ? 'bg-green-500 text-white'
                   : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
               }`}
             >
-              <Eye className="w-5 h-5" />
-              معاينة
+              <Eye className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="hidden xs:inline">معاينة</span>
             </button>
             <button
               onClick={handleSave}
               disabled={saving}
-              className="flex items-center gap-2 px-6 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 disabled:opacity-50"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-1 sm:gap-2 px-4 sm:px-6 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 disabled:opacity-50 text-sm"
             >
               {saving ? (
-                <RefreshCw className="w-5 h-5 animate-spin" />
+                <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
               ) : (
-                <Save className="w-5 h-5" />
+                <Save className="w-4 h-4 sm:w-5 sm:h-5" />
               )}
               حفظ
             </button>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             {/* Title */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+            <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 عنوان المقال *
               </label>
@@ -360,7 +360,7 @@ export default function EditArticlePage({
             </div>
 
             {/* Slug */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+            <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 الرابط (slug)
               </label>
@@ -374,8 +374,8 @@ export default function EditArticlePage({
             </div>
 
             {/* Content Tools */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm">
-              <div className="flex flex-wrap items-center gap-3">
+            <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-sm">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                 {/* تبديل نوع المحرر */}
                 <div className="flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
                   <button
@@ -406,29 +406,32 @@ export default function EditArticlePage({
 
                 <button
                   onClick={() => setShowImagePicker(!showImagePicker)}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50"
+                  className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 text-xs sm:text-sm"
                 >
-                  <Image className="w-4 h-4" />
-                  إدراج صورة
+                  <Image className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <span className="hidden xs:inline">إدراج صورة</span>
+                  <span className="xs:hidden">صورة</span>
                 </button>
                 <button
                   onClick={handleFormatContent}
-                  className="flex items-center gap-2 px-4 py-2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-lg hover:bg-green-200 dark:hover:bg-green-900/50"
+                  className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-lg hover:bg-green-200 dark:hover:bg-green-900/50 text-xs sm:text-sm"
                 >
-                  <Palette className="w-4 h-4" />
-                  تنسيق المحتوى
+                  <Palette className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <span className="hidden xs:inline">تنسيق المحتوى</span>
+                  <span className="xs:hidden">تنسيق</span>
                 </button>
                 <button
                   onClick={handleAddAutoImages}
                   disabled={addingImages}
-                  className="flex items-center gap-2 px-4 py-2 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-lg hover:bg-purple-200 dark:hover:bg-purple-900/50 disabled:opacity-50"
+                  className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-lg hover:bg-purple-200 dark:hover:bg-purple-900/50 disabled:opacity-50 text-xs sm:text-sm"
                 >
                   {addingImages ? (
-                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    <RefreshCw className="w-3 h-3 sm:w-4 sm:h-4 animate-spin" />
                   ) : (
-                    <Sparkles className="w-4 h-4" />
+                    <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" />
                   )}
-                  صور تلقائية
+                  <span className="hidden xs:inline">صور تلقائية</span>
+                  <span className="xs:hidden">صور</span>
                 </button>
                 <button
                   onClick={() => {
@@ -442,12 +445,13 @@ export default function EditArticlePage({
                       })
                       .catch(console.error);
                   }}
-                  className="flex items-center gap-2 px-4 py-2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-lg hover:bg-green-200 dark:hover:bg-green-900/50"
+                  className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-lg hover:bg-green-200 dark:hover:bg-green-900/50 text-xs sm:text-sm"
                 >
-                  <Zap className="w-4 h-4" />
-                  تنسيق ذكي
+                  <Zap className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <span className="hidden xs:inline">تنسيق ذكي</span>
+                  <span className="xs:hidden">ذكي</span>
                 </button>
-                <div className="flex items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                <div className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
                   <input
                     type="checkbox"
                     id="autoFormat"
@@ -457,12 +461,13 @@ export default function EditArticlePage({
                   />
                   <label
                     htmlFor="autoFormat"
-                    className="text-sm text-gray-600 dark:text-gray-400"
+                    className="text-xs sm:text-sm text-gray-600 dark:text-gray-400"
                   >
-                    تنسيق تلقائي
+                    <span className="hidden xs:inline">تنسيق تلقائي</span>
+                    <span className="xs:hidden">تلقائي</span>
                   </label>
                 </div>
-                <div className="flex items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                <div className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
                   <input
                     type="checkbox"
                     id="addTOC"
@@ -472,9 +477,12 @@ export default function EditArticlePage({
                   />
                   <label
                     htmlFor="addTOC"
-                    className="text-sm text-gray-600 dark:text-gray-400"
+                    className="text-xs sm:text-sm text-gray-600 dark:text-gray-400"
                   >
-                    جدول محتويات ({headingsCount} عنوان)
+                    <span className="hidden xs:inline">
+                      جدول محتويات ({headingsCount} عنوان)
+                    </span>
+                    <span className="xs:hidden">فهرس ({headingsCount})</span>
                   </label>
                 </div>
               </div>
@@ -482,8 +490,8 @@ export default function EditArticlePage({
 
             {/* Image Picker */}
             {showImagePicker && (
-              <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
-                <h3 className="font-medium text-gray-900 dark:text-white mb-4">
+              <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm">
+                <h3 className="font-medium text-gray-900 dark:text-white mb-4 text-sm sm:text-base">
                   إدراج صورة في المحتوى
                 </h3>
                 <EnhancedImagePicker onSelect={handleInsertImage} />
@@ -491,7 +499,7 @@ export default function EditArticlePage({
             )}
 
             {/* Content */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+            <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 المحتوى *
               </label>
@@ -529,7 +537,7 @@ export default function EditArticlePage({
             </div>
 
             {/* Excerpt */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+            <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 المقتطف
               </label>
@@ -544,11 +552,11 @@ export default function EditArticlePage({
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {/* Featured Image */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
-              <h3 className="font-medium text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                <Image className="w-5 h-5 text-purple-500" />
+            <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm">
+              <h3 className="font-medium text-gray-900 dark:text-white mb-3 sm:mb-4 flex items-center gap-2 text-sm sm:text-base">
+                <Image className="w-4 h-4 sm:w-5 sm:h-5 text-purple-500" />
                 الصورة البارزة
               </h3>
               <EnhancedImagePicker
@@ -559,11 +567,11 @@ export default function EditArticlePage({
             </div>
 
             {/* Category & Status */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
-              <h3 className="font-medium text-gray-900 dark:text-white mb-4">
+            <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm">
+              <h3 className="font-medium text-gray-900 dark:text-white mb-3 sm:mb-4 text-sm sm:text-base">
                 الإعدادات
               </h3>
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     التصنيف *
@@ -643,20 +651,20 @@ export default function EditArticlePage({
             </div>
 
             {/* SEO */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-medium text-gray-900 dark:text-white">
+            <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm">
+              <div className="flex items-center justify-between mb-3 sm:mb-4">
+                <h3 className="font-medium text-gray-900 dark:text-white text-sm sm:text-base">
                   تحسين SEO
                 </h3>
                 <button
                   onClick={handleGenerateMeta}
-                  className="text-sm text-purple-500 hover:text-purple-600 flex items-center gap-1"
+                  className="text-xs sm:text-sm text-purple-500 hover:text-purple-600 flex items-center gap-1"
                 >
-                  <Sparkles className="w-4 h-4" />
+                  <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" />
                   توليد
                 </button>
               </div>
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     وصف الميتا
@@ -690,9 +698,9 @@ export default function EditArticlePage({
 
             {/* AI Info */}
             {aiProvider && (
-              <div className="bg-purple-50 dark:bg-purple-900/20 rounded-2xl p-4 border border-purple-200 dark:border-purple-800">
-                <p className="text-sm text-purple-700 dark:text-purple-300 flex items-center gap-2">
-                  <Sparkles className="w-4 h-4" />
+              <div className="bg-purple-50 dark:bg-purple-900/20 rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-purple-200 dark:border-purple-800">
+                <p className="text-xs sm:text-sm text-purple-700 dark:text-purple-300 flex items-center gap-2">
+                  <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" />
                   {aiProvider === 'rewriter'
                     ? 'تم النقل من إعادة الصياغة'
                     : `تم التوليد بواسطة: ${aiProvider}`}
