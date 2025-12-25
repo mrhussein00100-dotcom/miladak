@@ -1,7 +1,12 @@
 /**
  * مزود Gemini API للذكاء الاصطناعي
  * مجاني ويدعم اللغة العربية
+ * تم التحديث: ديسمبر 2025
  */
+
+// النموذج الافتراضي - تم التحديث ديسمبر 2025
+const DEFAULT_MODEL = 'gemini-2.0-flash-exp';
+const FALLBACK_MODELS = ['gemini-1.5-flash-latest', 'gemini-pro'];
 
 export interface GeminiGenerationRequest {
   topic: string;
@@ -124,14 +129,7 @@ ${keywordsText}
   "keywords": ["كلمة1", "كلمة2", "كلمة3"]
 }`;
 
-  // استخدام النماذج العاملة فقط بناءً على الاختبار
-  // ملاحظة: gemini-flash-latest له حصة منفصلة ولا يزال يعمل!
-  const models = [
-    'gemini-flash-latest', // الأسرع والأكثر استقراراً ✨ (حصة منفصلة)
-    'gemini-1.5-flash', // بديل موثوق
-    'gemini-1.5-pro', // للمحتوى الطويل
-  ];
-
+  const models = [DEFAULT_MODEL, ...FALLBACK_MODELS];
   let lastError = '';
   let aiResponse = '';
 
@@ -206,14 +204,12 @@ ${keywordsText}
   }
 
   try {
-    // تنظيف إضافي قبل إرسال الاستجابة للتحليل
     aiResponse = aiResponse
       .replace(/^```json\s*/gi, '')
       .replace(/^```\s*/gi, '')
       .replace(/```\s*$/gi, '')
       .trim();
 
-    // استخراج JSON من الرد
     const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
       throw new Error('فشل في استخراج JSON من الرد');
@@ -277,13 +273,7 @@ export async function rewriteContent(
 
 ابدأ إعادة الصياغة الآن:`;
 
-  // قائمة النماذج للمحاولة (نماذج بحصص منفصلة)
-  const models = [
-    'gemini-flash-latest', // حصة منفصلة - يعمل!
-    'gemini-1.5-flash', // بديل موثوق
-    'gemini-1.5-pro', // للمحتوى المعقد
-  ];
-
+  const models = [DEFAULT_MODEL, ...FALLBACK_MODELS];
   let lastError = '';
 
   for (const model of models) {
@@ -335,7 +325,6 @@ export async function rewriteContent(
     }
   }
 
-  // إذا فشلت كل النماذج، أرجع خطأ مفصل
   throw new Error(
     `فشل في إعادة الصياغة باستخدام جميع نماذج Gemini. آخر خطأ: ${lastError}`
   );
@@ -369,7 +358,7 @@ export async function generateTitles(
 
   try {
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/${DEFAULT_MODEL}:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -441,7 +430,7 @@ ${content.substring(0, 2000)}
 
   try {
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/${DEFAULT_MODEL}:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -497,11 +486,7 @@ export async function rewriteTitle(title: string): Promise<string> {
 
 اكتب عنوان جديد فقط (8-12 كلمة) بدون أي شرح:`;
 
-  const models = [
-    'gemini-flash-latest', // حصة منفصلة - يعمل!
-    'gemini-1.5-flash', // بديل موثوق
-    'gemini-1.5-pro', // للمحتوى المعقد
-  ];
+  const models = [DEFAULT_MODEL, ...FALLBACK_MODELS];
 
   for (const model of models) {
     try {
@@ -532,14 +517,12 @@ export async function rewriteTitle(title: string): Promise<string> {
 
       if (result) {
         console.log(`✅ نجح ${model}:`, result.substring(0, 50));
-        // تنظيف العنوان
         const cleanedTitle = result
           .replace(/["""*]/g, '')
           .replace(/^(العنوان|عنوان|البديل|الجديد|المقترح)[:\-\s]*/gi, '')
           .split('\n')[0]
           .trim();
 
-        // التأكد من أن العنوان مختلف عن الأصلي
         if (cleanedTitle && cleanedTitle !== title) {
           return cleanedTitle;
         }
