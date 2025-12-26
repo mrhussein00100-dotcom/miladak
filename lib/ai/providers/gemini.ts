@@ -5,12 +5,15 @@
  */
 
 // النموذج الافتراضي - تم التحديث ديسمبر 2025
-// استخدام gemini-2.0-flash بدلاً من exp لتجنب Rate Limit
-const DEFAULT_MODEL = 'gemini-2.0-flash';
+// قائمة شاملة من نماذج Gemini المتاحة للـ fallback
+const DEFAULT_MODEL = 'gemini-2.5-flash';
 const FALLBACK_MODELS = [
+  'gemini-2.5-flash-lite', // أخف وأسرع
+  'gemini-2.5-pro', // أقوى
+  'gemini-2.0-flash', // الإصدار السابق
   'gemini-2.0-flash-001',
   'gemini-2.0-flash-lite',
-  'gemini-1.5-flash-latest',
+  'gemini-2.0-flash-lite-001',
 ];
 
 export interface GeminiGenerationRequest {
