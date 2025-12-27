@@ -1,6 +1,6 @@
 /**
- * 🌟 SONA - Smart Offline Native AI
- * نموذج الذكاء الاصطناعي المحلي الذكي
+ * 🌟 SONA v4 - Smart Offline Native AI
+ * نموذج الذكاء الاصطناعي المحلي الذكي - الإصدار الرابع
  * يولّد مقالات عربية احترافية متخصصة بدون الحاجة لـ APIs خارجية
  *
  * المميزات:
@@ -10,7 +10,20 @@
  * - دعم كامل للغة العربية
  * - سرعة فائقة (فوري)
  * - يعمل بدون إنترنت
+ * - نظام قوالب معيارية قابلة للتركيب (v4)
+ * - تنويع لغوي وأسلوبي متقدم (v4)
+ * - نظام plugins قابل للتوسيع (v4)
  */
+
+// استيراد SONA v4 الجديد
+import { contentGenerator as sonaV4Generator } from '../../sona/contentGenerator';
+import type {
+  GenerationRequest as SonaV4Request,
+  ArticleLength,
+} from '../../sona/types';
+
+// Flag لتفعيل SONA v4
+const USE_SONA_V4 = true;
 
 export interface SonaGenerationRequest {
   topic: string;
@@ -4527,9 +4540,61 @@ export async function generateArticle(
 ): Promise<SonaGenerationResponse> {
   const startTime = Date.now();
 
-  console.log('🧠 SONA الذكي: بدء التوليد...');
+  console.log('🧠 SONA v4: بدء التوليد...');
   console.log('📝 SONA: الموضوع:', request.topic);
   console.log('📏 SONA: الطول:', request.length);
+
+  // استخدام SONA v4 الجديد إذا كان مفعلاً
+  if (USE_SONA_V4) {
+    try {
+      console.log('🚀 SONA v4: استخدام النظام الجديد...');
+
+      // تحويل الطلب لصيغة SONA v4
+      const v4Request: SonaV4Request = {
+        topic: request.topic,
+        length: request.length as ArticleLength,
+        style: request.style as 'formal' | 'casual' | 'seo' | undefined,
+        includeKeywords: request.includeKeywords,
+        category: request.category as
+          | 'birthday'
+          | 'zodiac'
+          | 'health'
+          | 'dates'
+          | 'general'
+          | undefined,
+      };
+
+      // توليد المحتوى باستخدام SONA v4
+      const v4Result = await sonaV4Generator.generate(v4Request);
+
+      const generationTime = Date.now() - startTime;
+
+      console.log('✅ SONA v4: نجح التوليد!');
+      console.log('📊 SONA v4: عدد الكلمات:', v4Result.wordCount);
+      console.log(
+        '📈 SONA v4: درجة الجودة:',
+        v4Result.qualityReport.overallScore.toFixed(1)
+      );
+      console.log('⏱️ SONA v4: الوقت:', generationTime, 'ms');
+
+      return {
+        content: v4Result.content,
+        title: v4Result.title,
+        metaTitle: v4Result.metaTitle,
+        metaDescription: v4Result.metaDescription,
+        keywords: v4Result.keywords,
+        wordCount: v4Result.wordCount,
+        provider: 'sona',
+        generationTime,
+      };
+    } catch (error) {
+      console.error('⚠️ SONA v4: فشل، الرجوع للنظام القديم...', error);
+      // الرجوع للنظام القديم في حالة الفشل
+    }
+  }
+
+  // النظام القديم (fallback)
+  console.log('🔄 SONA: استخدام النظام القديم...');
 
   // تحليل الموضوع بذكاء
   const analysis = analyzeTopicIntelligently(request.topic);

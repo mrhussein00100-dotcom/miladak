@@ -436,7 +436,7 @@ export default function NewArticlePage() {
                     onChange={(e) => setSelectedProvider(e.target.value as any)}
                     className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
                   >
-                    <option value="sona">🟢 SONA (موصى به)</option>
+                    <option value="sona">🟢 SONA v4 (موصى به)</option>
                     <option value="groq">
                       {providersStatus.groq ? '🟢' : '🔴'} Groq
                     </option>
@@ -444,6 +444,14 @@ export default function NewArticlePage() {
                       {providersStatus.gemini ? '🟢' : '🔴'} Gemini
                     </option>
                   </select>
+                  {selectedProvider === 'sona' && (
+                    <Link
+                      href="/admin/sona/settings"
+                      className="text-xs text-purple-500 hover:text-purple-600 mt-1 inline-flex items-center gap-1"
+                    >
+                      ⚙️ إعدادات SONA المتقدمة
+                    </Link>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">

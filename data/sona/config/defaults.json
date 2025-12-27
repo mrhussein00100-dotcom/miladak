@@ -1,0 +1,23 @@
+{
+  "articleLength": "medium",
+  "wordCountTargets": {
+    "short": 500,
+    "medium": 1000,
+    "long": 2000,
+    "comprehensive": 3000
+  },
+  "keywordDensity": 3,
+  "minKeywordOccurrences": 3,
+  "maxKeywordOccurrences": 5,
+  "minQualityScore": 70,
+  "maxRetries": 3,
+  "diversityLevel": "high",
+  "templateRotation": true,
+  "excludedTemplates": [],
+  "preferredTemplates": [],
+  "enableSynonymReplacement": true,
+  "enableSentenceVariation": true,
+  "enableFAQGeneration": true,
+  "enableTipsGeneration": true,
+  "enableCTAs": true
+}

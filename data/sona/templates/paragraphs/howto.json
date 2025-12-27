@@ -1,0 +1,65 @@
+{
+  "category": "howto",
+  "templates": [
+    {
+      "id": "howto_1",
+      "template": "<h2>كيفية {action}</h2>\n<p>اتبعوا هذه الخطوات البسيطة:</p>\n<ol>\n{steps_list}\n</ol>",
+      "variables": ["action", "steps_list"],
+      "type": "steps"
+    },
+    {
+      "id": "howto_2",
+      "template": "<h2>خطوات {action}</h2>\n<p>دليل خطوة بخطوة:</p>\n<ol>\n{steps_list}\n</ol>",
+      "variables": ["action", "steps_list"],
+      "type": "steps"
+    },
+    {
+      "id": "howto_3",
+      "template": "<h2>طريقة {action}</h2>\n<p>إليكم الطريقة الصحيحة:</p>\n{steps_list}",
+      "variables": ["action", "steps_list"],
+      "type": "steps"
+    },
+    {
+      "id": "howto_4",
+      "template": "<h2>دليل {action}</h2>\n<p>اتبعوا هذا الدليل المفصل:</p>\n<ol>\n{steps_list}\n</ol>",
+      "variables": ["action", "steps_list"],
+      "type": "steps"
+    },
+    {
+      "id": "howto_5",
+      "template": "<h2>أفضل طريقة لـ{action}</h2>\n<p>نشارككم الطريقة المثلى:</p>\n{steps_list}",
+      "variables": ["action", "steps_list"],
+      "type": "steps"
+    },
+    {
+      "id": "howto_6",
+      "template": "<h2>تعلموا {action}</h2>\n<p>خطوات سهلة وواضحة:</p>\n<ol>\n{steps_list}\n</ol>",
+      "variables": ["action", "steps_list"],
+      "type": "steps"
+    },
+    {
+      "id": "howto_7",
+      "template": "<h2>الطريقة الصحيحة لـ{action}</h2>\n<p>إليكم الخطوات:</p>\n{steps_list}",
+      "variables": ["action", "steps_list"],
+      "type": "steps"
+    },
+    {
+      "id": "howto_8",
+      "template": "<h2>كيف تقومون بـ{action}؟</h2>\n<p>الإجابة في هذه الخطوات:</p>\n<ol>\n{steps_list}\n</ol>",
+      "variables": ["action", "steps_list"],
+      "type": "steps"
+    },
+    {
+      "id": "howto_9",
+      "template": "<h2>إرشادات {action}</h2>\n<p>اتبعوا هذه الإرشادات:</p>\n{steps_list}",
+      "variables": ["action", "steps_list"],
+      "type": "steps"
+    },
+    {
+      "id": "howto_10",
+      "template": "<h2>خطوات عملية لـ{action}</h2>\n<p>طبقوا هذه الخطوات:</p>\n<ol>\n{steps_list}\n</ol>",
+      "variables": ["action", "steps_list"],
+      "type": "steps"
+    }
+  ]
+}
