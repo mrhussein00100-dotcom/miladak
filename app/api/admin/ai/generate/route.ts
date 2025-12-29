@@ -86,29 +86,51 @@ export async function GET() {
   const providersWithStatus = Object.entries(PROVIDERS_INFO).map(
     ([id, info]) => {
       let available = info.available;
+      let keyStatus = '';
 
       // التحقق من وجود مفاتيح API
       switch (id) {
         case 'gemini':
-          available = !!process.env.GEMINI_API_KEY;
+          const geminiKey =
+            process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_API_KEY;
+          available = !!geminiKey;
+          keyStatus = geminiKey
+            ? `configured (${geminiKey.length} chars)`
+            : 'missing';
           break;
         case 'groq':
           available = !!process.env.GROQ_API_KEY;
+          keyStatus = process.env.GROQ_API_KEY ? 'configured' : 'missing';
           break;
         case 'cohere':
           available = !!process.env.COHERE_API_KEY;
+          keyStatus = process.env.COHERE_API_KEY ? 'configured' : 'missing';
           break;
         case 'huggingface':
           available = !!process.env.HUGGINGFACE_API_KEY;
+          keyStatus = process.env.HUGGINGFACE_API_KEY
+            ? 'configured'
+            : 'missing';
           break;
         case 'local':
           available = true; // المحلي دائماً متاح
+          keyStatus = 'not required';
           break;
         case 'sona':
           available = true; // SONA دائماً متاح
+          keyStatus = 'not required';
           break;
         case 'sona-enhanced':
           available = true; // SONA 4.01 دائماً متاح
+          keyStatus = 'not required';
+          break;
+        case 'sona-v5':
+          available = true; // SONA 5.0 دائماً متاح
+          keyStatus = 'not required';
+          break;
+        case 'sona-v6':
+          available = true; // SONA 6.0 دائماً متاح
+          keyStatus = 'not required';
           break;
       }
 
@@ -116,6 +138,7 @@ export async function GET() {
         id,
         ...info,
         available,
+        keyStatus,
       };
     }
   );
