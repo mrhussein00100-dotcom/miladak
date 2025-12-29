@@ -19,6 +19,7 @@ import {
   RefreshCw,
   Users,
   Bot,
+  Key,
 } from 'lucide-react';
 
 const adminLinks = [
@@ -57,6 +58,13 @@ const adminLinks = [
     title: '🤖 إعدادات SONA v4',
     description: 'تخصيص نظام توليد المحتوى المحلي المتقدم',
     color: 'from-cyan-500 to-blue-500',
+  },
+  {
+    href: '/admin/api-keys',
+    icon: Key,
+    title: '🔑 مفاتيح API',
+    description: 'مراقبة حالة مفاتيح Gemini والخدمات الأخرى',
+    color: 'from-amber-500 to-orange-500',
   },
   // إدارة البيانات
   {
@@ -142,7 +150,7 @@ export default function AdminPage() {
           إدارة المحتوى
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-          {adminLinks.slice(0, 5).map((link) => (
+          {adminLinks.slice(0, 6).map((link) => (
             <Link
               key={link.href}
               href={link.href}
@@ -175,7 +183,7 @@ export default function AdminPage() {
           إدارة البيانات
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-          {adminLinks.slice(5, 9).map((link) => (
+          {adminLinks.slice(6, 10).map((link) => (
             <Link
               key={link.href}
               href={link.href}
@@ -208,7 +216,7 @@ export default function AdminPage() {
           الإدارة العامة
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-          {adminLinks.slice(9).map((link) => (
+          {adminLinks.slice(10).map((link) => (
             <Link
               key={link.href}
               href={link.href}

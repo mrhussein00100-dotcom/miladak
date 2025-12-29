@@ -3,23 +3,56 @@
  */
 
 import { NextResponse } from 'next/server';
-import { getGeminiKeysStatus } from '@/lib/ai/providers/gemini';
+import geminiProvider, { getGeminiKeysStatus } from '@/lib/ai/providers/gemini';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
+// اختبار مفتاح Gemini
+async function testGeminiKey(
+  apiKey: string
+): Promise<{ working: boolean; error?: string }> {
+  try {
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1/models?key=${apiKey}`
+    );
+    if (response.ok) {
+      return { working: true };
+    }
+    const data = await response.json();
+    return { working: false, error: data.error?.message || 'فشل الاتصال' };
+  } catch {
+    return { working: false, error: 'خطأ في الشبكة' };
+  }
+}
+
 export async function GET() {
   // الحصول على حالة مفاتيح Gemini المتعددة
   const geminiStatus = getGeminiKeysStatus();
+  const allGeminiKeys = geminiProvider.getAllGeminiApiKeys();
+
+  // اختبار كل مفتاح Gemini
+  const geminiKeysTests = await Promise.all(
+    allGeminiKeys.map(async (key: string, index: number) => {
+      const result = await testGeminiKey(key);
+      return {
+        index: index + 1,
+        working: result.working,
+        error: result.error,
+      };
+    })
+  );
 
   const keys = {
     gemini: {
       name: 'Gemini',
       configured: geminiStatus.total > 0,
+      working: geminiKeysTests.some((k: { working: boolean }) => k.working),
+      keysCount: geminiStatus.total,
       totalKeys: geminiStatus.total,
       availableKeys: geminiStatus.available,
       exhaustedKeys: geminiStatus.exhausted,
-      keys: geminiStatus.keys,
+      keys: geminiKeysTests,
       envVars: [
         'GEMINI_API_KEY',
         'GOOGLE_AI_API_KEY',
