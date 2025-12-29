@@ -1,0 +1,58 @@
+{
+  "category": "faq",
+  "templates": [
+    {
+      "id": "faq_1",
+      "template": "<h2>الأسئلة الشائعة عن {topic}</h2>\n<p>نجيب على أكثر الأسئلة شيوعاً:</p>\n{faq_list}",
+      "variables": ["topic", "faq_list"],
+      "type": "faq"
+    },
+    {
+      "id": "faq_2",
+      "template": "<h2>أسئلة وأجوبة حول {topic}</h2>\n<p>إليكم إجابات الأسئلة التي تدور في أذهانكم:</p>\n{faq_list}",
+      "variables": ["topic", "faq_list"],
+      "type": "faq"
+    },
+    {
+      "id": "faq_3",
+      "template": "<h2>كل ما تريدون معرفته عن {topic}</h2>\n<p>أسئلتكم وإجاباتنا:</p>\n{faq_list}",
+      "variables": ["topic", "faq_list"],
+      "type": "faq"
+    },
+    {
+      "id": "faq_4",
+      "template": "<h2>استفساراتكم عن {topic}</h2>\n<p>نجيب على استفساراتكم الأكثر شيوعاً:</p>\n{faq_list}",
+      "variables": ["topic", "faq_list"],
+      "type": "faq"
+    },
+    {
+      "id": "faq_5",
+      "template": "<h2>أجوبة أسئلتكم حول {topic}</h2>\n<p>وجدنا لكم الإجابات:</p>\n{faq_list}",
+      "variables": ["topic", "faq_list"],
+      "type": "faq"
+    },
+    {
+      "id": "faq_6",
+      "template": "<h2>تساؤلات شائعة عن {topic}</h2>\n<p>هذه الأسئلة يطرحها الكثيرون:</p>\n{faq_list}",
+      "variables": ["topic", "faq_list"],
+      "type": "faq"
+    },
+    {
+      "id": "faq_7",
+      "template": "<h2>دليل الأسئلة والأجوبة - {topic}</h2>\n<p>كل ما تحتاجون معرفته:</p>\n{faq_list}",
+      "variables": ["topic", "faq_list"],
+      "type": "faq"
+    },
+    {
+      "id": "faq_8",
+      "template": "<h2>إجابات مفصلة عن {topic}</h2>\n<p>نقدم لكم إجابات شاملة:</p>\n{faq_list}",
+      "variables": ["topic", "faq_list"],
+      "type": "faq"
+    }
+  ],
+  "questionFormats": [
+    "<h3>س: {question}</h3>\n<p>ج: {answer}</p>",
+    "<div class=\"faq-item\">\n<h3>{question}</h3>\n<p>{answer}</p>\n</div>",
+    "<details>\n<summary>{question}</summary>\n<p>{answer}</p>\n</details>"
+  ]
+}

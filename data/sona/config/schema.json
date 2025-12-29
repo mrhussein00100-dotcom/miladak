@@ -1,0 +1,1 @@
+{"title":"SONA Schema","type":"object","properties":{"templates":{"type":"object"},"knowledge":{"type":"object"},"synonyms":{"type":"object"}}}

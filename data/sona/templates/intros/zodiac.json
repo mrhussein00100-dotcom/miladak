@@ -1,0 +1,110 @@
+{
+  "category": "zodiac",
+  "templates": [
+    {
+      "id": "intro_zodiac_1",
+      "template": "عالم الأبراج مليء بالأسرار والمفاجآت! في هذا المقال، نكشف لكم كل شيء عن {topic}.",
+      "variables": ["topic"],
+      "tone": "mysterious",
+      "length": "short"
+    },
+    {
+      "id": "intro_zodiac_2",
+      "template": "هل تريدون معرفة المزيد عن {topic}؟ اكتشفوا معنا صفاته وخصائصه وتوافقه مع الأبراج الأخرى.",
+      "variables": ["topic"],
+      "tone": "curious",
+      "length": "short"
+    },
+    {
+      "id": "intro_zodiac_3",
+      "template": "الأبراج الفلكية تكشف الكثير عن شخصياتنا. تعرفوا على {topic} وما يميز مواليده.",
+      "variables": ["topic"],
+      "tone": "informative",
+      "length": "short"
+    },
+    {
+      "id": "intro_zodiac_4",
+      "template": "مرحباً بكم في عالم الفلك والأبراج! اليوم نتحدث عن {topic} ونكشف أسراره المثيرة.",
+      "variables": ["topic"],
+      "tone": "welcoming",
+      "length": "short"
+    },
+    {
+      "id": "intro_zodiac_5",
+      "template": "هل أنتم من مواليد {topic}؟ أو تريدون فهم شخص عزيز عليكم؟ هذا المقال لكم!",
+      "variables": ["topic"],
+      "tone": "personal",
+      "length": "short"
+    },
+    {
+      "id": "intro_zodiac_6",
+      "template": "النجوم والكواكب تؤثر في حياتنا بطرق مدهشة. اكتشفوا كيف يؤثر {topic} على شخصيتكم.",
+      "variables": ["topic"],
+      "tone": "mystical",
+      "length": "medium"
+    },
+    {
+      "id": "intro_zodiac_7",
+      "template": "في رحلتنا عبر الأبراج الفلكية، نتوقف اليوم عند {topic}. تعرفوا على كل ما يميزه!",
+      "variables": ["topic"],
+      "tone": "narrative",
+      "length": "short"
+    },
+    {
+      "id": "intro_zodiac_8",
+      "template": "كل برج له طاقته الخاصة وصفاته المميزة. اكتشفوا معنا عالم {topic} الساحر.",
+      "variables": ["topic"],
+      "tone": "enchanting",
+      "length": "short"
+    },
+    {
+      "id": "intro_zodiac_9",
+      "template": "هل تساءلتم يوماً لماذا تتصرفون بطريقة معينة؟ قد يكون {topic} هو الجواب! تابعوا القراءة.",
+      "variables": ["topic"],
+      "tone": "intriguing",
+      "length": "medium"
+    },
+    {
+      "id": "intro_zodiac_10",
+      "template": "من موقع ميلادك، نقدم لكم دليلاً شاملاً عن {topic}. كل ما تريدون معرفته في مكان واحد!",
+      "variables": ["topic"],
+      "tone": "comprehensive",
+      "length": "short"
+    },
+    {
+      "id": "intro_zodiac_11",
+      "template": "الأبراج ليست مجرد تنبؤات، إنها نافذة لفهم الذات. تعمقوا معنا في {topic}.",
+      "variables": ["topic"],
+      "tone": "philosophical",
+      "length": "short"
+    },
+    {
+      "id": "intro_zodiac_12",
+      "template": "هل تبحثون عن معلومات دقيقة عن {topic}؟ جمعنا لكم كل ما تحتاجون معرفته هنا!",
+      "variables": ["topic"],
+      "tone": "helpful",
+      "length": "short"
+    },
+    {
+      "id": "intro_zodiac_13",
+      "template": "عالم الأبراج واسع ومثير! في هذا المقال، نركز على {topic} ونكشف أسراره.",
+      "variables": ["topic"],
+      "tone": "exciting",
+      "length": "short"
+    },
+    {
+      "id": "intro_zodiac_14",
+      "template": "كل برج يحمل طاقة فريدة من نوعها. اكتشفوا ما يجعل {topic} مميزاً عن غيره.",
+      "variables": ["topic"],
+      "tone": "unique",
+      "length": "short"
+    },
+    {
+      "id": "intro_zodiac_15",
+      "template": "النجوم تتحدث! تعرفوا على رسائل {topic} وما تكشفه عن شخصيتكم ومستقبلكم.",
+      "variables": ["topic"],
+      "tone": "mystical",
+      "length": "medium"
+    }
+  ]
+}

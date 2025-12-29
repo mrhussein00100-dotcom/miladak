@@ -1,0 +1,43 @@
+
+
+ما تم نقله:
+1. قاعدة البيانات (SQLite) - تم دمجها كجداول ✅
+نقلت جميع البيانات كـ جداول في قاعدة بيانات SQLite واحدة (database.sqlite):
+
+15 جدول مع 4,115 سجل
+articles, tools, categories, years, chinese_zodiac, daily_events, إلخ...
+2. ملفات الكود - نُسخت كملفات ✅
+ملفات lib/ (24 ملف)
+ملفات calculations/ (16 ملف)
+ملفات components/
+ملفات types/
+
+
+
+
+
+
+
+أيهما أفضل للرفع على Vercel؟
+الطريقة الحالية (SQLite) هي الأفضل لحالتك لأن:
+
+| الميزة | SQLite (الحالي) | ملفات JSON منفصلة | |--------|----------------|-------------------| | سهولة الرفع | ✅ ملف واحد | ❌ ملفات متعددة | | الأداء | ✅ سريع جداً | ⚠️ أبطأ | | الاستعلامات | ✅ SQL قوي | ❌ محدود | | التحديث | ✅ سهل | ⚠️ معقد | | حجم الملفات | ✅ صغير | ❌ أكبر |
+
+⚠️ ملاحظة مهمة للرفع على Vercel:
+SQLite يعمل في وضع القراءة فقط على Vercel (لأن الملفات read-only). هذا مناسب لموقعك لأن:
+
+المقالات والأدوات لا تتغير كثيراً
+البيانات ثابتة نسبياً
+إذا احتجت كتابة بيانات (مثل إضافة مقالات من لوحة التحكم):
+يمكنك استخدام:
+
+Vercel Postgres (مجاني حتى حد معين)
+Turso (SQLite سحابي)
+PlanetScale (MySQL)
+
+
+
+
+DATABASE_URL="postgres://66107bc5cceda36216a96956f61e069a47e4154e935b0a6166e37df394d4ac64:sk_ddn2SyAaNJotrrTIL_j2h@db.prisma.io:5432/postgres?sslmode=require"
+POSTGRES_URL="postgres://66107bc5cceda36216a96956f61e069a47e4154e935b0a6166e37df394d4ac64:sk_ddn2SyAaNJotrrTIL_j2h@db.prisma.io:5432/postgres?sslmode=require"
+PRISMA_DATABASE_URL="prisma+postgres://accelerate.prisma-data.net/?api_key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqd3RfaWQiOjEsInNlY3VyZV9rZXkiOiJza19kZG4yU3lBYU5Kb3RyclRJTF9qMmgiLCJhcGlfa2V5IjoiMDFLQ05HUjU2NEs3WlZaTkdHSDlSQjRYRkMiLCJ0ZW5hbnRfaWQiOiI2NjEwN2JjNWNjZWRhMzYyMTZhOTY5NTZmNjFlMDY5YTQ3ZTQxNTRlOTM1YjBhNjE2NmUzN2RmMzk0ZDRhYzY0IiwiaW50ZXJuYWxfc2VjcmV0IjoiYmEyMjI4NWQtNTQ0ZS00M2MxLTgxYjEtOTlhNmE4MzY0MDVhIn0.vsUOQlB0KJe_xJrdtk5qAjlF9WFH89DEIZaZQTnVKzw"

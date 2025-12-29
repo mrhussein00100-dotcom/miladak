@@ -1,0 +1,79 @@
+# Dependencies
+/node_modules
+/.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# Testing
+/coverage
+
+# Next.js
+/.next/
+/out/
+
+# Production
+/build
+
+# Misc
+.DS_Store
+*.pem
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Local env files
+.env*.local
+.env
+.env.production
+
+# Vercel
+.vercel
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Database (SQLite - للتطوير المحلي فقط)
+*.sqlite
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+database.sqlite
+*.db
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+
+# Logs
+/logs/
+*.log
+
+# Backup files
+backup/
+*.backup
+*.bak
+
+# Temporary files
+tmp/
+temp/
+.tmp
+
+# PowerShell execution policy
+*.ps1.bak
+# API Keys (sensitive)
+api-keys-local.txt
+add-api-keys.ps1
+add-env-vars.ps1
+# Vercel Environment Variables (sensitive)
+VERCEL_ENV_VARS.txt
+# API Keys Reference (local only)
+API_KEYS_REFERENCE.txt
+
+# دليل المشروع الشامل (معلومات حساسة)
+دليل_المشروع_الشامل.md

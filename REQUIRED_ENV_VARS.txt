@@ -1,0 +1,22 @@
+# متغيرات البيئة المطلوبة للإنتاج
+
+# قاعدة البيانات PostgreSQL
+POSTGRES_URL="postgres://default:xxx@xxx-pooler.us-east-1.postgres.vercel-storage.com/verceldb"
+DATABASE_URL="postgres://default:xxx@xxx-pooler.us-east-1.postgres.vercel-storage.com/verceldb"
+
+# مفاتيح AI (مطلوبة)
+GROQ_API_KEY="gsk_xxx"
+GEMINI_API_KEY="AIzaSyxxx"
+
+# مفاتيح AI (اختيارية)
+COHERE_API_KEY="xxx"
+HUGGINGFACE_API_KEY="hf_xxx"
+PEXELS_API_KEY="xxx"
+
+# الأمان
+NEXTAUTH_SECRET="your-super-secret-key-here"
+AUTH_SECRET="miladak-production-secret-2025"
+
+# معلومات الموقع
+NEXT_PUBLIC_APP_URL="https://miladak.com"
+NEXT_PUBLIC_SITE_URL="https://miladak.com"

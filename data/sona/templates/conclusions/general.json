@@ -1,0 +1,95 @@
+{
+  "category": "general",
+  "templates": [
+    {
+      "id": "conclusion_1",
+      "template": "<h2>الخلاصة</h2>\n<p>في الختام، نأمل أن يكون هذا المقال قد أفادكم في فهم {topic}. شاركوا المقال مع أصدقائكم وأحبائكم!</p>",
+      "variables": ["topic"],
+      "tone": "friendly"
+    },
+    {
+      "id": "conclusion_2",
+      "template": "<h2>كلمة أخيرة</h2>\n<p>وصلنا لنهاية مقالنا عن {topic}. نتمنى أن تكونوا قد استفدتم من المعلومات المقدمة. لا تترددوا في ترك تعليقاتكم!</p>",
+      "variables": ["topic"],
+      "tone": "engaging"
+    },
+    {
+      "id": "conclusion_3",
+      "template": "<h2>خاتمة</h2>\n<p>هكذا نكون قد استعرضنا أهم جوانب {topic}. نأمل أن تطبقوا ما تعلمتموه في حياتكم اليومية.</p>",
+      "variables": ["topic"],
+      "tone": "practical"
+    },
+    {
+      "id": "conclusion_4",
+      "template": "<h2>في النهاية</h2>\n<p>نشكركم على قراءة هذا المقال عن {topic}. تابعونا للمزيد من المحتوى المفيد والممتع!</p>",
+      "variables": ["topic"],
+      "tone": "thankful"
+    },
+    {
+      "id": "conclusion_5",
+      "template": "<h2>ختاماً</h2>\n<p>قدمنا لكم في هذا المقال كل ما يتعلق بـ{topic}. إذا كانت لديكم أسئلة، لا تترددوا في طرحها في التعليقات.</p>",
+      "variables": ["topic"],
+      "tone": "interactive"
+    },
+    {
+      "id": "conclusion_6",
+      "template": "<h2>الخلاصة</h2>\n<p>نأمل أن يكون هذا الدليل الشامل عن {topic} قد أجاب على جميع تساؤلاتكم. شاركونا آراءكم!</p>",
+      "variables": ["topic"],
+      "tone": "comprehensive"
+    },
+    {
+      "id": "conclusion_7",
+      "template": "<h2>كلمة ختامية</h2>\n<p>وبهذا نختم مقالنا عن {topic}. نتطلع لرؤيتكم في مقالاتنا القادمة!</p>",
+      "variables": ["topic"],
+      "tone": "forward-looking"
+    },
+    {
+      "id": "conclusion_8",
+      "template": "<h2>في الختام</h2>\n<p>استعرضنا معكم {topic} بالتفصيل. نأمل أن تكون المعلومات مفيدة وعملية لكم.</p>",
+      "variables": ["topic"],
+      "tone": "informative"
+    },
+    {
+      "id": "conclusion_9",
+      "template": "<h2>خلاصة القول</h2>\n<p>هذا كل ما تحتاجون معرفته عن {topic}. لا تنسوا مشاركة المقال مع من يهمه الأمر!</p>",
+      "variables": ["topic"],
+      "tone": "sharing"
+    },
+    {
+      "id": "conclusion_10",
+      "template": "<h2>نهاية المقال</h2>\n<p>شكراً لوقتكم في قراءة هذا المقال عن {topic}. نلتقي في مقال جديد قريباً!</p>",
+      "variables": ["topic"],
+      "tone": "grateful"
+    },
+    {
+      "id": "conclusion_11",
+      "template": "<h2>الخاتمة</h2>\n<p>نتمنى أن يكون {topic} أصبح أوضح لكم الآن. استخدموا أدوات ميلادك لمزيد من المعلومات!</p>",
+      "variables": ["topic"],
+      "tone": "promotional"
+    },
+    {
+      "id": "conclusion_12",
+      "template": "<h2>وأخيراً</h2>\n<p>قدمنا لكم كل ما يخص {topic}. نأمل أن تجدوا هذه المعلومات مفيدة في حياتكم.</p>",
+      "variables": ["topic"],
+      "tone": "hopeful"
+    },
+    {
+      "id": "conclusion_13",
+      "template": "<h2>ملخص</h2>\n<p>باختصار، {topic} موضوع مهم يستحق الاهتمام. طبقوا ما تعلمتموه واستمتعوا بالنتائج!</p>",
+      "variables": ["topic"],
+      "tone": "summary"
+    },
+    {
+      "id": "conclusion_14",
+      "template": "<h2>الكلمة الأخيرة</h2>\n<p>نأمل أن يكون هذا المقال عن {topic} قد أضاف لمعرفتكم. تابعوا موقع ميلادك للمزيد!</p>",
+      "variables": ["topic"],
+      "tone": "promotional"
+    },
+    {
+      "id": "conclusion_15",
+      "template": "<h2>في الخاتمة</h2>\n<p>وصلنا لنهاية رحلتنا مع {topic}. نتمنى لكم التوفيق والسعادة دائماً!</p>",
+      "variables": ["topic"],
+      "tone": "warm"
+    }
+  ]
+}

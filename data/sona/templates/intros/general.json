@@ -1,0 +1,110 @@
+{
+  "category": "general",
+  "templates": [
+    {
+      "id": "intro_gen_1",
+      "template": "مرحباً بكم في موقع ميلادك! في هذا المقال الشامل، سنتناول {topic} بالتفصيل، ونقدم لكم معلومات قيمة ونصائح عملية.",
+      "variables": ["topic"],
+      "tone": "friendly",
+      "length": "short"
+    },
+    {
+      "id": "intro_gen_2",
+      "template": "هل تبحثون عن معلومات موثوقة حول {topic}؟ أنتم في المكان الصحيح! سنستعرض معكم كل ما تحتاجون معرفته.",
+      "variables": ["topic"],
+      "tone": "engaging",
+      "length": "short"
+    },
+    {
+      "id": "intro_gen_3",
+      "template": "يسعدنا أن نقدم لكم هذا الدليل الشامل عن {topic}. ستجدون هنا إجابات لجميع أسئلتكم ومعلومات مفيدة تساعدكم.",
+      "variables": ["topic"],
+      "tone": "formal",
+      "length": "short"
+    },
+    {
+      "id": "intro_gen_4",
+      "template": "في عالم مليء بالمعلومات، نقدم لكم مقالاً متميزاً عن {topic}. تابعوا القراءة لاكتشاف حقائق مثيرة ونصائح قيمة.",
+      "variables": ["topic"],
+      "tone": "engaging",
+      "length": "medium"
+    },
+    {
+      "id": "intro_gen_5",
+      "template": "أهلاً وسهلاً بكم في رحلة معرفية ممتعة! اليوم نتحدث عن {topic}، موضوع يهم الكثيرين ويستحق الاهتمام.",
+      "variables": ["topic"],
+      "tone": "friendly",
+      "length": "short"
+    },
+    {
+      "id": "intro_gen_6",
+      "template": "هل سألتم أنفسكم يوماً عن {topic}؟ في هذا المقال، نجيب على جميع تساؤلاتكم ونقدم لكم معلومات شاملة ومفيدة.",
+      "variables": ["topic"],
+      "tone": "engaging",
+      "length": "medium"
+    },
+    {
+      "id": "intro_gen_7",
+      "template": "نرحب بكم في موقع ميلادك، وجهتكم الأولى للمعلومات الموثوقة. اليوم نستكشف معاً {topic} بكل جوانبه.",
+      "variables": ["topic"],
+      "tone": "formal",
+      "length": "short"
+    },
+    {
+      "id": "intro_gen_8",
+      "template": "ما الذي يجعل {topic} موضوعاً مهماً؟ في السطور التالية، نكشف لكم الإجابة ونقدم معلومات قد تفاجئكم!",
+      "variables": ["topic"],
+      "tone": "engaging",
+      "length": "short"
+    },
+    {
+      "id": "intro_gen_9",
+      "template": "إذا كنتم تبحثون عن مصدر موثوق للمعلومات حول {topic}، فقد وصلتم للمكان المناسب. دعونا نبدأ رحلتنا المعرفية!",
+      "variables": ["topic"],
+      "tone": "friendly",
+      "length": "medium"
+    },
+    {
+      "id": "intro_gen_10",
+      "template": "في هذا المقال المميز، نغوص في أعماق {topic} لنقدم لكم فهماً شاملاً وعملياً لهذا الموضوع المهم.",
+      "variables": ["topic"],
+      "tone": "formal",
+      "length": "short"
+    },
+    {
+      "id": "intro_gen_11",
+      "template": "هل أنتم مستعدون لاكتشاف كل شيء عن {topic}؟ أعددنا لكم هذا الدليل الشامل الذي يجيب على جميع أسئلتكم.",
+      "variables": ["topic"],
+      "tone": "engaging",
+      "length": "short"
+    },
+    {
+      "id": "intro_gen_12",
+      "template": "نقدم لكم اليوم مقالاً متكاملاً عن {topic}، حيث جمعنا لكم أهم المعلومات والنصائح في مكان واحد.",
+      "variables": ["topic"],
+      "tone": "friendly",
+      "length": "short"
+    },
+    {
+      "id": "intro_gen_13",
+      "template": "موضوع {topic} من المواضيع التي تستحق الاهتمام والدراسة. في هذا المقال، نلقي الضوء على أهم جوانبه.",
+      "variables": ["topic"],
+      "tone": "formal",
+      "length": "short"
+    },
+    {
+      "id": "intro_gen_14",
+      "template": "تساءل الكثيرون عن {topic}، واليوم نقدم لكم الإجابات الشافية والمعلومات الدقيقة التي تبحثون عنها.",
+      "variables": ["topic"],
+      "tone": "engaging",
+      "length": "medium"
+    },
+    {
+      "id": "intro_gen_15",
+      "template": "مرحباً بكم مجدداً في موقع ميلادك! نواصل تقديم المحتوى المفيد، واليوم نتحدث عن {topic} بشكل مفصل.",
+      "variables": ["topic"],
+      "tone": "friendly",
+      "length": "short"
+    }
+  ]
+}

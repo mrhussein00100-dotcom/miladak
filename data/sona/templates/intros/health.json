@@ -1,0 +1,110 @@
+{
+  "category": "health",
+  "templates": [
+    {
+      "id": "intro_health_1",
+      "template": "صحتكم أولويتنا! في هذا المقال، نقدم لكم معلومات مهمة عن {topic} ونصائح للحفاظ على صحتكم.",
+      "variables": ["topic"],
+      "tone": "caring",
+      "length": "short"
+    },
+    {
+      "id": "intro_health_2",
+      "template": "هل تبحثون عن معلومات صحية موثوقة حول {topic}؟ نقدم لكم دليلاً شاملاً ومفيداً.",
+      "variables": ["topic"],
+      "tone": "informative",
+      "length": "short"
+    },
+    {
+      "id": "intro_health_3",
+      "template": "الصحة نعمة تستحق الاهتمام. تعرفوا معنا على {topic} وكيف تحافظون على صحتكم.",
+      "variables": ["topic"],
+      "tone": "appreciative",
+      "length": "short"
+    },
+    {
+      "id": "intro_health_4",
+      "template": "في عالم مليء بالمعلومات الصحية، نقدم لكم حقائق موثوقة عن {topic}. تابعوا القراءة!",
+      "variables": ["topic"],
+      "tone": "trustworthy",
+      "length": "short"
+    },
+    {
+      "id": "intro_health_5",
+      "template": "صحة الجسم والعقل مترابطة. اكتشفوا معنا كل ما يتعلق بـ{topic} وأهميته لحياتكم.",
+      "variables": ["topic"],
+      "tone": "holistic",
+      "length": "medium"
+    },
+    {
+      "id": "intro_health_6",
+      "template": "نهتم بصحتكم ونقدم لكم معلومات قيمة عن {topic}. اقرأوا واستفيدوا!",
+      "variables": ["topic"],
+      "tone": "caring",
+      "length": "short"
+    },
+    {
+      "id": "intro_health_7",
+      "template": "المعرفة الصحية قوة! تعرفوا على {topic} واتخذوا قرارات صحية أفضل لحياتكم.",
+      "variables": ["topic"],
+      "tone": "empowering",
+      "length": "short"
+    },
+    {
+      "id": "intro_health_8",
+      "template": "هل لديكم أسئلة عن {topic}؟ في هذا المقال، نجيب على تساؤلاتكم ونقدم نصائح عملية.",
+      "variables": ["topic"],
+      "tone": "helpful",
+      "length": "short"
+    },
+    {
+      "id": "intro_health_9",
+      "template": "الوقاية خير من العلاج! تعلموا معنا عن {topic} وكيف تحمون أنفسكم وعائلاتكم.",
+      "variables": ["topic"],
+      "tone": "preventive",
+      "length": "medium"
+    },
+    {
+      "id": "intro_health_10",
+      "template": "من موقع ميلادك، نقدم لكم معلومات صحية موثوقة عن {topic}. صحتكم تهمنا!",
+      "variables": ["topic"],
+      "tone": "professional",
+      "length": "short"
+    },
+    {
+      "id": "intro_health_11",
+      "template": "الاهتمام بالصحة استثمار في المستقبل. اكتشفوا كل ما يتعلق بـ{topic} في هذا المقال.",
+      "variables": ["topic"],
+      "tone": "investment",
+      "length": "short"
+    },
+    {
+      "id": "intro_health_12",
+      "template": "نصائح صحية قيمة تنتظركم! تعرفوا على {topic} وطبقوا ما تتعلمونه في حياتكم اليومية.",
+      "variables": ["topic"],
+      "tone": "practical",
+      "length": "short"
+    },
+    {
+      "id": "intro_health_13",
+      "template": "صحتكم في أيديكم! في هذا المقال عن {topic}، نمنحكم المعرفة لاتخاذ قرارات صحية سليمة.",
+      "variables": ["topic"],
+      "tone": "empowering",
+      "length": "medium"
+    },
+    {
+      "id": "intro_health_14",
+      "template": "هل تريدون فهم {topic} بشكل أفضل؟ نقدم لكم شرحاً مبسطاً ومعلومات مفيدة.",
+      "variables": ["topic"],
+      "tone": "educational",
+      "length": "short"
+    },
+    {
+      "id": "intro_health_15",
+      "template": "الصحة الجيدة أساس الحياة السعيدة. تعمقوا معنا في موضوع {topic} واستفيدوا!",
+      "variables": ["topic"],
+      "tone": "positive",
+      "length": "short"
+    }
+  ]
+}

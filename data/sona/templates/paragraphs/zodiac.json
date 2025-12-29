@@ -1,0 +1,95 @@
+{
+  "category": "zodiac",
+  "templates": [
+    {
+      "id": "zodiac_para_1",
+      "template": "<h2>صفات برج {zodiac_sign}</h2>\n<p>يتميز مواليد برج {zodiac_sign} بصفات فريدة تجعلهم مميزين عن غيرهم.</p>",
+      "variables": ["zodiac_sign"],
+      "type": "traits"
+    },
+    {
+      "id": "zodiac_para_2",
+      "template": "<h2>توافق برج {zodiac_sign}</h2>\n<p>يتوافق برج {zodiac_sign} مع بعض الأبراج أكثر من غيرها في العلاقات العاطفية والصداقة.</p>",
+      "variables": ["zodiac_sign"],
+      "type": "compatibility"
+    },
+    {
+      "id": "zodiac_para_3",
+      "template": "<h2>نقاط قوة برج {zodiac_sign}</h2>\n<p>لكل برج نقاط قوة تميزه. إليك أبرز نقاط قوة برج {zodiac_sign}.</p>",
+      "variables": ["zodiac_sign"],
+      "type": "strengths"
+    },
+    {
+      "id": "zodiac_para_4",
+      "template": "<h2>تحديات برج {zodiac_sign}</h2>\n<p>يواجه مواليد برج {zodiac_sign} بعض التحديات التي يمكنهم التغلب عليها بالوعي.</p>",
+      "variables": ["zodiac_sign"],
+      "type": "challenges"
+    },
+    {
+      "id": "zodiac_para_5",
+      "template": "<h2>الحب والعلاقات لبرج {zodiac_sign}</h2>\n<p>في الحب، يتميز برج {zodiac_sign} بأسلوب خاص في التعبير عن مشاعره.</p>",
+      "variables": ["zodiac_sign"],
+      "type": "love"
+    },
+    {
+      "id": "zodiac_para_6",
+      "template": "<h2>العمل والمهنة لبرج {zodiac_sign}</h2>\n<p>يتفوق مواليد برج {zodiac_sign} في مجالات عمل معينة تناسب شخصيتهم.</p>",
+      "variables": ["zodiac_sign"],
+      "type": "career"
+    },
+    {
+      "id": "zodiac_para_7",
+      "template": "<h2>الصحة لبرج {zodiac_sign}</h2>\n<p>يجب على مواليد برج {zodiac_sign} الاهتمام ببعض الجوانب الصحية الخاصة بهم.</p>",
+      "variables": ["zodiac_sign"],
+      "type": "health"
+    },
+    {
+      "id": "zodiac_para_8",
+      "template": "<h2>حجر الحظ لبرج {zodiac_sign}</h2>\n<p>لكل برج حجر كريم يجلب له الحظ والطاقة الإيجابية.</p>",
+      "variables": ["zodiac_sign"],
+      "type": "lucky_stone"
+    },
+    {
+      "id": "zodiac_para_9",
+      "template": "<h2>الكوكب الحاكم لبرج {zodiac_sign}</h2>\n<p>يتأثر برج {zodiac_sign} بكوكبه الحاكم الذي يمنحه صفاته المميزة.</p>",
+      "variables": ["zodiac_sign"],
+      "type": "ruling_planet"
+    },
+    {
+      "id": "zodiac_para_10",
+      "template": "<h2>عنصر برج {zodiac_sign}</h2>\n<p>ينتمي برج {zodiac_sign} لعنصر معين يؤثر على شخصيته وطباعه.</p>",
+      "variables": ["zodiac_sign"],
+      "type": "element"
+    },
+    {
+      "id": "zodiac_para_11",
+      "template": "<h2>نصائح لمواليد برج {zodiac_sign}</h2>\n<p>إليك بعض النصائح التي تساعد مواليد برج {zodiac_sign} على تحقيق التوازن.</p>",
+      "variables": ["zodiac_sign"],
+      "type": "tips"
+    },
+    {
+      "id": "zodiac_para_12",
+      "template": "<h2>مشاهير برج {zodiac_sign}</h2>\n<p>العديد من المشاهير ينتمون لبرج {zodiac_sign}، مما يعكس صفات هذا البرج.</p>",
+      "variables": ["zodiac_sign"],
+      "type": "celebrities"
+    },
+    {
+      "id": "zodiac_para_13",
+      "template": "<h2>الأبراج الفلكية وتأثيرها</h2>\n<p>تؤثر الأبراج الفلكية على شخصياتنا وقراراتنا بطرق متعددة.</p>",
+      "variables": [],
+      "type": "general_astrology"
+    },
+    {
+      "id": "zodiac_para_14",
+      "template": "<h2>تاريخ علم الأبراج</h2>\n<p>يعود علم الأبراج إلى آلاف السنين، وقد تطور عبر الحضارات المختلفة.</p>",
+      "variables": [],
+      "type": "history"
+    },
+    {
+      "id": "zodiac_para_15",
+      "template": "<h2>كيف تعرف برجك؟</h2>\n<p>يتحدد برجك الفلكي بناءً على تاريخ ميلادك. إليك كيفية معرفة برجك.</p>",
+      "variables": [],
+      "type": "how_to"
+    }
+  ]
+}

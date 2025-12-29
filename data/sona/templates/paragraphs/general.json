@@ -1,0 +1,125 @@
+{
+  "category": "general",
+  "templates": [
+    {
+      "id": "gen_para_1",
+      "template": "<h2>مقدمة عن {topic}</h2>\n<p>{topic} من المواضيع التي تهم الكثيرين في عالمنا اليوم. دعونا نستكشف هذا الموضوع معاً ونتعرف على أهم جوانبه.</p>",
+      "variables": ["topic"],
+      "type": "introduction"
+    },
+    {
+      "id": "gen_para_2",
+      "template": "<h2>أهمية {topic}</h2>\n<p>لا يمكن إنكار أهمية {topic} في حياتنا اليومية. فهو يؤثر على العديد من جوانب حياتنا بطرق قد لا ندركها.</p>",
+      "variables": ["topic"],
+      "type": "importance"
+    },
+    {
+      "id": "gen_para_3",
+      "template": "<h2>تاريخ {topic}</h2>\n<p>يعود تاريخ {topic} إلى عصور قديمة، حيث اهتم به الإنسان منذ فجر التاريخ. وقد تطور فهمنا له عبر الزمن.</p>",
+      "variables": ["topic"],
+      "type": "history"
+    },
+    {
+      "id": "gen_para_4",
+      "template": "<h2>فوائد {topic}</h2>\n<p>هناك العديد من الفوائد المرتبطة بـ{topic}. من أبرزها تحسين جودة الحياة وزيادة الوعي والمعرفة.</p>",
+      "variables": ["topic"],
+      "type": "benefits"
+    },
+    {
+      "id": "gen_para_5",
+      "template": "<h2>تحديات {topic}</h2>\n<p>رغم الفوائد الكثيرة، يواجه {topic} بعض التحديات التي يجب التعامل معها بحكمة ووعي.</p>",
+      "variables": ["topic"],
+      "type": "challenges"
+    },
+    {
+      "id": "gen_para_6",
+      "template": "<h2>مستقبل {topic}</h2>\n<p>يبدو مستقبل {topic} واعداً، مع التطورات المستمرة والاهتمام المتزايد من مختلف الجهات.</p>",
+      "variables": ["topic"],
+      "type": "future"
+    },
+    {
+      "id": "gen_para_7",
+      "template": "<h2>كيف يؤثر {topic} علينا؟</h2>\n<p>يؤثر {topic} على حياتنا بطرق متعددة، سواء على المستوى الشخصي أو الاجتماعي أو المهني.</p>",
+      "variables": ["topic"],
+      "type": "impact"
+    },
+    {
+      "id": "gen_para_8",
+      "template": "<h2>أنواع {topic}</h2>\n<p>يتنوع {topic} ويتعدد، ولكل نوع خصائصه ومميزاته التي تجعله فريداً.</p>",
+      "variables": ["topic"],
+      "type": "types"
+    },
+    {
+      "id": "gen_para_9",
+      "template": "<h2>خصائص {topic}</h2>\n<p>يتميز {topic} بعدة خصائص تجعله موضوعاً مثيراً للاهتمام والدراسة.</p>",
+      "variables": ["topic"],
+      "type": "characteristics"
+    },
+    {
+      "id": "gen_para_10",
+      "template": "<h2>علاقة {topic} بحياتنا</h2>\n<p>ترتبط حياتنا اليومية ارتباطاً وثيقاً بـ{topic}، وفهم هذه العلاقة يساعدنا على التعامل معه بشكل أفضل.</p>",
+      "variables": ["topic"],
+      "type": "relation"
+    },
+    {
+      "id": "gen_para_11",
+      "template": "<h2>دراسات حول {topic}</h2>\n<p>أجريت العديد من الدراسات والأبحاث حول {topic}، وقد كشفت نتائج مثيرة للاهتمام.</p>",
+      "variables": ["topic"],
+      "type": "studies"
+    },
+    {
+      "id": "gen_para_12",
+      "template": "<h2>آراء الخبراء في {topic}</h2>\n<p>يرى الخبراء والمتخصصون أن {topic} يستحق المزيد من الاهتمام والدراسة.</p>",
+      "variables": ["topic"],
+      "type": "expert_opinions"
+    },
+    {
+      "id": "gen_para_13",
+      "template": "<h2>تجارب مع {topic}</h2>\n<p>شارك الكثيرون تجاربهم مع {topic}، وكانت معظمها إيجابية ومفيدة.</p>",
+      "variables": ["topic"],
+      "type": "experiences"
+    },
+    {
+      "id": "gen_para_14",
+      "template": "<h2>نظرة عامة على {topic}</h2>\n<p>لفهم {topic} بشكل شامل، يجب النظر إليه من زوايا متعددة ومختلفة.</p>",
+      "variables": ["topic"],
+      "type": "overview"
+    },
+    {
+      "id": "gen_para_15",
+      "template": "<h2>جوانب {topic}</h2>\n<p>يتضمن {topic} جوانب متعددة، كل منها يستحق الدراسة والتأمل.</p>",
+      "variables": ["topic"],
+      "type": "aspects"
+    },
+    {
+      "id": "gen_para_16",
+      "template": "<h2>مفاهيم أساسية في {topic}</h2>\n<p>هناك مفاهيم أساسية يجب فهمها للتعمق في {topic} بشكل صحيح.</p>",
+      "variables": ["topic"],
+      "type": "concepts"
+    },
+    {
+      "id": "gen_para_17",
+      "template": "<h2>تطبيقات {topic}</h2>\n<p>يمكن تطبيق ما نتعلمه عن {topic} في مجالات متعددة من حياتنا.</p>",
+      "variables": ["topic"],
+      "type": "applications"
+    },
+    {
+      "id": "gen_para_18",
+      "template": "<h2>أسئلة شائعة عن {topic}</h2>\n<p>يتساءل الكثيرون عن {topic}، وهنا نجيب على أبرز الأسئلة الشائعة.</p>",
+      "variables": ["topic"],
+      "type": "faq_intro"
+    },
+    {
+      "id": "gen_para_19",
+      "template": "<h2>حقائق وأرقام عن {topic}</h2>\n<p>تكشف الإحصائيات والأرقام جوانب مهمة عن {topic} قد لا نلاحظها.</p>",
+      "variables": ["topic"],
+      "type": "statistics"
+    },
+    {
+      "id": "gen_para_20",
+      "template": "<h2>مقارنات في {topic}</h2>\n<p>من خلال المقارنة، يمكننا فهم {topic} بشكل أعمق وأوضح.</p>",
+      "variables": ["topic"],
+      "type": "comparison"
+    }
+  ]
+}
