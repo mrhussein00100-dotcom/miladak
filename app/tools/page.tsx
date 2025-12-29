@@ -8,8 +8,9 @@ import KeywordsSection from '@/components/tools/KeywordsSection';
 import ToolRandomArticles from '@/components/tools/ToolRandomArticles';
 import type { Tool, ToolCategory } from '@/types';
 
-// إعادة التحقق كل 60 ثانية لتحديث البيانات من قاعدة البيانات
-export const revalidate = 60;
+// جعل الصفحة ديناميكية بالكامل لتحميل البيانات الجديدة دائماً
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 function toBoolean(value: unknown): boolean {
   return (
