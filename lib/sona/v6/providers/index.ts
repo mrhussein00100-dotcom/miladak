@@ -30,8 +30,19 @@ const PROVIDERS = [
   openaiProvider, // الأغلى
 ];
 
+// إعداد لتعطيل الـ fallback (يمكن تغييره من الخارج)
+let enableFallback = false; // تم تعطيل الـ fallback افتراضياً
+
 /**
- * توليد محتوى مع fallback تلقائي
+ * تعيين حالة الـ fallback
+ */
+export function setFallbackEnabled(enabled: boolean): void {
+  enableFallback = enabled;
+  console.log(`🔧 SONA v6: Fallback ${enabled ? 'مفعّل' : 'معطّل'}`);
+}
+
+/**
+ * توليد محتوى مع fallback تلقائي (إذا كان مفعّلاً)
  */
 export async function generate(
   prompt: string,
@@ -41,11 +52,22 @@ export async function generate(
   const providers = getOrderedProviders(preferredProvider);
   const errors: string[] = [];
 
-  for (const provider of providers) {
+  // إذا كان الـ fallback معطّلاً، استخدم المزود الأول فقط
+  const providersToTry = enableFallback ? providers : [providers[0]];
+
+  for (const provider of providersToTry) {
     try {
       const isAvailable = await provider.isAvailable();
       if (!isAvailable) {
         errors.push(`${provider.name}: not available`);
+        if (!enableFallback) {
+          throw new SONAError(
+            `${provider.name} غير متاح`,
+            'PROVIDER_UNAVAILABLE',
+            provider.name,
+            false
+          );
+        }
         continue;
       }
 
@@ -56,6 +78,16 @@ export async function generate(
     } catch (error: any) {
       errors.push(`${provider.name}: ${error.message}`);
       console.warn(`⚠️ SONA v6: فشل ${provider.name}:`, error.message);
+
+      // إذا كان الـ fallback معطّلاً، ارمِ الخطأ مباشرة
+      if (!enableFallback) {
+        throw new SONAError(
+          `فشل ${provider.name}: ${error.message}`,
+          'ALL_PROVIDERS_FAILED',
+          provider.name,
+          false
+        );
+      }
     }
   }
 
@@ -160,4 +192,5 @@ export default {
   enhance,
   evaluateQuality,
   getAvailableProviders,
+  setFallbackEnabled,
 };

@@ -7,37 +7,22 @@ import { AIProviderName, AIProviderResponse } from '../types';
 
 const GEMINI_API_URL =
   'https://generativelanguage.googleapis.com/v1beta/models';
-// قائمة شاملة جداً من نماذج Gemini - ديسمبر 2025
-const DEFAULT_MODEL = 'gemini-1.5-flash';
+// قائمة محدثة من نماذج Gemini - ديسمبر 2025
+// النماذج مرتبة حسب الأولوية: الأحدث والأكثر استقراراً أولاً
+const DEFAULT_MODEL = 'gemini-2.5-flash';
 const FALLBACK_MODELS = [
-  // نماذج Flash (الأسرع والأكثر استقراراً)
+  // نماذج 2.5 الجديدة (الأحدث والأكثر استقراراً)
+  'gemini-2.5-pro',
+  'gemini-2.5-flash-8b',
+  // نماذج 2.0
+  'gemini-2.0-flash',
+  'gemini-2.0-flash-lite',
+  'gemini-2.0-flash-exp',
+  // نماذج 1.5 (للتوافق)
+  'gemini-1.5-flash',
   'gemini-1.5-flash-latest',
-  'gemini-1.5-flash-001',
-  'gemini-1.5-flash-002',
-  'gemini-1.5-flash-8b',
-  'gemini-1.5-flash-8b-001',
-  'gemini-1.5-flash-8b-latest',
-  // نماذج Pro (أقوى)
   'gemini-1.5-pro',
   'gemini-1.5-pro-latest',
-  'gemini-1.5-pro-001',
-  'gemini-1.5-pro-002',
-  // نماذج 2.0 التجريبية
-  'gemini-2.0-flash-exp',
-  'gemini-2.0-flash',
-  'gemini-exp-1206',
-  'gemini-exp-1121',
-  // نماذج 1.0 القديمة (أكثر استقراراً)
-  'gemini-pro',
-  'gemini-1.0-pro',
-  'gemini-1.0-pro-001',
-  'gemini-1.0-pro-002',
-  'gemini-1.0-pro-latest',
-  'gemini-1.0-pro-vision-latest',
-  // نماذج PaLM القديمة (للتوافق)
-  'text-bison-001',
-  'text-bison-002',
-  'chat-bison-001',
 ];
 
 export interface GeminiOptions {
