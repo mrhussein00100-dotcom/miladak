@@ -228,17 +228,17 @@ export async function generateArticle(
     providers = [request.provider];
     console.log(`🔧 [DEBUG] مزود محلي - بدون fallback`);
   } else if (request.provider === 'gemini') {
-    // Gemini: جرب Gemini فقط بدون fallback (تم تعديله)
-    providers = ['gemini'];
-    console.log('🔧 [DEBUG] Gemini فقط - بدون fallback');
+    // Gemini: جرب Gemini أولاً ثم Groq كـ fallback (بسبب حدود الاستخدام المجاني)
+    providers = ['gemini', 'groq'];
+    console.log('🔧 [DEBUG] Gemini مع Groq كـ fallback');
   } else if (request.provider === 'groq') {
-    // Groq: جرب Groq فقط بدون fallback
-    providers = ['groq'];
-    console.log('🔧 [DEBUG] إجبار استخدام Groq فقط');
+    // Groq: جرب Groq أولاً ثم Gemini كـ fallback
+    providers = ['groq', 'gemini'];
+    console.log('🔧 [DEBUG] Groq مع Gemini كـ fallback');
   } else {
-    // باقي المزودين: المزود المطلوب فقط (تم تعديله - بدون fallback)
-    providers = [request.provider];
-    console.log(`🔧 [DEBUG] استخدام ${request.provider} فقط`);
+    // باقي المزودين: المزود المطلوب مع fallback
+    providers = [request.provider, 'groq', 'gemini'];
+    console.log(`🔧 [DEBUG] استخدام ${request.provider} مع fallback`);
   }
 
   console.log(`📋 [DEBUG] قائمة المزودين النهائية: [${providers.join(' → ')}]`);

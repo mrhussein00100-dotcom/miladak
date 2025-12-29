@@ -241,12 +241,29 @@ ${keywordsText}
           const asJson = await response.json();
           errText = JSON.stringify(asJson);
           console.error(`❌ Gemini ${model} Error Response:`, errText);
+
+          // التحقق من تجاوز الحصة
+          if (response.status === 429) {
+            const quotaError = asJson?.error?.message || '';
+            if (
+              quotaError.includes('quota') ||
+              quotaError.includes('exceeded')
+            ) {
+              console.warn(
+                `⚠️ Gemini ${model}: تجاوز حصة الاستخدام المجاني - سيتم استخدام مزود بديل`
+              );
+            }
+          }
         } catch {}
         lastError = JSON.stringify({
           provider: 'gemini',
           model,
           http_status: response.status,
           error: errText,
+          hint:
+            response.status === 429
+              ? 'تجاوز حصة الاستخدام المجاني - جرب Groq بدلاً من ذلك'
+              : undefined,
         });
         console.warn(`⚠️ Gemini ${model} فشل: HTTP ${response.status}`);
         continue;
