@@ -65,13 +65,8 @@ export async function validateGeminiApiKey(
   }
 }
 
-// متغير لتخزين حالة التحقق (cache)
-let apiValidationCache: {
-  valid: boolean;
-  error?: string;
-  timestamp: number;
-} | null = null;
-const CACHE_DURATION = 5 * 60 * 1000; // 5 دقائق
+// تم إزالة الـ cache لأنه كان يسبب مشاكل
+// الآن كل طلب يتم التحقق منه مباشرة مثل SONA
 
 export interface GeminiGenerationRequest {
   topic: string;
@@ -162,33 +157,9 @@ export async function generateArticle(
     throw new Error('Gemini API key is empty or not configured');
   }
 
-  // التحقق من صحة المفتاح (مع cache)
-  const now = Date.now();
-  if (
-    !apiValidationCache ||
-    now - apiValidationCache.timestamp > CACHE_DURATION
-  ) {
-    console.log('🔍 Gemini: التحقق من صحة مفتاح API...');
-    const validation = await validateGeminiApiKey(apiKey);
-    apiValidationCache = {
-      valid: validation.valid,
-      error: validation.error,
-      timestamp: now,
-    };
-
-    if (!validation.valid) {
-      console.error(`❌ Gemini API غير صالح: ${validation.error}`);
-      throw new Error(
-        `GEMINI_API_ERROR: ${validation.error || 'مفتاح API غير صالح'}`
-      );
-    }
-    console.log('✅ Gemini: مفتاح API صالح');
-  } else if (!apiValidationCache.valid) {
-    // استخدام النتيجة المخزنة
-    throw new Error(
-      `GEMINI_API_ERROR: ${apiValidationCache.error || 'مفتاح API غير صالح'}`
-    );
-  }
+  // لا نتحقق من المفتاح مسبقاً - نترك الـ API يتعامل مع الأخطاء مباشرة
+  // هذا يتوافق مع طريقة عمل SONA التي تعمل بنجاح
+  console.log('✅ Gemini: مفتاح API موجود، سيتم التحقق أثناء الطلب');
 
   const wordCount = getWordCount(request.length);
   const styleDesc = getStyleDescription(request.style || 'formal');
