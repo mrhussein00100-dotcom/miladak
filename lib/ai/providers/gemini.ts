@@ -2,6 +2,7 @@
  * مزود Gemini API للذكاء الاصطناعي
  * مجاني ويدعم اللغة العربية
  * تم التحديث: ديسمبر 2025
+ * يدعم مفاتيح API متعددة مع التبديل التلقائي عند انتهاء الحصة
  */
 
 // النموذج الافتراضي - تم التحديث ديسمبر 2025
@@ -16,6 +17,54 @@ const FALLBACK_MODELS = [
   'gemini-2.0-flash',
   'gemini-2.0-flash-lite',
 ];
+
+// الحصول على جميع مفاتيح Gemini API المتاحة
+function getAllGeminiApiKeys(): string[] {
+  const keys: string[] = [];
+
+  // المفتاح الأساسي
+  const primaryKey =
+    process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_API_KEY;
+  if (primaryKey) keys.push(primaryKey);
+
+  // المفاتيح الإضافية (GEMINI_API_KEY_2, GEMINI_API_KEY_3, ...)
+  for (let i = 2; i <= 10; i++) {
+    const key = process.env[`GEMINI_API_KEY_${i}`];
+    if (key) keys.push(key);
+  }
+
+  return keys;
+}
+
+// تتبع المفاتيح المستنفدة مؤقتاً (في الذاكرة)
+const exhaustedKeys: Map<string, number> = new Map();
+const EXHAUSTION_TIMEOUT = 60 * 60 * 1000; // ساعة واحدة
+
+// التحقق مما إذا كان المفتاح مستنفداً
+function isKeyExhausted(key: string): boolean {
+  const exhaustedAt = exhaustedKeys.get(key);
+  if (!exhaustedAt) return false;
+
+  // إذا مر أكثر من ساعة، أعد تفعيل المفتاح
+  if (Date.now() - exhaustedAt > EXHAUSTION_TIMEOUT) {
+    exhaustedKeys.delete(key);
+    return false;
+  }
+  return true;
+}
+
+// تحديد المفتاح كمستنفد
+function markKeyAsExhausted(key: string): void {
+  exhaustedKeys.set(key, Date.now());
+  console.log(
+    `⚠️ Gemini: تم تحديد المفتاح كمستنفد (${key.substring(0, 8)}...)`
+  );
+}
+
+// الحصول على المفاتيح المتاحة (غير المستنفدة)
+function getAvailableApiKeys(): string[] {
+  return getAllGeminiApiKeys().filter((key) => !isKeyExhausted(key));
+}
 
 // دالة للتحقق من صحة مفتاح Gemini API
 export async function validateGeminiApiKey(
@@ -131,35 +180,32 @@ function getStyleDescription(style: string): string {
   }
 }
 
-// توليد مقال باستخدام Gemini
+// توليد مقال باستخدام Gemini مع دعم مفاتيح API متعددة
 export async function generateArticle(
   request: GeminiGenerationRequest
 ): Promise<GeminiGenerationResponse> {
   const startTime = Date.now();
 
-  let apiKey: string;
-  try {
-    apiKey = await import('@/lib/config/api-keys').then((module) =>
-      module.getApiKey('gemini')
-    );
-    console.log(
-      `🔑 Gemini generateArticle: API Key loaded: ${
-        apiKey ? 'YES (length: ' + apiKey.length + ')' : 'NO'
-      }`
-    );
-  } catch (error: any) {
-    console.error('❌ Gemini: خطأ في الحصول على مفتاح API:', error.message);
-    throw new Error(error.message);
+  // الحصول على جميع المفاتيح المتاحة (غير المستنفدة)
+  const availableKeys = getAvailableApiKeys();
+  const allKeys = getAllGeminiApiKeys();
+
+  console.log(
+    `🔑 Gemini: ${allKeys.length} مفتاح متاح، ${availableKeys.length} غير مستنفد`
+  );
+
+  if (availableKeys.length === 0) {
+    if (allKeys.length === 0) {
+      throw new Error(
+        'لم يتم تكوين أي مفتاح Gemini API. يرجى إضافة GEMINI_API_KEY في متغيرات البيئة.'
+      );
+    }
+    // إذا كانت جميع المفاتيح مستنفدة، أعد تعيينها وحاول مرة أخرى
+    console.warn('⚠️ جميع مفاتيح Gemini مستنفدة، سيتم إعادة المحاولة...');
+    exhaustedKeys.clear();
   }
 
-  if (!apiKey) {
-    console.error('❌ Gemini: مفتاح API فارغ!');
-    throw new Error('Gemini API key is empty or not configured');
-  }
-
-  // لا نتحقق من المفتاح مسبقاً - نترك الـ API يتعامل مع الأخطاء مباشرة
-  // هذا يتوافق مع طريقة عمل SONA التي تعمل بنجاح
-  console.log('✅ Gemini: مفتاح API موجود، سيتم التحقق أثناء الطلب');
+  const keysToTry = availableKeys.length > 0 ? availableKeys : allKeys;
 
   const wordCount = getWordCount(request.length);
   const styleDesc = getStyleDescription(request.style || 'formal');
@@ -208,112 +254,122 @@ ${keywordsText}
   let aiResponse = '';
   let attemptedModels: string[] = [];
   let successfulModel = '';
+  let successfulKey = '';
 
-  console.log(`🔍 Gemini: سيتم تجربة ${models.length} نموذج...`);
+  console.log(
+    `🔍 Gemini: سيتم تجربة ${keysToTry.length} مفتاح × ${models.length} نموذج...`
+  );
 
-  for (const model of models) {
-    attemptedModels.push(model);
-    try {
-      console.log(
-        `🔄 Gemini: محاولة النموذج ${model} (${attemptedModels.length}/${models.length})...`
-      );
+  // حلقة على المفاتيح
+  keyLoop: for (const apiKey of keysToTry) {
+    const keyPrefix = apiKey.substring(0, 8);
+    console.log(`\n🔑 تجربة المفتاح: ${keyPrefix}...`);
 
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-      console.log(`📡 Gemini URL: ${url.replace(apiKey, 'API_KEY_HIDDEN')}`);
+    // حلقة على النماذج
+    for (const model of models) {
+      attemptedModels.push(`${keyPrefix}:${model}`);
+      try {
+        console.log(`🔄 Gemini: ${keyPrefix}... + ${model}`);
 
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 8192,
-          },
-        }),
-      });
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
-      console.log(`📊 Gemini ${model} Response Status: ${response.status}`);
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: {
+              temperature: 0.7,
+              maxOutputTokens: 8192,
+            },
+          }),
+        });
 
-      if (!response.ok) {
-        let errText = `HTTP ${response.status}`;
-        try {
-          const asJson = await response.json();
-          errText = JSON.stringify(asJson);
-          console.error(`❌ Gemini ${model} Error Response:`, errText);
+        console.log(`📊 Gemini ${model} Response Status: ${response.status}`);
 
-          // التحقق من تجاوز الحصة
-          if (response.status === 429) {
-            const quotaError = asJson?.error?.message || '';
-            if (
-              quotaError.includes('quota') ||
-              quotaError.includes('exceeded')
-            ) {
-              console.warn(
-                `⚠️ Gemini ${model}: تجاوز حصة الاستخدام المجاني - سيتم استخدام مزود بديل`
-              );
+        if (!response.ok) {
+          let errText = `HTTP ${response.status}`;
+          try {
+            const asJson = await response.json();
+            errText = JSON.stringify(asJson);
+
+            // التحقق من تجاوز الحصة - انتقل للمفتاح التالي
+            if (response.status === 429) {
+              const quotaError = asJson?.error?.message || '';
+              if (
+                quotaError.includes('quota') ||
+                quotaError.includes('exceeded') ||
+                quotaError.includes('RESOURCE_EXHAUSTED')
+              ) {
+                console.warn(
+                  `⚠️ المفتاح ${keyPrefix}... استنفد الحصة - الانتقال للمفتاح التالي`
+                );
+                markKeyAsExhausted(apiKey);
+                continue keyLoop; // انتقل للمفتاح التالي
+              }
             }
-          }
-        } catch {}
+          } catch {}
+          lastError = JSON.stringify({
+            provider: 'gemini',
+            model,
+            key: keyPrefix,
+            http_status: response.status,
+            error: errText,
+          });
+          console.warn(`⚠️ Gemini ${model} فشل: HTTP ${response.status}`);
+          continue; // جرب النموذج التالي
+        }
+
+        const data = await response.json();
+        const cand = data?.candidates?.[0] || {};
+        const parts = cand?.content?.parts || [];
+        const text = parts.map((p: any) => p.text || '').join('');
+        const finish = cand?.finishReason;
+        const feedback = data?.promptFeedback;
+
+        if (text && finish !== 'SAFETY' && finish !== 'RECITATION') {
+          aiResponse = text;
+          successfulModel = model;
+          successfulKey = keyPrefix;
+          console.log(
+            `✅ Gemini نجح! المفتاح: ${keyPrefix}... النموذج: ${model}`
+          );
+          break keyLoop; // خروج من كلا الحلقتين
+        } else {
+          lastError = JSON.stringify({
+            provider: 'gemini',
+            model,
+            key: keyPrefix,
+            reason: 'empty_or_blocked',
+            finishReason: finish,
+            promptFeedback: feedback,
+          });
+          console.warn(
+            `⚠️ Gemini ${model} محظور أو فارغ (finishReason: ${finish})`
+          );
+          continue;
+        }
+      } catch (e: any) {
         lastError = JSON.stringify({
           provider: 'gemini',
           model,
-          http_status: response.status,
-          error: errText,
-          hint:
-            response.status === 429
-              ? 'تجاوز حصة الاستخدام المجاني - جرب Groq بدلاً من ذلك'
-              : undefined,
+          key: keyPrefix,
+          error: e?.message || String(e),
         });
-        console.warn(`⚠️ Gemini ${model} فشل: HTTP ${response.status}`);
-        continue;
+        console.error(`❌ Gemini ${model} خطأ:`, e?.message);
       }
-
-      const data = await response.json();
-      const cand = data?.candidates?.[0] || {};
-      const parts = cand?.content?.parts || [];
-      const text = parts.map((p: any) => p.text || '').join('');
-      const finish = cand?.finishReason;
-      const feedback = data?.promptFeedback;
-
-      if (text && finish !== 'SAFETY' && finish !== 'RECITATION') {
-        aiResponse = text;
-        successfulModel = model;
-        console.log(
-          `✅ Gemini ${model} نجح! (بعد ${attemptedModels.length} محاولة)`
-        );
-        break;
-      } else {
-        lastError = JSON.stringify({
-          provider: 'gemini',
-          model,
-          reason: 'empty_or_blocked',
-          finishReason: finish,
-          promptFeedback: feedback,
-        });
-        console.warn(
-          `⚠️ Gemini ${model} محظور أو فارغ (finishReason: ${finish})`
-        );
-        continue;
-      }
-    } catch (e: any) {
-      lastError = JSON.stringify({
-        provider: 'gemini',
-        model,
-        error: e?.message || String(e),
-      });
-      console.error(`❌ Gemini ${model} خطأ:`, e?.message);
     }
   }
 
   if (!aiResponse) {
-    const errorSummary = `Gemini فشل مع جميع النماذج (${attemptedModels.length} نموذج). آخر خطأ: ${lastError}`;
+    const errorSummary = `Gemini فشل مع جميع المفاتيح والنماذج (${attemptedModels.length} محاولة). آخر خطأ: ${lastError}`;
     console.error(`❌ ${errorSummary}`);
-    console.error(`📋 النماذج المجربة: ${attemptedModels.join(', ')}`);
     throw new Error(errorSummary);
   }
 
-  console.log(`✅ Gemini نجح باستخدام: ${successfulModel}`);
+  console.log(
+    `✅ Gemini نجح باستخدام: ${successfulKey}... + ${successfulModel}`
+  );
 
   try {
     aiResponse = aiResponse
@@ -346,18 +402,16 @@ ${keywordsText}
   }
 }
 
-// إعادة صياغة محتوى باستخدام Gemini مع آلية fallback
+// إعادة صياغة محتوى باستخدام Gemini مع دعم مفاتيح متعددة
 export async function rewriteContent(
   request: GeminiRewriteRequest
 ): Promise<GeminiRewriteResponse> {
-  let apiKey: string;
-  try {
-    apiKey = await import('@/lib/config/api-keys').then((module) =>
-      module.getApiKey('gemini')
-    );
-  } catch (error: any) {
-    console.error('❌ Gemini: خطأ في الحصول على مفتاح API:', error.message);
-    throw new Error(error.message);
+  const availableKeys = getAvailableApiKeys();
+  const allKeys = getAllGeminiApiKeys();
+  const keysToTry = availableKeys.length > 0 ? availableKeys : allKeys;
+
+  if (keysToTry.length === 0) {
+    throw new Error('لم يتم تكوين أي مفتاح Gemini API');
   }
 
   const styleDesc = getStyleDescription(request.style);
@@ -388,73 +442,82 @@ export async function rewriteContent(
   const models = [DEFAULT_MODEL, ...FALLBACK_MODELS];
   let lastError = '';
 
-  for (const model of models) {
-    try {
-      console.log(`🔄 محاولة إعادة الصياغة باستخدام ${model}...`);
+  keyLoop: for (const apiKey of keysToTry) {
+    const keyPrefix = apiKey.substring(0, 8);
 
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: {
-              temperature: 0.8,
-              maxOutputTokens: 8192,
-            },
-          }),
+    for (const model of models) {
+      try {
+        console.log(`🔄 إعادة الصياغة: ${keyPrefix}... + ${model}`);
+
+        const response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: prompt }] }],
+              generationConfig: {
+                temperature: 0.8,
+                maxOutputTokens: 8192,
+              },
+            }),
+          }
+        );
+
+        if (!response.ok) {
+          const errorText = await response.text();
+
+          // التحقق من تجاوز الحصة
+          if (response.status === 429) {
+            console.warn(`⚠️ المفتاح ${keyPrefix}... استنفد الحصة`);
+            markKeyAsExhausted(apiKey);
+            continue keyLoop;
+          }
+
+          lastError = `${keyPrefix}:${model}: HTTP ${response.status}`;
+          console.warn(`⚠️ ${model} فشل:`, response.status);
+          continue;
         }
-      );
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        lastError = `${model}: HTTP ${response.status} - ${errorText}`;
-        console.warn(`⚠️ ${model} فشل:`, response.status);
+        const data = await response.json();
+        const rewritten = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+        if (!rewritten) {
+          lastError = `${keyPrefix}:${model}: لا يوجد محتوى في الرد`;
+          continue;
+        }
+
+        console.log(`✅ نجحت إعادة الصياغة: ${keyPrefix}... + ${model}`);
+        return {
+          original: request.content,
+          rewritten: rewritten.trim(),
+          wordCount: rewritten.split(/\s+/).length,
+          provider: 'gemini',
+        };
+      } catch (error: any) {
+        lastError = `${keyPrefix}:${model}: ${error.message}`;
+        console.error(`❌ خطأ:`, error.message);
         continue;
       }
-
-      const data = await response.json();
-      const rewritten = data.candidates?.[0]?.content?.parts?.[0]?.text;
-
-      if (!rewritten) {
-        lastError = `${model}: لا يوجد محتوى في الرد`;
-        console.warn(`⚠️ ${model} لم يرجع محتوى`);
-        continue;
-      }
-
-      console.log(`✅ نجحت إعادة الصياغة باستخدام ${model}`);
-      return {
-        original: request.content,
-        rewritten: rewritten.trim(),
-        wordCount: rewritten.split(/\s+/).length,
-        provider: 'gemini',
-      };
-    } catch (error: any) {
-      lastError = `${model}: ${error.message}`;
-      console.error(`❌ خطأ في ${model}:`, error.message);
-      continue;
     }
   }
 
   throw new Error(
-    `فشل في إعادة الصياغة باستخدام جميع نماذج Gemini. آخر خطأ: ${lastError}`
+    `فشل في إعادة الصياغة باستخدام جميع مفاتيح ونماذج Gemini. آخر خطأ: ${lastError}`
   );
 }
 
-// توليد عناوين باستخدام Gemini
+// توليد عناوين باستخدام Gemini مع دعم مفاتيح متعددة
 export async function generateTitles(
   topic: string,
   count: number = 10
 ): Promise<string[]> {
-  let apiKey: string;
-  try {
-    apiKey = await import('@/lib/config/api-keys').then((module) =>
-      module.getApiKey('gemini')
-    );
-  } catch (error: any) {
-    console.error('❌ Gemini: خطأ في الحصول على مفتاح API:', error.message);
-    throw new Error(error.message);
+  const availableKeys = getAvailableApiKeys();
+  const allKeys = getAllGeminiApiKeys();
+  const keysToTry = availableKeys.length > 0 ? availableKeys : allKeys;
+
+  if (keysToTry.length === 0) {
+    throw new Error('لم يتم تكوين أي مفتاح Gemini API');
   }
 
   const prompt = `اقترح ${count} عناوين جذابة ومحسنة للسيو باللغة العربية لمقال عن: "${topic}"
@@ -468,59 +531,75 @@ export async function generateTitles(
 أرجع العناوين كقائمة JSON فقط:
 ["عنوان 1", "عنوان 2", ...]`;
 
-  try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${DEFAULT_MODEL}:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.9,
-            maxOutputTokens: 2048,
-          },
-        }),
+  const models = [DEFAULT_MODEL, ...FALLBACK_MODELS.slice(0, 2)];
+  let lastError = '';
+
+  keyLoop: for (const apiKey of keysToTry) {
+    const keyPrefix = apiKey.substring(0, 8);
+
+    for (const model of models) {
+      try {
+        const response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: prompt }] }],
+              generationConfig: {
+                temperature: 0.9,
+                maxOutputTokens: 2048,
+              },
+            }),
+          }
+        );
+
+        if (!response.ok) {
+          if (response.status === 429) {
+            markKeyAsExhausted(apiKey);
+            continue keyLoop;
+          }
+          lastError = `${keyPrefix}:${model}: HTTP ${response.status}`;
+          continue;
+        }
+
+        const data = await response.json();
+        const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+        if (!text) {
+          lastError = `${keyPrefix}:${model}: لم يتم الحصول على رد`;
+          continue;
+        }
+
+        const jsonMatch = text.match(/\[[\s\S]*\]/);
+        if (!jsonMatch) {
+          lastError = `${keyPrefix}:${model}: فشل في استخراج العناوين`;
+          continue;
+        }
+
+        return JSON.parse(jsonMatch[0]);
+      } catch (error: any) {
+        lastError = `${keyPrefix}:${model}: ${error.message}`;
+        continue;
       }
-    );
-
-    if (!response.ok) {
-      throw new Error(`Gemini API error: ${response.status}`);
     }
-
-    const data = await response.json();
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-
-    if (!text) {
-      throw new Error('لم يتم الحصول على رد من Gemini');
-    }
-
-    const jsonMatch = text.match(/\[[\s\S]*\]/);
-    if (!jsonMatch) {
-      throw new Error('فشل في استخراج العناوين');
-    }
-
-    return JSON.parse(jsonMatch[0]);
-  } catch (error) {
-    console.error('Gemini titles error:', error);
-    throw error;
   }
+
+  throw new Error(`فشل توليد العناوين: ${lastError}`);
 }
 
-// توليد ميتا وكلمات مفتاحية
+// توليد ميتا وكلمات مفتاحية مع دعم مفاتيح متعددة
 export async function generateMeta(content: string): Promise<{
   metaTitle: string;
   metaDescription: string;
   keywords: string[];
 }> {
-  let apiKey: string;
-  try {
-    apiKey = await import('@/lib/config/api-keys').then((module) =>
-      module.getApiKey('gemini')
-    );
-  } catch (error: any) {
-    console.error('❌ Gemini: خطأ في الحصول على مفتاح API:', error.message);
-    throw new Error(error.message);
+  const availableKeys = getAvailableApiKeys();
+  const allKeys = getAllGeminiApiKeys();
+  const keysToTry = availableKeys.length > 0 ? availableKeys : allKeys;
+
+  if (keysToTry.length === 0) {
+    throw new Error('لم يتم تكوين أي مفتاح Gemini API');
   }
 
   const prompt = `حلل المحتوى التالي واستخرج منه:
@@ -540,55 +619,72 @@ ${content.substring(0, 2000)}
   "keywords": ["...", "..."]
 }`;
 
-  try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${DEFAULT_MODEL}:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.5,
-            maxOutputTokens: 1024,
-          },
-        }),
+  const models = [DEFAULT_MODEL, ...FALLBACK_MODELS.slice(0, 2)];
+  let lastError = '';
+
+  keyLoop: for (const apiKey of keysToTry) {
+    const keyPrefix = apiKey.substring(0, 8);
+
+    for (const model of models) {
+      try {
+        const response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: prompt }] }],
+              generationConfig: {
+                temperature: 0.5,
+                maxOutputTokens: 1024,
+              },
+            }),
+          }
+        );
+
+        if (!response.ok) {
+          if (response.status === 429) {
+            markKeyAsExhausted(apiKey);
+            continue keyLoop;
+          }
+          lastError = `${keyPrefix}:${model}: HTTP ${response.status}`;
+          continue;
+        }
+
+        const data = await response.json();
+        const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+        if (!text) {
+          lastError = `${keyPrefix}:${model}: لم يتم الحصول على رد`;
+          continue;
+        }
+
+        const jsonMatch = text.match(/\{[\s\S]*\}/);
+        if (!jsonMatch) {
+          lastError = `${keyPrefix}:${model}: فشل في استخراج الميتا`;
+          continue;
+        }
+
+        return JSON.parse(jsonMatch[0]);
+      } catch (error: any) {
+        lastError = `${keyPrefix}:${model}: ${error.message}`;
+        continue;
       }
-    );
-
-    if (!response.ok) {
-      throw new Error(`Gemini API error: ${response.status}`);
     }
-
-    const data = await response.json();
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-
-    if (!text) {
-      throw new Error('لم يتم الحصول على رد من Gemini');
-    }
-
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      throw new Error('فشل في استخراج الميتا');
-    }
-
-    return JSON.parse(jsonMatch[0]);
-  } catch (error) {
-    console.error('Gemini meta error:', error);
-    throw error;
   }
+
+  throw new Error(`فشل توليد الميتا: ${lastError}`);
 }
 
-// إعادة صياغة عنوان فقط (قصير ومباشر)
+// إعادة صياغة عنوان فقط مع دعم مفاتيح متعددة
 export async function rewriteTitle(title: string): Promise<string> {
-  let apiKey: string;
-  try {
-    apiKey = await import('@/lib/config/api-keys').then((module) =>
-      module.getApiKey('gemini')
-    );
-  } catch (error: any) {
-    console.error('❌ Gemini: خطأ في الحصول على مفتاح API:', error.message);
-    throw new Error(error.message);
+  const availableKeys = getAvailableApiKeys();
+  const allKeys = getAllGeminiApiKeys();
+  const keysToTry = availableKeys.length > 0 ? availableKeys : allKeys;
+
+  if (keysToTry.length === 0) {
+    console.warn('⚠️ لا توجد مفاتيح Gemini، إرجاع العنوان الأصلي');
+    return title;
   }
 
   console.log('🔄 محاولة إعادة صياغة العنوان باستخدام Gemini...');
@@ -598,55 +694,85 @@ export async function rewriteTitle(title: string): Promise<string> {
 
 اكتب عنوان جديد فقط (8-12 كلمة) بدون أي شرح:`;
 
-  const models = [DEFAULT_MODEL, ...FALLBACK_MODELS];
+  const models = [DEFAULT_MODEL, ...FALLBACK_MODELS.slice(0, 2)];
 
-  for (const model of models) {
-    try {
-      console.log(`🔄 محاولة النموذج ${model}...`);
+  keyLoop: for (const apiKey of keysToTry) {
+    const keyPrefix = apiKey.substring(0, 8);
 
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: {
-              temperature: 0.9,
-              maxOutputTokens: 150,
-            },
-          }),
+    for (const model of models) {
+      try {
+        console.log(`🔄 ${keyPrefix}... + ${model}`);
+
+        const response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: prompt }] }],
+              generationConfig: {
+                temperature: 0.9,
+                maxOutputTokens: 150,
+              },
+            }),
+          }
+        );
+
+        if (!response.ok) {
+          if (response.status === 429) {
+            markKeyAsExhausted(apiKey);
+            continue keyLoop;
+          }
+          console.warn(`⚠️ ${model} فشل: HTTP ${response.status}`);
+          continue;
         }
-      );
 
-      if (!response.ok) {
-        console.warn(`⚠️ ${model} فشل: HTTP ${response.status}`);
+        const data = await response.json();
+        const result = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+        if (result) {
+          console.log(`✅ نجح ${keyPrefix}... + ${model}`);
+          const cleanedTitle = result
+            .replace(/["""*]/g, '')
+            .replace(/^(العنوان|عنوان|البديل|الجديد|المقترح)[:\-\s]*/gi, '')
+            .split('\n')[0]
+            .trim();
+
+          if (cleanedTitle && cleanedTitle !== title) {
+            return cleanedTitle;
+          }
+        }
+      } catch (error: any) {
+        console.error(`❌ خطأ:`, error.message);
         continue;
       }
-
-      const data = await response.json();
-      const result = data.candidates?.[0]?.content?.parts?.[0]?.text;
-
-      if (result) {
-        console.log(`✅ نجح ${model}:`, result.substring(0, 50));
-        const cleanedTitle = result
-          .replace(/["""*]/g, '')
-          .replace(/^(العنوان|عنوان|البديل|الجديد|المقترح)[:\-\s]*/gi, '')
-          .split('\n')[0]
-          .trim();
-
-        if (cleanedTitle && cleanedTitle !== title) {
-          return cleanedTitle;
-        }
-      }
-    } catch (error: any) {
-      console.error(`❌ خطأ في ${model}:`, error.message);
-      continue;
     }
   }
 
   console.warn('⚠️ فشلت جميع المحاولات، إرجاع العنوان الأصلي');
   return title;
+}
+
+// دالة للحصول على حالة المفاتيح (للـ API)
+export function getGeminiKeysStatus(): {
+  total: number;
+  available: number;
+  exhausted: number;
+  keys: Array<{ prefix: string; exhausted: boolean; exhaustedAt?: number }>;
+} {
+  const allKeys = getAllGeminiApiKeys();
+  const available = getAvailableApiKeys();
+
+  return {
+    total: allKeys.length,
+    available: available.length,
+    exhausted: allKeys.length - available.length,
+    keys: allKeys.map((key) => ({
+      prefix: key.substring(0, 8) + '...',
+      exhausted: isKeyExhausted(key),
+      exhaustedAt: exhaustedKeys.get(key),
+    })),
+  };
 }
 
 export default {
@@ -656,4 +782,6 @@ export default {
   generateTitles,
   generateMeta,
   validateGeminiApiKey,
+  getGeminiKeysStatus,
+  getAllGeminiApiKeys,
 };

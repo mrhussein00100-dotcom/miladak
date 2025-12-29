@@ -3,27 +3,30 @@
  */
 
 import { NextResponse } from 'next/server';
+import { getGeminiKeysStatus } from '@/lib/ai/providers/gemini';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export async function GET() {
+  // الحصول على حالة مفاتيح Gemini المتعددة
+  const geminiStatus = getGeminiKeysStatus();
+
   const keys = {
     gemini: {
       name: 'Gemini',
-      configured: !!(
-        process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_API_KEY
-      ),
-      keyLength: (
-        process.env.GEMINI_API_KEY ||
-        process.env.GOOGLE_AI_API_KEY ||
-        ''
-      ).length,
-      envVar: process.env.GEMINI_API_KEY
-        ? 'GEMINI_API_KEY'
-        : process.env.GOOGLE_AI_API_KEY
-        ? 'GOOGLE_AI_API_KEY'
-        : 'none',
+      configured: geminiStatus.total > 0,
+      totalKeys: geminiStatus.total,
+      availableKeys: geminiStatus.available,
+      exhaustedKeys: geminiStatus.exhausted,
+      keys: geminiStatus.keys,
+      envVars: [
+        'GEMINI_API_KEY',
+        'GOOGLE_AI_API_KEY',
+        'GEMINI_API_KEY_2',
+        'GEMINI_API_KEY_3',
+        '...',
+      ],
     },
     groq: {
       name: 'Groq',
@@ -54,9 +57,11 @@ export async function GET() {
   const summary = {
     total: Object.keys(keys).length,
     configured: Object.values(keys).filter((k) => k.configured).length,
-    missing: Object.values(keys)
-      .filter((k) => !k.configured)
-      .map((k) => k.name),
+    missing: Object.entries(keys)
+      .filter(([_, v]) => !v.configured)
+      .map(([k, v]) => v.name),
+    geminiKeysTotal: geminiStatus.total,
+    geminiKeysAvailable: geminiStatus.available,
   };
 
   return NextResponse.json({
@@ -65,11 +70,28 @@ export async function GET() {
     keys,
     summary,
     instructions: {
-      gemini: 'احصل على مفتاح من: https://aistudio.google.com/app/apikey',
+      gemini:
+        'احصل على مفاتيح من: https://aistudio.google.com/app/apikey - يمكنك إضافة عدة مفاتيح (GEMINI_API_KEY, GEMINI_API_KEY_2, GEMINI_API_KEY_3, ...)',
       groq: 'احصل على مفتاح من: https://console.groq.com/keys',
       cohere: 'احصل على مفتاح من: https://dashboard.cohere.ai/api-keys',
       huggingface: 'احصل على مفتاح من: https://huggingface.co/settings/tokens',
       pexels: 'احصل على مفتاح من: https://www.pexels.com/api/',
+    },
+    multipleKeysSupport: {
+      gemini: {
+        supported: true,
+        description:
+          'يدعم Gemini مفاتيح API متعددة مع التبديل التلقائي عند انتهاء الحصة',
+        envVars: [
+          'GEMINI_API_KEY (أو GOOGLE_AI_API_KEY)',
+          'GEMINI_API_KEY_2',
+          'GEMINI_API_KEY_3',
+          'GEMINI_API_KEY_4',
+          '... حتى GEMINI_API_KEY_10',
+        ],
+        howItWorks:
+          'عند انتهاء حصة مفتاح، يتم الانتقال تلقائياً للمفتاح التالي. المفاتيح المستنفدة تُعاد تفعيلها بعد ساعة.',
+      },
     },
   });
 }
