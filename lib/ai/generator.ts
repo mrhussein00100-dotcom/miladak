@@ -27,6 +27,7 @@ import type { EnhancedGenerationRequest } from '../sona/enhancedGenerator';
 import {
   injectImagesIntoContent,
   getArticleCoverImage,
+  addSmartImagesToArticle,
 } from '../images/pexels';
 
 export type AIProvider =
@@ -474,7 +475,7 @@ export async function generateArticle(
   throw lastError || new Error('فشل التوليد مع جميع المزودين');
 }
 
-// توليد مقال مع صور
+// توليد مقال مع صور (محسّن - الإصدار 3.0)
 export async function generateArticleWithImages(
   request: GenerationRequest
 ): Promise<GenerationResponse> {
@@ -484,18 +485,27 @@ export async function generateArticleWithImages(
   // إضافة الصور إذا طُلب ذلك
   if (request.includeImages !== false) {
     try {
-      const imageCount = request.imageCount || 3;
+      console.log('🖼️ [Generator] بدء إضافة الصور الذكية للمقال...');
 
-      // حقن الصور في المحتوى
-      article.content = await injectImagesIntoContent(
+      // استخدام النظام الذكي الجديد
+      const articleWithImages = await addSmartImagesToArticle(
         article.content,
         request.topic,
-        imageCount
+        {
+          maxImages: request.imageCount,
+          includeFeaturedImage: true,
+        }
       );
 
-      // الحصول على صورة الغلاف
-      article.coverImage =
-        (await getArticleCoverImage(request.topic)) || undefined;
+      // تحديث المحتوى بالصور
+      article.content = articleWithImages.content;
+
+      // تعيين الصورة البارزة
+      article.coverImage = articleWithImages.featuredImage || undefined;
+
+      console.log(
+        `✅ [Generator] تم إضافة ${articleWithImages.imagesAdded} صور + صورة بارزة`
+      );
     } catch (error) {
       console.error('فشل في إضافة الصور:', error);
       // نستمر بدون صور

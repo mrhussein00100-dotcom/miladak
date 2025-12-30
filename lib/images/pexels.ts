@@ -2,7 +2,10 @@
  * Pexels API للصور المجانية
  * https://www.pexels.com/api/
  *
- * Version 2.0 - تحسين دقة البحث عن الصور
+ * Version 3.0 - نظام ذكي لاختيار الصور المناسبة للمقالات
+ * - تحليل المحتوى لاختيار صور أكثر دقة
+ * - حساب عدد الصور المناسب لحجم المقال
+ * - إضافة الصورة البارزة تلقائياً
  */
 
 export interface PexelsImage {
@@ -23,11 +26,34 @@ export interface PexelsImage {
   alt: string;
 }
 
+// نتيجة تحليل المحتوى للصور
+export interface ContentImageAnalysis {
+  mainTopic: string;
+  subTopics: string[];
+  context: string;
+  suggestedImageCount: number;
+  searchQueries: string[];
+  featuredImageQuery: string;
+}
+
 export interface PexelsSearchResult {
   total_results: number;
   page: number;
   per_page: number;
   photos: PexelsImage[];
+}
+
+// نتيجة إضافة الصور للمقال
+export interface ArticleWithImages {
+  content: string;
+  featuredImage: string | null;
+  imagesAdded: number;
+  imageDetails: Array<{
+    url: string;
+    alt: string;
+    photographer: string;
+    position: string;
+  }>;
 }
 
 // قاموس شامل ومحسّن للترجمة العربية-الإنجليزية
@@ -248,6 +274,199 @@ function getContextualKeywords(context: string): string[] {
   return contextKeywords[context] || contextKeywords['general'];
 }
 
+// ===== نظام تحليل المحتوى الذكي =====
+
+// تحليل المحتوى لاستخراج معلومات الصور المناسبة
+export function analyzeContentForImages(
+  content: string,
+  title: string
+): ContentImageAnalysis {
+  // حساب عدد الكلمات
+  const wordCount = content.split(/\s+/).filter((w) => w.length > 0).length;
+
+  // استخراج العناوين الفرعية (H2, H3)
+  const h2Matches = content.match(/<h2[^>]*>(.*?)<\/h2>/gi) || [];
+  const h3Matches = content.match(/<h3[^>]*>(.*?)<\/h3>/gi) || [];
+  const subTopics = [...h2Matches, ...h3Matches]
+    .map((h) => h.replace(/<[^>]*>/g, '').trim())
+    .filter((t) => t.length > 0);
+
+  // تحديد السياق الرئيسي
+  const context = detectTopicContext(title + ' ' + content.substring(0, 500));
+
+  // حساب عدد الصور المناسب بناءً على حجم المقال
+  const suggestedImageCount = calculateOptimalImageCount(
+    wordCount,
+    subTopics.length
+  );
+
+  // توليد استعلامات البحث للصور
+  const searchQueries = generateSearchQueries(
+    title,
+    subTopics,
+    context,
+    suggestedImageCount
+  );
+
+  // استعلام الصورة البارزة (أكثر عمومية وجاذبية)
+  const featuredImageQuery = generateFeaturedImageQuery(title, context);
+
+  console.log(`📊 [تحليل المحتوى] عدد الكلمات: ${wordCount}`);
+  console.log(`📊 [تحليل المحتوى] عدد العناوين الفرعية: ${subTopics.length}`);
+  console.log(`📊 [تحليل المحتوى] السياق: ${context}`);
+  console.log(`📊 [تحليل المحتوى] عدد الصور المقترح: ${suggestedImageCount}`);
+
+  return {
+    mainTopic: title,
+    subTopics,
+    context,
+    suggestedImageCount,
+    searchQueries,
+    featuredImageQuery,
+  };
+}
+
+// حساب عدد الصور المثالي بناءً على حجم المقال
+function calculateOptimalImageCount(
+  wordCount: number,
+  headingsCount: number
+): number {
+  // قاعدة: صورة واحدة لكل 300-400 كلمة تقريباً
+  // مع حد أدنى 2 وحد أقصى 8
+
+  let baseCount = Math.floor(wordCount / 350);
+
+  // تعديل بناءً على عدد العناوين (صورة لكل 2-3 عناوين)
+  const headingBasedCount = Math.ceil(headingsCount / 2);
+
+  // اختيار الأكبر بين الطريقتين
+  let optimalCount = Math.max(baseCount, headingBasedCount);
+
+  // تطبيق الحدود
+  optimalCount = Math.max(2, Math.min(8, optimalCount));
+
+  // جدول مرجعي لأحجام المقالات
+  if (wordCount < 500) {
+    return 2; // مقال قصير
+  } else if (wordCount < 1000) {
+    return 3; // مقال متوسط قصير
+  } else if (wordCount < 1500) {
+    return 4; // مقال متوسط
+  } else if (wordCount < 2500) {
+    return 5; // مقال طويل
+  } else if (wordCount < 4000) {
+    return 6; // مقال شامل
+  } else {
+    return 8; // مقال طويل جداً
+  }
+}
+
+// توليد استعلامات بحث متنوعة للصور
+function generateSearchQueries(
+  title: string,
+  subTopics: string[],
+  context: string,
+  imageCount: number
+): string[] {
+  const queries: string[] = [];
+
+  // استعلام من العنوان الرئيسي
+  const mainQuery = topicToEnglishKeywords(title);
+  queries.push(mainQuery);
+
+  // استعلامات من العناوين الفرعية
+  for (let i = 0; i < Math.min(subTopics.length, imageCount - 1); i++) {
+    const subQuery = topicToEnglishKeywords(subTopics[i]);
+    if (subQuery !== mainQuery && !queries.includes(subQuery)) {
+      queries.push(subQuery);
+    }
+  }
+
+  // إضافة استعلامات سياقية إذا لم نصل للعدد المطلوب
+  const contextualQueries = getContextualSearchQueries(context);
+  for (const cq of contextualQueries) {
+    if (queries.length >= imageCount) break;
+    if (!queries.includes(cq)) {
+      queries.push(cq);
+    }
+  }
+
+  return queries.slice(0, imageCount);
+}
+
+// استعلامات بحث حسب السياق
+function getContextualSearchQueries(context: string): string[] {
+  const contextQueries: Record<string, string[]> = {
+    birthday: [
+      'birthday celebration happy',
+      'birthday cake candles',
+      'birthday party decorations',
+      'birthday balloons colorful',
+      'birthday gifts presents',
+      'happy birthday celebration',
+    ],
+    zodiac: [
+      'zodiac signs astrology',
+      'horoscope stars constellation',
+      'astrology symbols',
+      'zodiac wheel',
+      'starry night sky',
+      'cosmic universe',
+    ],
+    age: [
+      'birthday milestone celebration',
+      'age celebration happy',
+      'birthday party family',
+      'celebration cake',
+      'happy moments family',
+    ],
+    family: [
+      'happy family together',
+      'family celebration',
+      'family gathering',
+      'parents children happy',
+      'family love',
+    ],
+    celebration: [
+      'celebration party',
+      'festive decorations',
+      'happy celebration',
+      'party confetti',
+      'joyful moment',
+    ],
+    general: [
+      'celebration happy',
+      'colorful festive',
+      'happy moment',
+      'beautiful celebration',
+    ],
+  };
+
+  return contextQueries[context] || contextQueries['general'];
+}
+
+// توليد استعلام الصورة البارزة
+function generateFeaturedImageQuery(title: string, context: string): string {
+  // الصورة البارزة يجب أن تكون جذابة وعامة أكثر
+  const featuredQueries: Record<string, string> = {
+    birthday: 'birthday celebration cake balloons happy',
+    zodiac: 'zodiac astrology stars beautiful',
+    age: 'birthday celebration milestone happy',
+    family: 'happy family celebration together',
+    celebration: 'celebration party festive colorful',
+    general: 'celebration happy colorful beautiful',
+  };
+
+  // دمج استعلام العنوان مع الاستعلام السياقي
+  const titleKeywords = topicToEnglishKeywords(title);
+  const contextQuery = featuredQueries[context] || featuredQueries['general'];
+
+  // أخذ أول كلمتين من العنوان ودمجها مع السياق
+  const titleWords = titleKeywords.split(' ').slice(0, 2).join(' ');
+
+  return `${titleWords} ${contextQuery.split(' ').slice(0, 2).join(' ')}`;
+}
+
 // تحويل الموضوع العربي لكلمات إنجليزية للبحث (محسّن)
 export function topicToEnglishKeywords(topic: string): string {
   // استخراج الكلمات المفتاحية من الموضوع
@@ -384,22 +603,45 @@ export async function getRandomImage(
   return images[randomIndex];
 }
 
-// حقن الصور في محتوى HTML (محسّن)
+// حقن الصور في محتوى HTML (محسّن - الإصدار 3.0)
 export async function injectImagesIntoContent(
   html: string,
   topic: string,
-  imageCount: number = 3
+  imageCount?: number
 ): Promise<string> {
-  console.log(`🖼️ [Pexels] بدء حقن ${imageCount} صور للموضوع: "${topic}"`);
+  // تحليل المحتوى لتحديد الصور المناسبة
+  const analysis = analyzeContentForImages(html, topic);
 
-  const images = await searchImages(topic, imageCount + 2);
+  // استخدام العدد المحسوب إذا لم يُحدد
+  const targetImageCount = imageCount || analysis.suggestedImageCount;
 
-  if (images.length === 0) {
-    console.warn('⚠️ [Pexels] لم يتم العثور على صور');
+  console.log(
+    `🖼️ [Pexels v3] بدء حقن ${targetImageCount} صور للموضوع: "${topic}"`
+  );
+  console.log(`📋 [Pexels v3] استعلامات البحث:`, analysis.searchQueries);
+
+  // جلب صور متنوعة باستخدام استعلامات مختلفة
+  const allImages: PexelsImage[] = [];
+  const usedImageIds = new Set<number>();
+
+  for (const query of analysis.searchQueries) {
+    if (allImages.length >= targetImageCount + 2) break;
+
+    const images = await searchImages(query, 5);
+    for (const img of images) {
+      if (!usedImageIds.has(img.id)) {
+        allImages.push(img);
+        usedImageIds.add(img.id);
+      }
+    }
+  }
+
+  if (allImages.length === 0) {
+    console.warn('⚠️ [Pexels v3] لم يتم العثور على صور');
     return html;
   }
 
-  console.log(`✅ [Pexels] تم العثور على ${images.length} صور`);
+  console.log(`✅ [Pexels v3] تم جمع ${allImages.length} صورة فريدة`);
 
   let result = html;
 
@@ -407,20 +649,21 @@ export async function injectImagesIntoContent(
   const h2Matches = html.match(/<h2[^>]*>(.*?)<\/h2>/g) || [];
   const h2Texts = h2Matches.map((h) => h.replace(/<[^>]*>/g, '').trim());
 
-  console.log(`📝 [Pexels] تم العثور على ${h2Matches.length} عنوان H2`);
+  console.log(`📝 [Pexels v3] تم العثور على ${h2Matches.length} عنوان H2`);
 
-  // إضافة صورة بعد كل H2 (حتى عدد الصور المطلوب)
+  // توزيع الصور بشكل متساوي على المحتوى
   let imageIndex = 0;
 
+  // إضافة صورة بعد كل H2 (حتى عدد الصور المطلوب)
   for (
     let i = 0;
     i < h2Matches.length &&
-    imageIndex < images.length &&
-    imageIndex < imageCount;
+    imageIndex < allImages.length &&
+    imageIndex < targetImageCount;
     i++
   ) {
     const h2 = h2Matches[i];
-    const image = images[imageIndex];
+    const image = allImages[imageIndex];
     const caption = h2Texts[i] || topic;
 
     // استخدام alt text أفضل من Pexels أو العنوان
@@ -446,69 +689,214 @@ export async function injectImagesIntoContent(
     result = result.replace(h2, h2 + figureHtml);
     imageIndex++;
     console.log(
-      `✅ [Pexels] تم إضافة صورة ${imageIndex} بعد: "${caption.substring(
+      `✅ [Pexels v3] تم إضافة صورة ${imageIndex} بعد: "${caption.substring(
         0,
         30
       )}..."`
     );
   }
 
-  // إضافة صورة رئيسية في البداية إذا لم تكن موجودة
-  if (images.length > imageIndex && !result.includes('<figure')) {
-    const mainImage = images[imageIndex];
-    const mainAltText = mainImage.alt || topic;
+  // إذا بقيت صور وعناوين H2 أقل، أضف صور بين الفقرات
+  if (imageIndex < targetImageCount && imageIndex < allImages.length) {
+    const paragraphs = result.match(/<\/p>/g) || [];
+    const paragraphInterval = Math.floor(
+      paragraphs.length / (targetImageCount - imageIndex + 1)
+    );
 
-    const mainFigure = `
-      <figure class="my-6 rounded-xl overflow-hidden shadow-lg">
-        <img 
-          src="${mainImage.src.large2x}" 
-          alt="${mainAltText}"
-          class="w-full h-auto rounded-xl"
-          loading="eager"
-          width="1600"
-          height="1067"
-        />
-        <figcaption class="text-center text-sm text-gray-500 dark:text-gray-400 mt-2 px-4 pb-2">
-          ${topic} - تصوير: <a href="${mainImage.photographer_url}" target="_blank" rel="noopener noreferrer" class="text-blue-500 hover:underline">${mainImage.photographer}</a> (Pexels)
-        </figcaption>
-      </figure>
-    `;
+    let paragraphCount = 0;
+    let insertedAfterParagraph = 0;
 
-    // إضافة بعد أول فقرة
-    const firstParagraphEnd = result.indexOf('</p>');
-    if (firstParagraphEnd > -1) {
-      result =
-        result.slice(0, firstParagraphEnd + 4) +
-        mainFigure +
-        result.slice(firstParagraphEnd + 4);
-      console.log('✅ [Pexels] تم إضافة صورة رئيسية في البداية');
-    }
+    // إضافة صور بعد كل N فقرات
+    result = result.replace(/<\/p>/g, (match) => {
+      paragraphCount++;
+      if (
+        paragraphCount % paragraphInterval === 0 &&
+        imageIndex < allImages.length &&
+        imageIndex < targetImageCount &&
+        insertedAfterParagraph < targetImageCount - imageIndex
+      ) {
+        const image = allImages[imageIndex];
+        const altText = image.alt || topic;
+
+        const figureHtml = `
+          <figure class="my-6 rounded-xl overflow-hidden shadow-lg">
+            <img 
+              src="${image.src.large}" 
+              alt="${altText}"
+              class="w-full h-auto rounded-xl"
+              loading="lazy"
+              width="1200"
+              height="800"
+            />
+            <figcaption class="text-center text-sm text-gray-500 dark:text-gray-400 mt-2 px-4 pb-2">
+              ${topic} - تصوير: <a href="${image.photographer_url}" target="_blank" rel="noopener noreferrer" class="text-blue-500 hover:underline">${image.photographer}</a> (Pexels)
+            </figcaption>
+          </figure>
+        `;
+
+        imageIndex++;
+        insertedAfterParagraph++;
+        console.log(
+          `✅ [Pexels v3] تم إضافة صورة ${imageIndex} بعد فقرة ${paragraphCount}`
+        );
+        return match + figureHtml;
+      }
+      return match;
+    });
   }
 
-  console.log(`🎉 [Pexels] اكتمل حقن الصور - تم إضافة ${imageIndex} صور`);
+  console.log(`🎉 [Pexels v3] اكتمل حقن الصور - تم إضافة ${imageIndex} صور`);
   return result;
 }
 
-// الحصول على صورة غلاف للمقال (محسّن)
+// الحصول على صورة غلاف للمقال (محسّن - الإصدار 3.0)
 export async function getArticleCoverImage(
-  topic: string
+  topic: string,
+  content?: string
 ): Promise<string | null> {
-  console.log(`🖼️ [Pexels] البحث عن صورة غلاف للموضوع: "${topic}"`);
+  console.log(`🖼️ [Pexels v3] البحث عن صورة غلاف للموضوع: "${topic}"`);
 
-  const image = await getRandomImage(topic);
-
-  if (image) {
-    console.log(
-      `✅ [Pexels] تم العثور على صورة غلاف: ${image.src.large2x.substring(
-        0,
-        50
-      )}...`
-    );
-    return image.src.large2x;
+  // تحليل المحتوى إذا كان متاحاً
+  let searchQuery: string;
+  if (content) {
+    const analysis = analyzeContentForImages(content, topic);
+    searchQuery = analysis.featuredImageQuery;
+  } else {
+    const context = detectTopicContext(topic);
+    searchQuery = generateFeaturedImageQuery(topic, context);
   }
 
-  console.warn('⚠️ [Pexels] لم يتم العثور على صورة غلاف');
-  return null;
+  console.log(`🔍 [Pexels v3] استعلام الصورة البارزة: "${searchQuery}"`);
+
+  // البحث عن صور عالية الجودة
+  const images = await searchImages(searchQuery, 10);
+
+  if (images.length === 0) {
+    // محاولة بحث أبسط
+    const simpleQuery = topicToEnglishKeywords(topic);
+    const fallbackImages = await searchImages(simpleQuery, 10);
+
+    if (fallbackImages.length > 0) {
+      // اختيار أفضل صورة (الأولى عادة الأكثر صلة)
+      const bestImage = fallbackImages[0];
+      console.log(
+        `✅ [Pexels v3] تم العثور على صورة غلاف (fallback): ${bestImage.src.large2x.substring(
+          0,
+          50
+        )}...`
+      );
+      return bestImage.src.large2x;
+    }
+
+    console.warn('⚠️ [Pexels v3] لم يتم العثور على صورة غلاف');
+    return null;
+  }
+
+  // اختيار أفضل صورة للغلاف
+  const bestImage = selectBestFeaturedImage(images);
+  console.log(
+    `✅ [Pexels v3] تم اختيار صورة غلاف: ${bestImage.src.large2x.substring(
+      0,
+      50
+    )}...`
+  );
+
+  return bestImage.src.large2x;
+}
+
+// اختيار أفضل صورة للغلاف
+function selectBestFeaturedImage(images: PexelsImage[]): PexelsImage {
+  // الأولوية للصور ذات alt text جيد
+  const withAlt = images.filter((img) => img.alt && img.alt.length > 10);
+  if (withAlt.length > 0) {
+    return withAlt[0];
+  }
+
+  // إرجاع الصورة الأولى (الأكثر صلة حسب Pexels)
+  return images[0];
+}
+
+// ===== الدالة الرئيسية الشاملة =====
+
+// إضافة الصور للمقال بشكل ذكي (الصورة البارزة + صور المحتوى)
+export async function addSmartImagesToArticle(
+  content: string,
+  title: string,
+  options?: {
+    maxImages?: number;
+    includeFeaturedImage?: boolean;
+  }
+): Promise<ArticleWithImages> {
+  const maxImages = options?.maxImages;
+  const includeFeaturedImage = options?.includeFeaturedImage !== false;
+
+  console.log(`🚀 [Pexels v3] بدء إضافة الصور الذكية للمقال: "${title}"`);
+
+  // تحليل المحتوى
+  const analysis = analyzeContentForImages(content, title);
+  const targetImageCount = maxImages || analysis.suggestedImageCount;
+
+  console.log(`📊 [Pexels v3] تحليل المحتوى:`);
+  console.log(`   - السياق: ${analysis.context}`);
+  console.log(`   - عدد الصور المقترح: ${targetImageCount}`);
+  console.log(`   - عدد العناوين الفرعية: ${analysis.subTopics.length}`);
+
+  // الحصول على الصورة البارزة
+  let featuredImage: string | null = null;
+  if (includeFeaturedImage) {
+    featuredImage = await getArticleCoverImage(title, content);
+  }
+
+  // حقن الصور في المحتوى
+  const contentWithImages = await injectImagesIntoContent(
+    content,
+    title,
+    targetImageCount
+  );
+
+  // حساب عدد الصور المضافة
+  const figureCount = (contentWithImages.match(/<figure/g) || []).length;
+
+  // استخراج تفاصيل الصور المضافة
+  const imageDetails: ArticleWithImages['imageDetails'] = [];
+  const figureMatches =
+    contentWithImages.match(/<figure[^>]*>[\s\S]*?<\/figure>/g) || [];
+
+  for (const figure of figureMatches) {
+    const srcMatch = figure.match(/src="([^"]+)"/);
+    const altMatch = figure.match(/alt="([^"]+)"/);
+    const photographerMatch = figure.match(/تصوير:.*?<a[^>]*>([^<]+)<\/a>/);
+
+    if (srcMatch) {
+      imageDetails.push({
+        url: srcMatch[1],
+        alt: altMatch?.[1] || title,
+        photographer: photographerMatch?.[1] || 'Unknown',
+        position: 'content',
+      });
+    }
+  }
+
+  // إضافة الصورة البارزة للتفاصيل
+  if (featuredImage) {
+    imageDetails.unshift({
+      url: featuredImage,
+      alt: title,
+      photographer: 'Pexels',
+      position: 'featured',
+    });
+  }
+
+  console.log(`🎉 [Pexels v3] اكتمل إضافة الصور:`);
+  console.log(`   - الصورة البارزة: ${featuredImage ? '✅' : '❌'}`);
+  console.log(`   - صور المحتوى: ${figureCount}`);
+
+  return {
+    content: contentWithImages,
+    featuredImage,
+    imagesAdded: figureCount,
+    imageDetails,
+  };
 }
 
 export default {
@@ -517,4 +905,6 @@ export default {
   injectImagesIntoContent,
   getArticleCoverImage,
   topicToEnglishKeywords,
+  analyzeContentForImages,
+  addSmartImagesToArticle,
 };
