@@ -22,34 +22,33 @@ export interface GroqGenerationResponse {
   generationTime: number;
 }
 
-// الحصول على عدد الكلمات المطلوب - قيم واقعية لـ Groq
-// ملاحظة: Groq له حدود في طول الرد، لذا نستخدم قيم واقعية
-// الحد الأدنى المطلق منخفض جداً لتجنب رفض المقالات
+// الحصول على عدد الكلمات المطلوب - قيم محسّنة لـ Groq
+// تم رفع الحدود لضمان محتوى غني وشامل
 function getWordCount(length: string): {
   min: number;
   max: number;
   target: string;
-  absoluteMin: number; // الحد الأدنى المطلق - منخفض جداً لقبول أي محتوى
+  absoluteMin: number;
 } {
   const lengthWords: Record<
     string,
     { min: number; max: number; target: string; absoluteMin: number }
   > = {
-    short: { min: 500, max: 800, target: '600', absoluteMin: 200 },
-    medium: { min: 800, max: 1200, target: '1000', absoluteMin: 300 },
-    long: { min: 1200, max: 2000, target: '1500', absoluteMin: 400 },
-    comprehensive: { min: 1500, max: 2500, target: '2000', absoluteMin: 500 },
+    short: { min: 800, max: 1200, target: '1000', absoluteMin: 600 },
+    medium: { min: 1200, max: 1800, target: '1500', absoluteMin: 900 },
+    long: { min: 1800, max: 2500, target: '2200', absoluteMin: 1400 },
+    comprehensive: { min: 2500, max: 3500, target: '3000', absoluteMin: 2000 },
   };
   return lengthWords[length] || lengthWords.medium;
 }
 
-// الحصول على عدد الأقسام المطلوبة حسب الطول
+// الحصول على عدد الأقسام المطلوبة حسب الطول - قيم محسّنة
 function getSectionCount(length: string): { min: number; max: number } {
   const sections: Record<string, { min: number; max: number }> = {
-    short: { min: 4, max: 6 },
-    medium: { min: 6, max: 10 },
-    long: { min: 10, max: 15 },
-    comprehensive: { min: 15, max: 25 },
+    short: { min: 6, max: 8 },
+    medium: { min: 8, max: 12 },
+    long: { min: 12, max: 18 },
+    comprehensive: { min: 18, max: 25 },
   };
   return sections[length] || sections.medium;
 }
@@ -64,6 +63,28 @@ function getStyleDescription(style: string): string {
     academic: 'أكاديمي وعلمي',
   };
   return toneMap[style] || 'احترافي';
+}
+
+// توليد قائمة أقسام مخصصة للموضوع
+function generateSectionsList(topic: string, sectionCount: number): string {
+  const genericSections = [
+    `1. مقدمة شاملة عن ${topic}`,
+    `2. ما هو ${topic} وما أهميته`,
+    `3. فوائد ومميزات ${topic}`,
+    `4. كيفية الاستفادة من ${topic}`,
+    `5. أنواع وأقسام ${topic}`,
+    `6. نصائح مهمة حول ${topic}`,
+    `7. أخطاء شائعة يجب تجنبها`,
+    `8. تجارب وأمثلة عملية`,
+    `9. مقارنات وتحليلات`,
+    `10. المستقبل والتطورات`,
+    `11. موارد ومصادر إضافية`,
+    `12. خلاصة وتوصيات`,
+  ];
+
+  return genericSections
+    .slice(0, Math.min(sectionCount, genericSections.length))
+    .join('\n');
 }
 
 // توليد مقال باستخدام Groq
@@ -101,38 +122,33 @@ export async function generateArticle(
     apiKey ? `موجود (${apiKey.substring(0, 10)}...)` : '❌ غير موجود'
   );
 
+  // بناء قائمة الأقسام المطلوبة بشكل صريح
+  const sectionsList = generateSectionsList(request.topic, sectionConfig.min);
+
   const prompt = `اكتب مقالاً عربياً شاملاً عن: "${request.topic}"
 
-المتطلبات الأساسية:
-- الطول: ${wordConfig.min}-${wordConfig.max} كلمة (الهدف: ${
+الطول المطلوب: ${wordConfig.min} كلمة على الأقل (الهدف: ${
     wordConfig.target
   } كلمة)
-- الأسلوب: ${styleDesc}
+الأسلوب: ${styleDesc}
 ${
   request.includeKeywords?.length
-    ? `- الكلمات المفتاحية: ${request.includeKeywords.join(', ')}`
+    ? `الكلمات المفتاحية: ${request.includeKeywords.join(', ')}`
     : ''
 }
-${request.category ? `- التصنيف: ${request.category}` : ''}
 
-الهيكل المطلوب:
-1. مقدمة (3-4 فقرات)
-2. ${sectionConfig.min}-${sectionConfig.max} أقسام رئيسية بعناوين <h2>
-3. كل قسم يحتوي على 3-5 فقرات وقوائم
-4. قسم أسئلة شائعة (5-7 أسئلة)
-5. خاتمة
+الأقسام المطلوبة (اكتب كل قسم بالتفصيل):
+${sectionsList}
+
+قسم الأسئلة الشائعة (8 أسئلة مع إجابات مفصلة)
+
+خاتمة شاملة
 
 التنسيق: HTML فقط (<p>, <h2>, <h3>, <ul>, <ol>, <li>, <strong>)
+كل فقرة: 4-5 جمل على الأقل
 
-أرجع JSON فقط:
-{
-  "title": "العنوان",
-  "content": "<p>المحتوى الكامل</p>",
-  "excerpt": "ملخص قصير",
-  "metaDescription": "وصف ميتا",
-  "metaKeywords": "كلمات مفتاحية",
-  "focusKeyword": "الكلمة الرئيسية"
-}`;
+أرجع JSON:
+{"title":"العنوان","content":"<p>المحتوى...</p>","excerpt":"ملخص","metaDescription":"وصف","metaKeywords":"كلمات","focusKeyword":"كلمة"}`;
 
   try {
     console.log('📡 Groq: إرسال الطلب إلى API...');
@@ -150,10 +166,13 @@ ${request.category ? `- التصنيف: ${request.category}` : ''}
           messages: [
             {
               role: 'system',
-              content: `أنت كاتب محتوى عربي محترف. اكتب مقالات كاملة ومفصلة.
-قواعد:
+              content: `أنت كاتب محتوى عربي متخصص. اكتب مقالات طويلة ومفصلة.
+
+قواعد إلزامية:
+- الحد الأدنى: ${wordConfig.min} كلمة
+- كل قسم: 4-6 فقرات
+- كل فقرة: 4-5 جمل
 - استخدم HTML: <p>, <h2>, <h3>, <ul>, <ol>, <li>, <strong>
-- أكمل المقال حتى الخاتمة
 - أرجع JSON صحيح فقط`,
             },
             { role: 'user', content: prompt },
@@ -225,10 +244,32 @@ ${request.category ? `- التصنيف: ${request.category}` : ''}
     console.log('⏱️ Groq: الوقت المستغرق:', Date.now() - startTime, 'ms');
 
     // تحذير إذا كان عدد الكلمات أقل من الحد الأدنى المطلق
-    // لا نرفض المقال - نقبله مع تحذير فقط
+    // إعادة المحاولة إذا كان المحتوى قصيراً جداً
     if (actualWordCount < wordConfig.absoluteMin) {
       console.warn(
-        `⚠️ Groq: عدد الكلمات (${actualWordCount}) أقل من الحد الأدنى المطلق (${wordConfig.absoluteMin}) - لكن سنقبل المقال`
+        `⚠️ Groq: عدد الكلمات (${actualWordCount}) أقل من الحد الأدنى المطلق (${wordConfig.absoluteMin})`
+      );
+      console.log('🔄 Groq: إعادة المحاولة للحصول على محتوى أطول...');
+
+      // محاولة ثانية مع prompt مختصر ومباشر
+      const retryResult = await retryWithExtendedContent(
+        apiKey,
+        request.topic,
+        result.content || '',
+        wordConfig,
+        sectionConfig
+      );
+
+      if (retryResult && retryResult.wordCount > actualWordCount) {
+        console.log('✅ Groq: إعادة المحاولة نجحت - محتوى أطول');
+        return {
+          ...retryResult,
+          generationTime: Date.now() - startTime,
+        };
+      }
+
+      console.log(
+        '⚠️ Groq: إعادة المحاولة لم تحسن النتيجة - استخدام النتيجة الأصلية'
       );
     } else if (actualWordCount < wordConfig.min) {
       console.warn(
@@ -345,3 +386,97 @@ export default {
   generateArticle,
   rewriteContent,
 };
+
+// دالة مساعدة لإعادة المحاولة مع توسيع المحتوى
+async function retryWithExtendedContent(
+  apiKey: string,
+  topic: string,
+  existingContent: string,
+  wordConfig: { min: number; max: number; target: string; absoluteMin: number },
+  sectionConfig: { min: number; max: number }
+): Promise<GroqGenerationResponse | null> {
+  try {
+    // استراتيجية: طلب توسيع المحتوى الموجود
+    const extendPrompt = `لديك محتوى قصير عن "${topic}". وسّعه ليصبح ${
+      wordConfig.min
+    } كلمة على الأقل.
+
+المحتوى الحالي:
+${existingContent.substring(0, 2000)}
+
+المطلوب:
+1. أضف مقدمة مفصلة (4 فقرات)
+2. أضف ${sectionConfig.min} أقسام جديدة مع عناوين <h2>
+3. كل قسم: 4-5 فقرات، كل فقرة: 4-5 جمل
+4. أضف قسم أسئلة شائعة (8 أسئلة مع إجابات مفصلة)
+5. أضف خاتمة شاملة
+
+أرجع JSON:
+{"title":"العنوان","content":"<p>المحتوى الموسّع...</p>","excerpt":"ملخص","metaDescription":"وصف","metaKeywords":"كلمات","focusKeyword":"كلمة"}`;
+
+    const response = await fetch(
+      'https://api.groq.com/openai/v1/chat/completions',
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'llama-3.3-70b-versatile',
+          messages: [
+            {
+              role: 'system',
+              content: `أنت كاتب محتوى عربي. وسّع المحتوى ليصبح ${wordConfig.min} كلمة. أرجع JSON فقط.`,
+            },
+            { role: 'user', content: extendPrompt },
+          ],
+          temperature: 0.8,
+          max_tokens: 16000,
+          response_format: { type: 'json_object' },
+        }),
+      }
+    );
+
+    if (!response.ok) return null;
+
+    const data = await response.json();
+    const text = data.choices?.[0]?.message?.content;
+    if (!text) return null;
+
+    const jsonMatch = text
+      .replace(/^```json\s*/gi, '')
+      .replace(/```\s*$/gi, '')
+      .match(/\{[\s\S]*\}/);
+    if (!jsonMatch) return null;
+
+    const result = JSON.parse(jsonMatch[0]);
+    const wordCount = result.content
+      ? result.content
+          .replace(/<[^>]*>/g, ' ')
+          .replace(/[^\u0600-\u06FF\s]/g, ' ')
+          .trim()
+          .split(/\s+/)
+          .filter((word: string) => word.length > 0).length
+      : 0;
+
+    console.log('📊 Groq (توسيع): عدد الكلمات:', wordCount);
+
+    return {
+      content: result.content || '',
+      title: result.title || topic,
+      metaTitle: result.metaTitle || result.title || topic,
+      metaDescription: result.metaDescription || result.excerpt || '',
+      keywords:
+        result.keywords ||
+        result.metaKeywords?.split(',').map((k: string) => k.trim()) ||
+        [],
+      wordCount,
+      provider: 'groq',
+      generationTime: 0,
+    };
+  } catch (error) {
+    console.error('❌ Groq: خطأ في توسيع المحتوى:', error);
+    return null;
+  }
+}
