@@ -120,7 +120,7 @@ export const PROVIDERS_INFO: Record<
     name: 'Groq',
     nameAr: 'جروك',
     isFree: true,
-    maxTokens: 16000,
+    maxTokens: 32000,
     supportsArabic: true,
     available: true,
   },
