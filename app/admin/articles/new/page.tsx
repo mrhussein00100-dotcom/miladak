@@ -457,6 +457,13 @@ export default function NewArticlePage() {
                     <option value="gemini">
                       {providersStatus.gemini ? '🟢' : '🔴'} Gemini
                     </option>
+                    <option value="cohere">
+                      {providersStatus.cohere ? '🟢' : '🔴'} Cohere
+                    </option>
+                    <option value="huggingface">
+                      {providersStatus.huggingface ? '🟢' : '🔴'} HuggingFace
+                    </option>
+                    <option value="local">🟢 Local AI</option>
                   </select>
                 </div>
                 <div>

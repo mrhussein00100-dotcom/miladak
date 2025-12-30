@@ -295,8 +295,15 @@ export default function AutoPublishPage() {
                   onChange={(e) => setProvider(e.target.value)}
                   className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900"
                 >
-                  <option value="gemini">Gemini (مجاني)</option>
-                  <option value="local">المولد المحلي</option>
+                  <option value="sona-v6">🌟 SONA 6.0 (المنسق الذكي)</option>
+                  <option value="sona-v5">⭐ SONA 5.0</option>
+                  <option value="sona-enhanced">🚀 SONA 4.01</option>
+                  <option value="sona">🟢 SONA v4</option>
+                  <option value="groq">🟢 Groq (سحابي)</option>
+                  <option value="gemini">🟢 Gemini (سحابي)</option>
+                  <option value="cohere">🟢 Cohere (سحابي)</option>
+                  <option value="huggingface">🟢 HuggingFace (سحابي)</option>
+                  <option value="local">🟢 Local AI (محلي)</option>
                 </select>
               </div>
 

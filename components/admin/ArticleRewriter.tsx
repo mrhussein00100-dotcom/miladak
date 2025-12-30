@@ -275,8 +275,21 @@ export default function ArticleRewriter({
                   onChange={(e) => setProvider(e.target.value)}
                   className="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="groq">Groq (أسرع)</option>
-                  <option value="gemini">Gemini (أذكى)</option>
+                  <optgroup label="🌟 SONA (محلي)">
+                    <option value="sona-v6">🌟 SONA 6.0 (المنسق الذكي)</option>
+                    <option value="sona-v5">⭐ SONA 5.0</option>
+                    <option value="sona-enhanced">🚀 SONA 4.01</option>
+                    <option value="sona">🟢 SONA v4</option>
+                  </optgroup>
+                  <optgroup label="☁️ سحابي">
+                    <option value="groq">🟢 Groq (أسرع)</option>
+                    <option value="gemini">🟢 Gemini (أذكى)</option>
+                    <option value="cohere">🟢 Cohere</option>
+                    <option value="huggingface">🟢 HuggingFace</option>
+                  </optgroup>
+                  <optgroup label="🖥️ محلي">
+                    <option value="local">🟢 Local AI</option>
+                  </optgroup>
                 </select>
               </div>
             </div>
