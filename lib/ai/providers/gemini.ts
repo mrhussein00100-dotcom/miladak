@@ -6,16 +6,19 @@
  */
 
 // النموذج الافتراضي - تم التحديث ديسمبر 2025
-// قائمة شاملة من نماذج Gemini المتاحة للـ fallback
-// مرتبة حسب الأولوية: الأحدث والأكثر استقراراً أولاً
-const DEFAULT_MODEL = 'gemini-2.5-flash';
+// ملاحظة: gemini-2.5-flash-lite هو النموذج الوحيد المتاح مجاناً حالياً
+// باقي النماذج (gemini-2.5-flash, gemini-2.5-pro, gemini-2.0-flash) تجاوزت الحصة المجانية
+const DEFAULT_MODEL = 'gemini-2.5-flash-lite';
 const FALLBACK_MODELS = [
-  // نماذج 2.5 الجديدة (الأحدث والأكثر استقراراً)
+  // نماذج 2.5 - مرتبة حسب التوفر
+  'gemini-2.5-flash',
   'gemini-2.5-pro',
-  'gemini-2.5-flash-8b',
-  // نماذج 2.0 (قد تكون محدودة الحصة)
-  'gemini-2.0-flash',
+  // نماذج 2.0
   'gemini-2.0-flash-lite',
+  'gemini-2.0-flash',
+  // نماذج latest
+  'gemini-flash-latest',
+  'gemini-pro-latest',
 ];
 
 // الحصول على جميع مفاتيح Gemini API المتاحة
