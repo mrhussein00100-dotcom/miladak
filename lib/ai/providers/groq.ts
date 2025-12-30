@@ -24,20 +24,21 @@ export interface GroqGenerationResponse {
 
 // الحصول على عدد الكلمات المطلوب - قيم واقعية لـ Groq
 // ملاحظة: Groq له حدود في طول الرد، لذا نستخدم قيم واقعية
+// الحد الأدنى المطلق منخفض جداً لتجنب رفض المقالات
 function getWordCount(length: string): {
   min: number;
   max: number;
   target: string;
-  absoluteMin: number; // الحد الأدنى المطلق الذي لا يجب النزول عنه
+  absoluteMin: number; // الحد الأدنى المطلق - منخفض جداً لقبول أي محتوى
 } {
   const lengthWords: Record<
     string,
     { min: number; max: number; target: string; absoluteMin: number }
   > = {
-    short: { min: 600, max: 900, target: '800', absoluteMin: 500 },
-    medium: { min: 1000, max: 1500, target: '1200', absoluteMin: 800 },
-    long: { min: 1500, max: 2500, target: '2000', absoluteMin: 1200 },
-    comprehensive: { min: 2000, max: 3500, target: '2500', absoluteMin: 1500 },
+    short: { min: 500, max: 800, target: '600', absoluteMin: 200 },
+    medium: { min: 800, max: 1200, target: '1000', absoluteMin: 300 },
+    long: { min: 1200, max: 2000, target: '1500', absoluteMin: 400 },
+    comprehensive: { min: 1500, max: 2500, target: '2000', absoluteMin: 500 },
   };
   return lengthWords[length] || lengthWords.medium;
 }
@@ -99,10 +100,6 @@ export async function generateArticle(
     '🔑 Groq: API Key:',
     apiKey ? `موجود (${apiKey.substring(0, 10)}...)` : '❌ غير موجود'
   );
-
-  // تحديد ما إذا كان المقال طويل جداً ويحتاج لتوليد متعدد
-  const isLongArticle =
-    request.length === 'comprehensive' || request.length === 'long';
 
   const prompt = `اكتب مقالاً عربياً شاملاً عن: "${request.topic}"
 
@@ -228,16 +225,18 @@ ${request.category ? `- التصنيف: ${request.category}` : ''}
     console.log('⏱️ Groq: الوقت المستغرق:', Date.now() - startTime, 'ms');
 
     // تحذير إذا كان عدد الكلمات أقل من الحد الأدنى المطلق
+    // لا نرفض المقال - نقبله مع تحذير فقط
     if (actualWordCount < wordConfig.absoluteMin) {
-      console.error(
-        `❌ Groq: عدد الكلمات (${actualWordCount}) أقل من الحد الأدنى المطلق (${wordConfig.absoluteMin})`
-      );
-      throw new Error(
-        `المقال قصير جداً (${actualWordCount} كلمة). الحد الأدنى المطلوب: ${wordConfig.absoluteMin} كلمة`
+      console.warn(
+        `⚠️ Groq: عدد الكلمات (${actualWordCount}) أقل من الحد الأدنى المطلق (${wordConfig.absoluteMin}) - لكن سنقبل المقال`
       );
     } else if (actualWordCount < wordConfig.min) {
       console.warn(
         `⚠️ Groq: عدد الكلمات (${actualWordCount}) أقل من الهدف (${wordConfig.min}) لكنه مقبول`
+      );
+    } else {
+      console.log(
+        `✅ Groq: عدد الكلمات (${actualWordCount}) ضمن النطاق المطلوب`
       );
     }
 
