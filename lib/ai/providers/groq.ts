@@ -79,6 +79,10 @@ export async function generateArticle(
     throw new Error(error.message);
   }
 
+  const wordConfig = getWordCount(request.length);
+  const sectionConfig = getSectionCount(request.length);
+  const styleDesc = getStyleDescription(request.style || 'formal');
+
   console.log('🚀 Groq: بدء التوليد...');
   console.log('📝 Groq: الموضوع:', request.topic);
   console.log('📏 Groq: الطول:', request.length);
@@ -93,10 +97,6 @@ export async function generateArticle(
     '🔑 Groq: API Key:',
     apiKey ? `موجود (${apiKey.substring(0, 10)}...)` : '❌ غير موجود'
   );
-
-  const wordConfig = getWordCount(request.length);
-  const sectionConfig = getSectionCount(request.length);
-  const styleDesc = getStyleDescription(request.style || 'formal');
 
   // تحديد ما إذا كان المقال طويل جداً ويحتاج لتوليد متعدد
   const isLongArticle =
