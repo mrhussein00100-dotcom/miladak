@@ -6,17 +6,15 @@
  */
 
 // النموذج الافتراضي - تم التحديث يناير 2026
-// v6.2: إصلاح مشكلة المقالات القصيرة - استخدام نماذج أقوى
-const DEFAULT_MODEL = 'gemini-1.5-flash';
+// v6.3: استخدام gemini-2.5-flash كنموذج افتراضي (الأحدث والأسرع)
+const DEFAULT_MODEL = 'gemini-2.5-flash';
 const FALLBACK_MODELS = [
-  // نماذج 1.5 - الأكثر استقراراً وتدعم مخرجات طويلة
+  // نماذج 2.x - الأحدث
+  'gemini-2.0-flash',
+  // نماذج 1.5 - الأكثر استقراراً
+  'gemini-1.5-flash',
   'gemini-1.5-pro',
   'gemini-1.5-flash-latest',
-  // نماذج 2.0
-  'gemini-2.0-flash',
-  // نماذج latest
-  'gemini-flash-latest',
-  'gemini-pro-latest',
 ];
 
 // الحصول على جميع مفاتيح Gemini API المتاحة
@@ -274,6 +272,10 @@ ${keywordsText}
     // حلقة على النماذج
     for (const model of models) {
       attemptedModels.push(`${keyPrefix}:${model}`);
+      // إضافة timeout للطلب (45 ثانية)
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 45000);
+
       try {
         console.log(`🔄 Gemini: ${keyPrefix}... + ${model}`);
 
@@ -286,12 +288,15 @@ ${keywordsText}
             contents: [{ parts: [{ text: prompt }] }],
             generationConfig: {
               temperature: 0.7,
-              maxOutputTokens: 16384, // v6.1: زيادة الحد الأقصى للتوكنز
+              maxOutputTokens: 8192, // v6.3: تقليل التوكنز لتسريع الاستجابة
               topP: 0.95,
               topK: 40,
             },
           }),
+          signal: controller.signal,
         });
+
+        clearTimeout(timeoutId);
 
         console.log(`📊 Gemini ${model} Response Status: ${response.status}`);
 
@@ -358,6 +363,20 @@ ${keywordsText}
           continue;
         }
       } catch (e: any) {
+        clearTimeout(timeoutId);
+
+        // التحقق من خطأ timeout
+        if (e.name === 'AbortError') {
+          lastError = JSON.stringify({
+            provider: 'gemini',
+            model,
+            key: keyPrefix,
+            error: 'Request timeout after 45 seconds',
+          });
+          console.warn(`⚠️ Gemini ${model} timeout - جرب النموذج التالي`);
+          continue;
+        }
+
         lastError = JSON.stringify({
           provider: 'gemini',
           model,
