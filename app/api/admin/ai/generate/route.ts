@@ -72,12 +72,50 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('AI generation error:', error);
+
+    // استخراج رسالة الخطأ الحقيقية
+    const errorMessage = error instanceof Error ? error.message : String(error);
+
+    // تحديد نوع الخطأ وإرجاع رسالة مفيدة
+    let userFriendlyError = 'فشل في توليد المحتوى';
+
+    if (
+      errorMessage.includes('API key not valid') ||
+      errorMessage.includes('INVALID_KEY')
+    ) {
+      userFriendlyError = 'مفتاح API غير صالح. يرجى التحقق من إعدادات المفتاح.';
+    } else if (
+      errorMessage.includes('API_NOT_ENABLED') ||
+      errorMessage.includes('403')
+    ) {
+      userFriendlyError =
+        'خدمة Gemini API غير مفعّلة. يرجى تفعيلها من Google Cloud Console.';
+    } else if (
+      errorMessage.includes('quota') ||
+      errorMessage.includes('429') ||
+      errorMessage.includes('RESOURCE_EXHAUSTED')
+    ) {
+      userFriendlyError =
+        'تم تجاوز حصة API. يرجى الانتظار أو استخدام مزود آخر.';
+    } else if (
+      errorMessage.includes('SAFETY') ||
+      errorMessage.includes('blocked')
+    ) {
+      userFriendlyError =
+        'تم حظر المحتوى بسبب سياسات الأمان. جرب موضوعاً مختلفاً.';
+    } else if (
+      errorMessage.includes('فشل') ||
+      errorMessage.includes('failed')
+    ) {
+      userFriendlyError = errorMessage; // استخدم الرسالة الأصلية إذا كانت بالعربية
+    }
+
     return NextResponse.json(
       {
         success: false,
-        error: 'فشل في توليد المحتوى',
-        details:
-          process.env.NODE_ENV === 'development' ? String(error) : undefined,
+        error: userFriendlyError,
+        details: errorMessage, // دائماً أرجع التفاصيل للمساعدة في التشخيص
+        provider: body?.provider || 'unknown',
       },
       { status: 500 }
     );
