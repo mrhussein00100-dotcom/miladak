@@ -24,11 +24,7 @@ import type {
   ContentTone,
 } from '../sona/types';
 import type { EnhancedGenerationRequest } from '../sona/enhancedGenerator';
-import {
-  injectImagesIntoContent,
-  getArticleCoverImage,
-  addSmartImagesToArticle,
-} from '../images/pexels';
+import { addSmartImagesToArticle } from '../images/pexels';
 
 export type AIProvider =
   | 'gemini'
@@ -475,7 +471,7 @@ export async function generateArticle(
   throw lastError || new Error('فشل التوليد مع جميع المزودين');
 }
 
-// توليد مقال مع صور (محسّن - الإصدار 3.0)
+// توليد مقال مع صور (محسّن - الإصدار 3.1)
 export async function generateArticleWithImages(
   request: GenerationRequest
 ): Promise<GenerationResponse> {
@@ -485,7 +481,12 @@ export async function generateArticleWithImages(
   // إضافة الصور إذا طُلب ذلك
   if (request.includeImages !== false) {
     try {
-      console.log('🖼️ [Generator] بدء إضافة الصور الذكية للمقال...');
+      console.log('🖼️ [Generator v3.1] بدء إضافة الصور الذكية للمقال...');
+      console.log(
+        `📝 [Generator v3.1] عدد الصور المطلوب: ${
+          request.imageCount || 'تلقائي'
+        }`
+      );
 
       // استخدام النظام الذكي الجديد
       const articleWithImages = await addSmartImagesToArticle(
@@ -501,13 +502,23 @@ export async function generateArticleWithImages(
       article.content = articleWithImages.content;
 
       // تعيين الصورة البارزة
-      article.coverImage = articleWithImages.featuredImage || undefined;
+      if (articleWithImages.featuredImage) {
+        article.coverImage = articleWithImages.featuredImage;
+        console.log(
+          `✅ [Generator v3.1] تم تعيين الصورة البارزة: ${article.coverImage.substring(
+            0,
+            60
+          )}...`
+        );
+      } else {
+        console.warn(`⚠️ [Generator v3.1] لم يتم العثور على صورة بارزة`);
+      }
 
       console.log(
-        `✅ [Generator] تم إضافة ${articleWithImages.imagesAdded} صور + صورة بارزة`
+        `✅ [Generator v3.1] تم إضافة ${articleWithImages.imagesAdded} صور للمحتوى`
       );
     } catch (error) {
-      console.error('فشل في إضافة الصور:', error);
+      console.error('❌ [Generator v3.1] فشل في إضافة الصور:', error);
       // نستمر بدون صور
     }
   }

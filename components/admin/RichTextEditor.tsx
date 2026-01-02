@@ -30,8 +30,8 @@ import {
   Globe,
   Upload,
   TableOfContents,
-  Sparkles,
 } from 'lucide-react';
+import ImageToolbar from './ImageToolbar';
 
 interface RichTextEditorProps {
   value: string;
@@ -71,6 +71,10 @@ export default function RichTextEditor({
   // حالة الروابط
   const [linkUrl, setLinkUrl] = useState('');
   const [linkText, setLinkText] = useState('');
+
+  // حالة شريط أدوات الصور
+  const [selectedImageElement, setSelectedImageElement] =
+    useState<HTMLImageElement | null>(null);
 
   // نظام التراجع والإعادة
   const [history, setHistory] = useState<HistoryState>({
@@ -183,13 +187,10 @@ export default function RichTextEditor({
   const handleInsertImage = () => {
     const url = imageMode === 'url' ? imageUrl : selectedImage;
     if (url) {
+      // إدراج الصورة بدون figcaption - فقط alt للسيو والوصول
       const html = `<figure class="my-4"><img src="${url}" alt="${
         imageAlt || 'صورة'
-      }" class="max-w-full h-auto rounded-lg mx-auto" />${
-        imageAlt
-          ? `<figcaption class="text-center text-sm text-gray-500 mt-2">${imageAlt}</figcaption>`
-          : ''
-      }</figure>`;
+      }" class="max-w-full h-auto rounded-lg mx-auto" /></figure>`;
       insertHTML(html);
       resetImageModal();
     }
@@ -251,6 +252,52 @@ export default function RichTextEditor({
       onChange(editorRef.current.innerHTML);
     }
   };
+
+  // معالجة النقر على الصور
+  const handleEditorClick = useCallback(
+    (e: React.MouseEvent) => {
+      const target = e.target as HTMLElement;
+
+      // التحقق إذا كان العنصر المنقور عليه صورة
+      if (target.tagName === 'IMG') {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const imgElement = target as HTMLImageElement;
+
+        // إضافة تأثير التحديد
+        imgElement.style.outline = '3px solid #3b82f6';
+        imgElement.style.outlineOffset = '2px';
+        imgElement.style.borderRadius = '8px';
+
+        setSelectedImageElement(imgElement);
+      } else {
+        // إذا نقر على مكان آخر، إزالة التحديد
+        if (selectedImageElement) {
+          selectedImageElement.style.outline = '';
+          selectedImageElement.style.outlineOffset = '';
+          setSelectedImageElement(null);
+        }
+      }
+    },
+    [selectedImageElement]
+  );
+
+  // إغلاق شريط أدوات الصور
+  const handleCloseImageToolbar = useCallback(() => {
+    if (selectedImageElement) {
+      selectedImageElement.style.outline = '';
+      selectedImageElement.style.outlineOffset = '';
+      setSelectedImageElement(null);
+    }
+  }, [selectedImageElement]);
+
+  // تحديث المحتوى بعد تعديل الصورة
+  const handleImageUpdate = useCallback(() => {
+    if (editorRef.current) {
+      onChange(editorRef.current.innerHTML);
+    }
+  }, [onChange]);
 
   // أزرار شريط الأدوات
   const toolbarButtons = [
@@ -399,6 +446,7 @@ export default function RichTextEditor({
           ref={editorRef}
           contentEditable
           onInput={handleInput}
+          onClick={handleEditorClick}
           dangerouslySetInnerHTML={{ __html: value }}
           className="bg-white dark:bg-gray-900 border border-t-0 border-gray-200 dark:border-gray-700 rounded-b-xl p-6 prose prose-lg dark:prose-invert max-w-none focus:outline-none focus:ring-2 focus:ring-blue-500 overflow-auto flex-1"
           style={{ minHeight }}
@@ -632,6 +680,15 @@ export default function RichTextEditor({
             </div>
           </div>
         </div>
+      )}
+
+      {/* شريط أدوات الصور */}
+      {selectedImageElement && !isPreview && (
+        <ImageToolbar
+          imageElement={selectedImageElement}
+          onClose={handleCloseImageToolbar}
+          onUpdate={handleImageUpdate}
+        />
       )}
 
       {/* إحصائيات */}

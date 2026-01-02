@@ -83,7 +83,7 @@ export default function NewArticlePage() {
   >('sona-v6');
   const [aiKeywords, setAiKeywords] = useState('');
   const [includeImages, setIncludeImages] = useState(true);
-  const [imageCount, setImageCount] = useState(3);
+  const [imageCount, setImageCount] = useState<number | 'auto'>('auto'); // تلقائي بناءً على حجم المقال
   const [providersStatus, setProvidersStatus] = useState<
     Record<string, boolean>
   >({
@@ -256,9 +256,6 @@ export default function NewArticlePage() {
             <img src="${images[0]}" alt="${
             title || 'صورة توضيحية'
           }" class="w-full rounded-xl shadow-lg" loading="lazy" />
-            <figcaption class="text-center text-sm text-gray-500 mt-2">${
-              title || 'صورة توضيحية'
-            }</figcaption>
           </figure>`;
 
           // إدراج الصورة بعد أول فقرة أو عنوان
@@ -294,10 +291,13 @@ export default function NewArticlePage() {
     setAddingImages(false);
   };
 
-  // إدراج صورة في المحتوى
+  // إدراج صورة في المحتوى - يتم إضافتها في نهاية المحتوى
+  // ملاحظة: لإدراج الصورة في موقع المؤشر، استخدم المحرر المرئي المحسن
   const handleInsertImage = (url: string) => {
-    const imageHtml = `\n<figure class="my-6">\n  <img src="${url}" alt="" class="w-full rounded-xl" />\n  <figcaption class="text-center text-sm text-gray-500 mt-2">وصف الصورة</figcaption>\n</figure>\n`;
-    setContent(content + imageHtml);
+    const imageHtml = `\n<figure class="my-6">\n  <img src="${url}" alt="صورة توضيحية" class="w-full rounded-xl" />\n</figure>\n`;
+
+    // إضافة الصورة في نهاية المحتوى
+    setContent((prevContent) => prevContent + imageHtml);
     setShowImagePicker(false);
   };
 
@@ -554,9 +554,10 @@ export default function NewArticlePage() {
                 <button
                   onClick={() => setShowImagePicker(!showImagePicker)}
                   className="flex items-center gap-2 px-4 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50"
+                  title="إضافة صورة في نهاية المحتوى. لإدراج في موقع المؤشر، استخدم زر الصورة في المحرر المرئي"
                 >
                   <Image className="w-4 h-4" />
-                  إدراج صورة
+                  صورة +
                 </button>
                 <button
                   onClick={handleFormatContent}

@@ -38,7 +38,11 @@ export async function POST(request: NextRequest) {
 
     // استخدام التوليد مع الصور إذا طُلب
     const includeImages = body.includeImages !== false;
-    const imageCount = body.imageCount || 3;
+    // إذا لم يُحدد عدد الصور، سيتم حسابه تلقائياً بناءً على حجم المقال
+    const imageCount =
+      body.imageCount === 'auto' || !body.imageCount
+        ? undefined
+        : body.imageCount;
 
     const result = includeImages
       ? await generateArticleWithImages({
@@ -50,7 +54,7 @@ export async function POST(request: NextRequest) {
           category: body.category,
           variables: body.variables,
           includeImages,
-          imageCount,
+          imageCount, // undefined = حساب تلقائي
         })
       : await generateArticle({
           topic: body.topic,

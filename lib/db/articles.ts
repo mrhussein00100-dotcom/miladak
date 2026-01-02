@@ -258,7 +258,7 @@ export async function createArticle(input: ArticleInput): Promise<number> {
       input.category_id,
       input.published ?? 0,
       input.featured ?? 0,
-      input.author || 'admin',
+      input.author || '',
       input.read_time || Math.ceil(input.content.split(/\s+/).length / 200),
       input.meta_description || '',
       input.meta_keywords || '',

@@ -167,9 +167,6 @@ export default function EditArticlePage({
             <img src="${images[0]}" alt="${
             title || 'صورة توضيحية'
           }" class="w-full rounded-xl shadow-lg" loading="lazy" />
-            <figcaption class="text-center text-sm text-gray-500 mt-2">${
-              title || 'صورة توضيحية'
-            }</figcaption>
           </figure>`;
 
           // إدراج الصورة بعد أول فقرة أو عنوان
@@ -206,7 +203,7 @@ export default function EditArticlePage({
 
   // إدراج صورة في المحتوى
   const handleInsertImage = (url: string) => {
-    const imageHtml = `\n<figure class="my-6">\n  <img src="${url}" alt="" class="w-full rounded-xl" />\n  <figcaption class="text-center text-sm text-gray-500 mt-2">وصف الصورة</figcaption>\n</figure>\n`;
+    const imageHtml = `\n<figure class="my-6">\n  <img src="${url}" alt="صورة توضيحية" class="w-full rounded-xl" />\n</figure>\n`;
     setContent(content + imageHtml);
     setShowImagePicker(false);
   };

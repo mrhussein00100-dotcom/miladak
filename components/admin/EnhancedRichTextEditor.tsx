@@ -44,7 +44,12 @@ import {
   Zap,
   Settings,
   Info,
+  ChevronDown,
+  ChevronUp,
+  Check,
+  Sliders,
 } from 'lucide-react';
+import ImageToolbar from './ImageToolbar';
 
 interface EnhancedRichTextEditorProps {
   value: string;
@@ -82,6 +87,80 @@ interface ContentStats {
   readTime: number;
 }
 
+// تعريف معرفات الأدوات الفردية
+type ToolId =
+  | 'bold'
+  | 'italic'
+  | 'underline'
+  | 'strikethrough'
+  | 'h1'
+  | 'h2'
+  | 'h3'
+  | 'paragraph'
+  | 'unorderedList'
+  | 'orderedList'
+  | 'indent'
+  | 'outdent'
+  | 'alignRight'
+  | 'alignCenter'
+  | 'alignLeft'
+  | 'alignJustify'
+  | 'link'
+  | 'image'
+  | 'quote'
+  | 'code'
+  | 'toc'
+  | 'autoFormat'
+  | 'autoImages'
+  | 'removeFormat'
+  | 'undo'
+  | 'redo';
+
+// تعريف مجموعات الأدوات للعرض فقط
+type ToolGroupId =
+  | 'formatting'
+  | 'headings'
+  | 'lists'
+  | 'alignment'
+  | 'insert'
+  | 'advanced'
+  | 'history';
+
+interface ToolbarPreferences {
+  enabledTools: ToolId[];
+  compactMode: boolean;
+}
+
+// قائمة كل الأدوات الافتراضية
+const ALL_TOOLS: ToolId[] = [
+  'bold',
+  'italic',
+  'underline',
+  'strikethrough',
+  'h1',
+  'h2',
+  'h3',
+  'paragraph',
+  'unorderedList',
+  'orderedList',
+  'indent',
+  'outdent',
+  'alignRight',
+  'alignCenter',
+  'alignLeft',
+  'alignJustify',
+  'link',
+  'image',
+  'quote',
+  'code',
+  'toc',
+  'autoFormat',
+  'autoImages',
+  'removeFormat',
+  'undo',
+  'redo',
+];
+
 export default function EnhancedRichTextEditor({
   value,
   onChange,
@@ -99,17 +178,24 @@ export default function EnhancedRichTextEditor({
   const [showSettingsModal, setShowSettingsModal] = useState(false);
 
   // حالة الصور
-  const [imageMode, setImageMode] = useState<'url' | 'search'>('search');
+  const [imageMode, setImageMode] = useState<'upload' | 'url' | 'search'>(
+    'search'
+  );
   const [imageUrl, setImageUrl] = useState('');
   const [imageAlt, setImageAlt] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<string[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const [selectedImage, setSelectedImage] = useState('');
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // حالة الروابط
   const [linkUrl, setLinkUrl] = useState('');
   const [linkText, setLinkText] = useState('');
+
+  // حفظ موضع المؤشر للإدراج
+  const savedSelectionRef = useRef<Range | null>(null);
 
   // حالة التنسيق
   const [formattingState, setFormattingState] = useState<FormattingState>({
@@ -137,6 +223,88 @@ export default function EnhancedRichTextEditor({
   const [autoSaveStatus, setAutoSaveStatus] = useState<
     'saved' | 'saving' | 'error'
   >('saved');
+
+  // حالة شريط أدوات الصور
+  const [selectedImageElement, setSelectedImageElement] =
+    useState<HTMLImageElement | null>(null);
+
+  // حالة تخصيص شريط الأدوات
+  const [showToolbarCustomizer, setShowToolbarCustomizer] = useState(false);
+  const [toolbarPreferences, setToolbarPreferences] =
+    useState<ToolbarPreferences>(() => {
+      // تحميل التفضيلات من localStorage
+      if (typeof window !== 'undefined') {
+        const saved = localStorage.getItem('editor-toolbar-preferences-v2');
+        if (saved) {
+          try {
+            return JSON.parse(saved);
+          } catch {
+            // تجاهل الأخطاء
+          }
+        }
+      }
+      // الإعدادات الافتراضية - كل الأدوات مفعلة
+      return {
+        enabledTools: [...ALL_TOOLS],
+        compactMode: false,
+      };
+    });
+
+  // حفظ تفضيلات شريط الأدوات
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(
+        'editor-toolbar-preferences-v2',
+        JSON.stringify(toolbarPreferences)
+      );
+    }
+  }, [toolbarPreferences]);
+
+  // تبديل أداة فردية
+  const toggleTool = (toolId: ToolId) => {
+    setToolbarPreferences((prev) => {
+      const isEnabled = prev.enabledTools.includes(toolId);
+      return {
+        ...prev,
+        enabledTools: isEnabled
+          ? prev.enabledTools.filter((id) => id !== toolId)
+          : [...prev.enabledTools, toolId],
+      };
+    });
+  };
+
+  // تفعيل/إلغاء كل أدوات مجموعة
+  const toggleGroupTools = (groupTools: ToolId[], enable: boolean) => {
+    setToolbarPreferences((prev) => {
+      if (enable) {
+        const newTools = [...new Set([...prev.enabledTools, ...groupTools])];
+        return { ...prev, enabledTools: newTools };
+      } else {
+        return {
+          ...prev,
+          enabledTools: prev.enabledTools.filter(
+            (t) => !groupTools.includes(t)
+          ),
+        };
+      }
+    });
+  };
+
+  // تبديل الوضع المضغوط
+  const toggleCompactMode = () => {
+    setToolbarPreferences((prev) => ({
+      ...prev,
+      compactMode: !prev.compactMode,
+    }));
+  };
+
+  // إعادة تعيين التفضيلات
+  const resetToolbarPreferences = () => {
+    setToolbarPreferences({
+      enabledTools: [...ALL_TOOLS],
+      compactMode: false,
+    });
+  };
 
   // إحصائيات المحتوى
   const contentStats = useMemo((): ContentStats => {
@@ -264,6 +432,7 @@ export default function EnhancedRichTextEditor({
             break;
           case 'k':
             e.preventDefault();
+            saveSelection();
             setShowLinkModal(true);
             break;
         }
@@ -291,13 +460,13 @@ export default function EnhancedRichTextEditor({
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [handleUndo, handleRedo]);
 
-  // البحث عن صور
+  // البحث عن صور - محسّن لإرجاع نتائج أكثر
   const handleImageSearch = async () => {
     if (!searchQuery.trim()) return;
     setSearchLoading(true);
     try {
       const res = await fetch(
-        `/api/images/search?q=${encodeURIComponent(searchQuery)}&count=12`
+        `/api/images/search?q=${encodeURIComponent(searchQuery)}&count=24`
       );
       const data = await res.json();
       if (data.success) {
@@ -307,6 +476,46 @@ export default function EnhancedRichTextEditor({
       console.error('Search error:', error);
     }
     setSearchLoading(false);
+  };
+
+  // رفع صورة من الكمبيوتر
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // التحقق من نوع الملف
+    if (!file.type.startsWith('image/')) {
+      alert('يرجى اختيار ملف صورة');
+      return;
+    }
+
+    // التحقق من حجم الملف (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('حجم الصورة يجب أن يكون أقل من 5 ميجابايت');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await fetch('/api/admin/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (data.success && data.url) {
+        setSelectedImage(data.url);
+      } else {
+        alert(data.error || 'فشل في رفع الصورة');
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      alert('حدث خطأ أثناء رفع الصورة');
+    }
+    setUploading(false);
   };
 
   // تنفيذ أمر التنسيق
@@ -340,31 +549,98 @@ export default function EnhancedRichTextEditor({
     });
   }, []);
 
-  // إدراج HTML
+  // حفظ موضع المؤشر الحالي
+  const saveSelection = useCallback(() => {
+    const selection = window.getSelection();
+    if (selection && selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0);
+      // التأكد من أن المؤشر داخل المحرر
+      if (
+        editorRef.current &&
+        editorRef.current.contains(range.commonAncestorContainer)
+      ) {
+        savedSelectionRef.current = range.cloneRange();
+      }
+    }
+  }, []);
+
+  // استعادة موضع المؤشر المحفوظ
+  const restoreSelection = useCallback(() => {
+    if (savedSelectionRef.current && editorRef.current) {
+      editorRef.current.focus();
+      const selection = window.getSelection();
+      if (selection) {
+        selection.removeAllRanges();
+        try {
+          selection.addRange(savedSelectionRef.current);
+        } catch (e) {
+          // إذا فشلت الاستعادة، ضع المؤشر في نهاية المحرر
+          const range = document.createRange();
+          range.selectNodeContents(editorRef.current);
+          range.collapse(false);
+          selection.addRange(range);
+        }
+      }
+    }
+  }, []);
+
+  // إدراج HTML في موضع المؤشر
   const insertHTML = useCallback(
     (html: string) => {
-      document.execCommand('insertHTML', false, html);
+      // استعادة موضع المؤشر أولاً
+      restoreSelection();
+
+      // محاولة الإدراج باستخدام execCommand
+      const success = document.execCommand('insertHTML', false, html);
+
+      // إذا فشل execCommand، استخدم طريقة بديلة
+      if (!success && editorRef.current) {
+        const selection = window.getSelection();
+        if (selection && selection.rangeCount > 0) {
+          const range = selection.getRangeAt(0);
+          range.deleteContents();
+
+          // إنشاء عنصر مؤقت لتحويل HTML إلى عقد DOM
+          const tempDiv = document.createElement('div');
+          tempDiv.innerHTML = html;
+
+          // إدراج كل العقد
+          const fragment = document.createDocumentFragment();
+          while (tempDiv.firstChild) {
+            fragment.appendChild(tempDiv.firstChild);
+          }
+          range.insertNode(fragment);
+
+          // تحريك المؤشر بعد المحتوى المدرج
+          range.collapse(false);
+          selection.removeAllRanges();
+          selection.addRange(range);
+        } else {
+          // إذا لم يكن هناك تحديد، أضف في النهاية
+          editorRef.current.innerHTML += html;
+        }
+      }
+
       editorRef.current?.focus();
       if (editorRef.current) {
         onChange(editorRef.current.innerHTML);
       }
+
+      // مسح المؤشر المحفوظ
+      savedSelectionRef.current = null;
     },
-    [onChange]
+    [onChange, restoreSelection]
   );
 
   // إدراج صورة
   const handleInsertImage = () => {
     const url = imageMode === 'url' ? imageUrl : selectedImage;
     if (url) {
+      // إدراج الصورة بدون figcaption - فقط alt للسيو والوصول
       const html = `<figure class="my-6 text-center">
         <img src="${url}" alt="${
         imageAlt || 'صورة'
       }" class="max-w-full h-auto rounded-xl mx-auto shadow-lg" loading="lazy" />
-        ${
-          imageAlt
-            ? `<figcaption class="text-center text-sm text-gray-500 dark:text-gray-400 mt-3 italic">${imageAlt}</figcaption>`
-            : ''
-        }
       </figure>`;
       insertHTML(html);
       resetImageModal();
@@ -519,30 +795,88 @@ export default function EnhancedRichTextEditor({
     }
   };
 
-  // أزرار شريط الأدوات المحسن
+  // معالجة النقر على الصور في المحرر
+  const handleEditorClick = useCallback(
+    (e: React.MouseEvent) => {
+      const target = e.target as HTMLElement;
+
+      // التحقق إذا كان العنصر المنقور عليه صورة
+      if (target.tagName === 'IMG') {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const imgElement = target as HTMLImageElement;
+
+        // إزالة التحديد من الصورة السابقة إن وجدت
+        if (selectedImageElement && selectedImageElement !== imgElement) {
+          selectedImageElement.style.outline = '';
+          selectedImageElement.style.outlineOffset = '';
+        }
+
+        // إضافة تأثير التحديد للصورة الجديدة
+        imgElement.style.outline = '3px solid #3b82f6';
+        imgElement.style.outlineOffset = '2px';
+        imgElement.style.borderRadius = '8px';
+
+        setSelectedImageElement(imgElement);
+      } else {
+        // إذا نقر على مكان آخر، إزالة التحديد
+        if (selectedImageElement) {
+          selectedImageElement.style.outline = '';
+          selectedImageElement.style.outlineOffset = '';
+          setSelectedImageElement(null);
+        }
+      }
+    },
+    [selectedImageElement]
+  );
+
+  // إغلاق شريط أدوات الصور
+  const handleCloseImageToolbar = useCallback(() => {
+    if (selectedImageElement) {
+      selectedImageElement.style.outline = '';
+      selectedImageElement.style.outlineOffset = '';
+      setSelectedImageElement(null);
+    }
+  }, [selectedImageElement]);
+
+  // تحديث المحتوى بعد تعديل الصورة
+  const handleImageUpdate = useCallback(() => {
+    if (editorRef.current) {
+      onChange(editorRef.current.innerHTML);
+    }
+  }, [onChange]);
+
+  // أزرار شريط الأدوات المحسن مع معرفات فردية
   const toolbarGroups = [
     {
+      id: 'formatting' as ToolGroupId,
       name: 'تنسيق النص',
+      toolIds: ['bold', 'italic', 'underline', 'strikethrough'] as ToolId[],
       buttons: [
         {
+          toolId: 'bold' as ToolId,
           icon: Bold,
           command: 'bold',
           title: 'عريض (Ctrl+B)',
           active: formattingState.isBold,
         },
         {
+          toolId: 'italic' as ToolId,
           icon: Italic,
           command: 'italic',
           title: 'مائل (Ctrl+I)',
           active: formattingState.isItalic,
         },
         {
+          toolId: 'underline' as ToolId,
           icon: Underline,
           command: 'underline',
           title: 'تسطير (Ctrl+U)',
           active: formattingState.isUnderline,
         },
         {
+          toolId: 'strikethrough' as ToolId,
           icon: Strikethrough,
           command: 'strikeThrough',
           title: 'يتوسطه خط',
@@ -551,44 +885,70 @@ export default function EnhancedRichTextEditor({
       ],
     },
     {
+      id: 'headings' as ToolGroupId,
       name: 'العناوين',
+      toolIds: ['h1', 'h2', 'h3', 'paragraph'] as ToolId[],
       buttons: [
         {
+          toolId: 'h1' as ToolId,
           icon: Heading1,
           command: 'formatBlock',
           value: 'h1',
           title: 'عنوان رئيسي (Ctrl+Alt+1)',
         },
         {
+          toolId: 'h2' as ToolId,
           icon: Heading2,
           command: 'formatBlock',
           value: 'h2',
           title: 'عنوان فرعي (Ctrl+Alt+2)',
         },
         {
+          toolId: 'h3' as ToolId,
           icon: Heading3,
           command: 'formatBlock',
           value: 'h3',
           title: 'عنوان صغير (Ctrl+Alt+3)',
         },
-        { icon: Type, command: 'formatBlock', value: 'p', title: 'فقرة عادية' },
+        {
+          toolId: 'paragraph' as ToolId,
+          icon: Type,
+          command: 'formatBlock',
+          value: 'p',
+          title: 'فقرة عادية',
+        },
       ],
     },
     {
-      name: 'القوائم والمحاذاة',
+      id: 'lists' as ToolGroupId,
+      name: 'القوائم',
+      toolIds: [
+        'unorderedList',
+        'orderedList',
+        'indent',
+        'outdent',
+      ] as ToolId[],
       buttons: [
-        { icon: List, command: 'insertUnorderedList', title: 'قائمة نقطية' },
         {
+          toolId: 'unorderedList' as ToolId,
+          icon: List,
+          command: 'insertUnorderedList',
+          title: 'قائمة نقطية',
+        },
+        {
+          toolId: 'orderedList' as ToolId,
           icon: ListOrdered,
           command: 'insertOrderedList',
           title: 'قائمة مرقمة',
         },
         {
+          toolId: 'indent' as ToolId,
           icon: IndentIncrease,
           command: 'indent',
           title: 'زيادة المسافة البادئة',
         },
         {
+          toolId: 'outdent' as ToolId,
           icon: IndentDecrease,
           command: 'outdent',
           title: 'تقليل المسافة البادئة',
@@ -596,59 +956,125 @@ export default function EnhancedRichTextEditor({
       ],
     },
     {
+      id: 'alignment' as ToolGroupId,
       name: 'المحاذاة',
+      toolIds: [
+        'alignRight',
+        'alignCenter',
+        'alignLeft',
+        'alignJustify',
+      ] as ToolId[],
       buttons: [
-        { icon: AlignRight, command: 'justifyRight', title: 'محاذاة يمين' },
-        { icon: AlignCenter, command: 'justifyCenter', title: 'توسيط' },
-        { icon: AlignLeft, command: 'justifyLeft', title: 'محاذاة يسار' },
-        { icon: AlignJustify, command: 'justifyFull', title: 'ضبط' },
+        {
+          toolId: 'alignRight' as ToolId,
+          icon: AlignRight,
+          command: 'justifyRight',
+          title: 'محاذاة يمين',
+        },
+        {
+          toolId: 'alignCenter' as ToolId,
+          icon: AlignCenter,
+          command: 'justifyCenter',
+          title: 'توسيط',
+        },
+        {
+          toolId: 'alignLeft' as ToolId,
+          icon: AlignLeft,
+          command: 'justifyLeft',
+          title: 'محاذاة يسار',
+        },
+        {
+          toolId: 'alignJustify' as ToolId,
+          icon: AlignJustify,
+          command: 'justifyFull',
+          title: 'ضبط',
+        },
       ],
     },
     {
+      id: 'insert' as ToolGroupId,
       name: 'إدراج',
+      toolIds: ['link', 'image', 'quote', 'code'] as ToolId[],
       buttons: [
         {
+          toolId: 'link' as ToolId,
           icon: Link,
-          action: () => setShowLinkModal(true),
+          action: () => {
+            saveSelection();
+            setShowLinkModal(true);
+          },
           title: 'إدراج رابط (Ctrl+K)',
         },
         {
+          toolId: 'image' as ToolId,
           icon: Image,
-          action: () => setShowImageModal(true),
+          action: () => {
+            saveSelection();
+            setShowImageModal(true);
+          },
           title: 'إدراج صورة',
         },
         {
+          toolId: 'quote' as ToolId,
           icon: Quote,
           command: 'formatBlock',
           value: 'blockquote',
           title: 'اقتباس',
         },
-        { icon: Code, command: 'formatBlock', value: 'pre', title: 'كود' },
+        {
+          toolId: 'code' as ToolId,
+          icon: Code,
+          command: 'formatBlock',
+          value: 'pre',
+          title: 'كود',
+        },
       ],
     },
     {
+      id: 'advanced' as ToolGroupId,
       name: 'أدوات متقدمة',
+      toolIds: ['toc', 'autoFormat', 'autoImages', 'removeFormat'] as ToolId[],
       buttons: [
         {
+          toolId: 'toc' as ToolId,
           icon: TableOfContents,
           action: generateTOC,
           title: 'إنشاء جدول محتويات',
         },
-        { icon: Sparkles, action: applyAutoFormat, title: 'تنسيق تلقائي' },
-        { icon: Zap, action: addAutoImages, title: 'إضافة صور تلقائية' },
-        { icon: RotateCcw, command: 'removeFormat', title: 'إزالة التنسيق' },
+        {
+          toolId: 'autoFormat' as ToolId,
+          icon: Sparkles,
+          action: applyAutoFormat,
+          title: 'تنسيق تلقائي',
+        },
+        {
+          toolId: 'autoImages' as ToolId,
+          icon: Zap,
+          action: addAutoImages,
+          title: 'إضافة صور تلقائية',
+        },
+        {
+          toolId: 'removeFormat' as ToolId,
+          icon: RotateCcw,
+          command: 'removeFormat',
+          title: 'إزالة التنسيق',
+        },
       ],
     },
     {
+      id: 'history' as ToolGroupId,
       name: 'التراجع والإعادة',
+      toolIds: ['undo', 'redo'] as ToolId[],
       buttons: [
         {
+          toolId: 'undo' as ToolId,
           icon: Undo,
           action: handleUndo,
           title: 'تراجع (Ctrl+Z)',
           disabled: history.past.length === 0,
         },
         {
+          toolId: 'redo' as ToolId,
           icon: Redo,
           action: handleRedo,
           title: 'إعادة (Ctrl+Y)',
@@ -658,6 +1084,27 @@ export default function EnhancedRichTextEditor({
     },
   ];
 
+  // تصفية الأدوات المفعلة فقط لكل مجموعة
+  const getEnabledButtonsForGroup = (group: (typeof toolbarGroups)[0]) => {
+    return group.buttons.filter((btn) =>
+      toolbarPreferences.enabledTools.includes(btn.toolId)
+    );
+  };
+
+  // التحقق إذا كانت المجموعة تحتوي على أدوات مفعلة
+  const hasEnabledTools = (group: (typeof toolbarGroups)[0]) => {
+    return group.buttons.some((btn) =>
+      toolbarPreferences.enabledTools.includes(btn.toolId)
+    );
+  };
+
+  // التحقق إذا كانت كل أدوات المجموعة مفعلة
+  const isGroupFullyEnabled = (group: (typeof toolbarGroups)[0]) => {
+    return group.buttons.every((btn) =>
+      toolbarPreferences.enabledTools.includes(btn.toolId)
+    );
+  };
+
   const containerClass = isFullscreen
     ? 'fixed inset-0 z-50 bg-white dark:bg-gray-900 p-4 flex flex-col'
     : 'relative';
@@ -665,112 +1112,267 @@ export default function EnhancedRichTextEditor({
   return (
     <div className={containerClass}>
       {/* شريط الأدوات المحسن */}
-      <div className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-t-xl border border-gray-200 dark:border-gray-700 p-3">
-        {/* الصف الأول - أدوات التنسيق الأساسية */}
-        <div className="flex flex-wrap items-center gap-1 mb-2">
-          {toolbarGroups.slice(0, 4).map((group, groupIdx) => (
-            <div key={groupIdx} className="flex items-center gap-1">
-              {group.buttons.map((btn, idx) => {
-                const Icon = btn.icon;
-                return (
-                  <button
-                    key={idx}
-                    type="button"
-                    onMouseDown={(e) => e.preventDefault()}
-                    onClick={() => {
-                      if (btn.action) btn.action();
-                      else if (btn.command) {
-                        if (btn.value)
-                          execCommand(btn.command, `<${btn.value}>`);
-                        else execCommand(btn.command);
-                      }
-                    }}
-                    disabled={btn.disabled}
-                    title={btn.title}
-                    className={`p-2 rounded-lg transition-all duration-200 ${
-                      btn.disabled
-                        ? 'opacity-30 cursor-not-allowed'
-                        : btn.active
-                        ? 'bg-blue-500 text-white shadow-md'
-                        : 'hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
-                    }`}
-                  >
-                    <Icon className="w-4 h-4" />
-                  </button>
-                );
-              })}
-              {groupIdx < 3 && (
-                <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-2" />
-              )}
-            </div>
-          ))}
-        </div>
-
-        {/* الصف الثاني - أدوات متقدمة وإعدادات */}
+      <div className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-t-xl border border-gray-200 dark:border-gray-700 p-2 sm:p-3">
+        {/* زر تخصيص شريط الأدوات + الأدوات */}
         <div className="flex flex-wrap items-center gap-1">
-          {toolbarGroups.slice(4).map((group, groupIdx) => (
-            <div key={groupIdx + 4} className="flex items-center gap-1">
-              {group.buttons.map((btn, idx) => {
-                const Icon = btn.icon;
-                return (
+          {/* زر تخصيص الأدوات */}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setShowToolbarCustomizer(!showToolbarCustomizer)}
+              onMouseDown={(e) => e.preventDefault()}
+              title="تخصيص شريط الأدوات"
+              className={`p-2 rounded-lg transition-all duration-200 ${
+                showToolbarCustomizer
+                  ? 'bg-purple-500 text-white shadow-md'
+                  : 'hover:bg-purple-100 dark:hover:bg-purple-900/30 text-purple-600 dark:text-purple-400'
+              }`}
+            >
+              <Sliders className="w-4 h-4" />
+            </button>
+
+            {/* قائمة تخصيص الأدوات */}
+            {showToolbarCustomizer && (
+              <div className="absolute top-full right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 z-50 p-3 max-h-[70vh] overflow-hidden flex flex-col">
+                <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-200 dark:border-gray-700">
+                  <h4 className="text-sm font-bold text-gray-900 dark:text-white">
+                    تخصيص الأدوات
+                  </h4>
                   <button
-                    key={idx}
-                    type="button"
-                    onMouseDown={(e) => e.preventDefault()}
-                    onClick={() => {
-                      if (btn.action) btn.action();
-                      else if (btn.command) {
-                        if (btn.value)
-                          execCommand(btn.command, `<${btn.value}>`);
-                        else execCommand(btn.command);
-                      }
-                    }}
-                    disabled={btn.disabled}
-                    title={btn.title}
-                    className={`p-2 rounded-lg transition-all duration-200 ${
-                      btn.disabled
-                        ? 'opacity-30 cursor-not-allowed'
-                        : 'hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
-                    }`}
+                    onClick={() => setShowToolbarCustomizer(false)}
+                    className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
                   >
-                    <Icon className="w-4 h-4" />
+                    <X className="w-4 h-4" />
                   </button>
-                );
-              })}
-              {groupIdx < 2 && (
-                <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-2" />
-              )}
-            </div>
-          ))}
+                </div>
+
+                <div className="space-y-3 overflow-y-auto flex-1 pr-1">
+                  {toolbarGroups.map((group) => {
+                    const enabledCount = group.buttons.filter((btn) =>
+                      toolbarPreferences.enabledTools.includes(btn.toolId)
+                    ).length;
+                    const isAllEnabled = enabledCount === group.buttons.length;
+                    const isPartialEnabled = enabledCount > 0 && !isAllEnabled;
+
+                    return (
+                      <div
+                        key={group.id}
+                        className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden"
+                      >
+                        {/* رأس المجموعة */}
+                        <div
+                          className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-700/50 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
+                          onClick={() =>
+                            toggleGroupTools(group.toolIds, !isAllEnabled)
+                          }
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isAllEnabled}
+                            ref={(el) => {
+                              if (el) el.indeterminate = isPartialEnabled;
+                            }}
+                            onChange={() =>
+                              toggleGroupTools(group.toolIds, !isAllEnabled)
+                            }
+                            className="w-4 h-4 text-blue-500 rounded focus:ring-blue-500"
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                          <span className="text-sm font-medium text-gray-800 dark:text-gray-200 flex-1">
+                            {group.name}
+                          </span>
+                          <span className="text-xs text-gray-500 dark:text-gray-400">
+                            {enabledCount}/{group.buttons.length}
+                          </span>
+                        </div>
+
+                        {/* أدوات المجموعة */}
+                        <div className="p-2 grid grid-cols-2 gap-1">
+                          {group.buttons.map((btn) => {
+                            const Icon = btn.icon;
+                            const isEnabled =
+                              toolbarPreferences.enabledTools.includes(
+                                btn.toolId
+                              );
+                            return (
+                              <label
+                                key={btn.toolId}
+                                className={`flex items-center gap-2 p-1.5 rounded cursor-pointer transition-colors ${
+                                  isEnabled
+                                    ? 'bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30'
+                                    : 'hover:bg-gray-100 dark:hover:bg-gray-700/50'
+                                }`}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={isEnabled}
+                                  onChange={() => toggleTool(btn.toolId)}
+                                  className="w-3.5 h-3.5 text-blue-500 rounded focus:ring-blue-500"
+                                />
+                                <Icon className="w-3.5 h-3.5 text-gray-600 dark:text-gray-400" />
+                                <span className="text-xs text-gray-700 dark:text-gray-300 truncate">
+                                  {btn.title.split(' (')[0]}
+                                </span>
+                              </label>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="mt-3 pt-2 border-t border-gray-200 dark:border-gray-700 space-y-2">
+                  <label className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={toolbarPreferences.compactMode}
+                      onChange={toggleCompactMode}
+                      className="w-4 h-4 text-blue-500 rounded focus:ring-blue-500"
+                    />
+                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                      الوضع المضغوط
+                    </span>
+                  </label>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() =>
+                        setToolbarPreferences((prev) => ({
+                          ...prev,
+                          enabledTools: [],
+                        }))
+                      }
+                      className="flex-1 text-xs text-center py-2 text-red-500 hover:text-red-700 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded"
+                    >
+                      إخفاء الكل
+                    </button>
+                    <button
+                      onClick={resetToolbarPreferences}
+                      className="flex-1 text-xs text-center py-2 text-blue-500 hover:text-blue-700 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded"
+                    >
+                      إظهار الكل
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
+
+          {/* عرض الأدوات المفعلة فقط مجمعة حسب المجموعات */}
+          {toolbarGroups.map((group, groupIdx) => {
+            const enabledButtons = getEnabledButtonsForGroup(group);
+            if (enabledButtons.length === 0) return null;
+
+            return (
+              <div
+                key={group.id}
+                className="flex items-center gap-0.5 sm:gap-1"
+              >
+                {enabledButtons.map((btn) => {
+                  const Icon = btn.icon;
+                  const isDisabled = 'disabled' in btn ? btn.disabled : false;
+                  const isActive = 'active' in btn ? btn.active : false;
+                  return (
+                    <button
+                      key={btn.toolId}
+                      type="button"
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => {
+                        if ('action' in btn && btn.action) {
+                          btn.action();
+                        } else if ('command' in btn && btn.command) {
+                          if ('value' in btn && btn.value) {
+                            execCommand(btn.command, `<${btn.value}>`);
+                          } else {
+                            execCommand(btn.command);
+                          }
+                        }
+                      }}
+                      disabled={isDisabled}
+                      title={btn.title}
+                      className={`${
+                        toolbarPreferences.compactMode ? 'p-1' : 'p-1.5 sm:p-2'
+                      } rounded-lg transition-all duration-200 ${
+                        isDisabled
+                          ? 'opacity-30 cursor-not-allowed'
+                          : isActive
+                          ? 'bg-blue-500 text-white shadow-md'
+                          : 'hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                      }`}
+                    >
+                      <Icon
+                        className={
+                          toolbarPreferences.compactMode
+                            ? 'w-3.5 h-3.5'
+                            : 'w-3.5 h-3.5 sm:w-4 sm:h-4'
+                        }
+                      />
+                    </button>
+                  );
+                })}
+                {/* فاصل بين المجموعات */}
+                {groupIdx < toolbarGroups.length - 1 &&
+                  toolbarGroups
+                    .slice(groupIdx + 1)
+                    .some((g) => hasEnabledTools(g)) && (
+                    <div className="w-px h-5 sm:h-6 bg-gray-300 dark:bg-gray-600 mx-1 sm:mx-2" />
+                  )}
+              </div>
+            );
+          })}
 
           <div className="flex-1" />
 
           {/* أزرار التحكم */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
             <button
               type="button"
               onClick={() => setShowSettingsModal(true)}
               onMouseDown={(e) => e.preventDefault()}
               title="إعدادات المحرر"
-              className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 transition-colors"
+              className={`${
+                toolbarPreferences.compactMode ? 'p-1' : 'p-1.5 sm:p-2'
+              } rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 transition-colors`}
             >
-              <Settings className="w-4 h-4" />
+              <Settings
+                className={
+                  toolbarPreferences.compactMode
+                    ? 'w-3.5 h-3.5'
+                    : 'w-3.5 h-3.5 sm:w-4 sm:h-4'
+                }
+              />
             </button>
             <button
               type="button"
               onClick={() => setIsPreview(!isPreview)}
               onMouseDown={(e) => e.preventDefault()}
               title={isPreview ? 'تحرير' : 'معاينة'}
-              className={`p-2 rounded-lg transition-colors ${
+              className={`${
+                toolbarPreferences.compactMode ? 'p-1' : 'p-1.5 sm:p-2'
+              } rounded-lg transition-colors ${
                 isPreview
                   ? 'bg-green-500 text-white'
                   : 'hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
               }`}
             >
               {isPreview ? (
-                <Edit3 className="w-4 h-4" />
+                <Edit3
+                  className={
+                    toolbarPreferences.compactMode
+                      ? 'w-3.5 h-3.5'
+                      : 'w-3.5 h-3.5 sm:w-4 sm:h-4'
+                  }
+                />
               ) : (
-                <Eye className="w-4 h-4" />
+                <Eye
+                  className={
+                    toolbarPreferences.compactMode
+                      ? 'w-3.5 h-3.5'
+                      : 'w-3.5 h-3.5 sm:w-4 sm:h-4'
+                  }
+                />
               )}
             </button>
             <button
@@ -778,12 +1380,26 @@ export default function EnhancedRichTextEditor({
               onClick={() => setIsFullscreen(!isFullscreen)}
               onMouseDown={(e) => e.preventDefault()}
               title={isFullscreen ? 'تصغير' : 'ملء الشاشة'}
-              className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 transition-colors"
+              className={`${
+                toolbarPreferences.compactMode ? 'p-1' : 'p-1.5 sm:p-2'
+              } rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 transition-colors`}
             >
               {isFullscreen ? (
-                <Minimize2 className="w-4 h-4" />
+                <Minimize2
+                  className={
+                    toolbarPreferences.compactMode
+                      ? 'w-3.5 h-3.5'
+                      : 'w-3.5 h-3.5 sm:w-4 sm:h-4'
+                  }
+                />
               ) : (
-                <Maximize2 className="w-4 h-4" />
+                <Maximize2
+                  className={
+                    toolbarPreferences.compactMode
+                      ? 'w-3.5 h-3.5'
+                      : 'w-3.5 h-3.5 sm:w-4 sm:h-4'
+                  }
+                />
               )}
             </button>
           </div>
@@ -803,6 +1419,7 @@ export default function EnhancedRichTextEditor({
           contentEditable
           suppressContentEditableWarning={true}
           onInput={handleInput}
+          onClick={handleEditorClick}
           onMouseUp={updateFormattingState}
           onKeyUp={updateFormattingState}
           onFocus={updateFormattingState}
@@ -873,7 +1490,7 @@ export default function EnhancedRichTextEditor({
         </div>
       </div>
 
-      {/* Modal إدراج صورة محسن */}
+      {/* Modal إدراج صورة محسن - مع دعم الرفع */}
       {showImageModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl">
@@ -890,8 +1507,19 @@ export default function EnhancedRichTextEditor({
               </button>
             </div>
 
-            {/* تبويبات */}
+            {/* تبويبات - مع إضافة تبويب الرفع */}
             <div className="flex border-b border-gray-200 dark:border-gray-700">
+              <button
+                onClick={() => setImageMode('upload')}
+                className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 text-sm font-medium transition-all ${
+                  imageMode === 'upload'
+                    ? 'text-blue-600 border-b-2 border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                    : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                }`}
+              >
+                <Upload className="w-4 h-4" />
+                رفع من الجهاز
+              </button>
               <button
                 onClick={() => setImageMode('search')}
                 className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 text-sm font-medium transition-all ${
@@ -901,7 +1529,7 @@ export default function EnhancedRichTextEditor({
                 }`}
               >
                 <Globe className="w-4 h-4" />
-                بحث من الإنترنت
+                بحث Pexels
               </button>
               <button
                 onClick={() => setImageMode('url')}
@@ -911,13 +1539,50 @@ export default function EnhancedRichTextEditor({
                     : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
                 }`}
               >
-                <Upload className="w-4 h-4" />
+                <Link className="w-4 h-4" />
                 رابط مباشر
               </button>
             </div>
 
             <div className="p-6 overflow-auto max-h-[60vh]">
-              {imageMode === 'search' ? (
+              {/* تبويب الرفع من الجهاز */}
+              {imageMode === 'upload' && (
+                <div className="space-y-6">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                    className="w-full flex flex-col items-center justify-center gap-3 px-4 py-12 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl hover:border-blue-400 dark:hover:border-blue-500 transition-colors bg-gray-50 dark:bg-gray-900"
+                  >
+                    {uploading ? (
+                      <>
+                        <Loader2 className="w-10 h-10 text-blue-500 animate-spin" />
+                        <span className="text-gray-500">جاري الرفع...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-10 h-10 text-gray-400" />
+                        <span className="text-gray-600 dark:text-gray-300 font-medium">
+                          اضغط لاختيار صورة من جهازك
+                        </span>
+                        <span className="text-xs text-gray-400">
+                          PNG, JPG, GIF, WebP حتى 5MB
+                        </span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
+
+              {/* تبويب البحث من Pexels */}
+              {imageMode === 'search' && (
                 <div className="space-y-6">
                   {/* حقل البحث */}
                   <div className="flex gap-3">
@@ -928,7 +1593,7 @@ export default function EnhancedRichTextEditor({
                       onKeyDown={(e) =>
                         e.key === 'Enter' && handleImageSearch()
                       }
-                      placeholder="ابحث عن صور... (مثال: طبيعة، تكنولوجيا، طعام)"
+                      placeholder="ابحث عن صور... (مثال: طبيعة، تكنولوجيا، طعام، عيد ميلاد)"
                       className="flex-1 px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                     <button
@@ -945,9 +1610,9 @@ export default function EnhancedRichTextEditor({
                     </button>
                   </div>
 
-                  {/* نتائج البحث */}
+                  {/* نتائج البحث - شبكة أكبر */}
                   {searchResults.length > 0 && (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3">
                       {searchResults.map((url, idx) => (
                         <button
                           key={idx}
@@ -980,12 +1645,15 @@ export default function EnhancedRichTextEditor({
                           لم يتم العثور على نتائج
                         </p>
                         <p className="text-gray-400 text-sm mt-1">
-                          جرب كلمات بحث مختلفة
+                          جرب كلمات بحث مختلفة باللغة العربية أو الإنجليزية
                         </p>
                       </div>
                     )}
                 </div>
-              ) : (
+              )}
+
+              {/* تبويب الرابط المباشر */}
+              {imageMode === 'url' && (
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -1210,6 +1878,15 @@ export default function EnhancedRichTextEditor({
             </div>
           </div>
         </div>
+      )}
+
+      {/* شريط أدوات الصور */}
+      {selectedImageElement && !isPreview && (
+        <ImageToolbar
+          imageElement={selectedImageElement}
+          onClose={handleCloseImageToolbar}
+          onUpdate={handleImageUpdate}
+        />
       )}
     </div>
   );
