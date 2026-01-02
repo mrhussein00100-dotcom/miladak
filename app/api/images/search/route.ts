@@ -1,8 +1,13 @@
-﻿import { NextRequest, NextResponse } from 'next/server';
+﻿// Image Search API v2.1 - Pexels + Unsplash Integration
+// Last updated: 2026-01-02
+import { NextRequest, NextResponse } from 'next/server';
 import { topicToEnglishKeywords } from '@/lib/images/pexels';
 import { searchUnsplashImages, convertUnsplashToUnified, UnifiedImage } from '@/lib/images/unsplash';
 import { query } from '@/lib/db/database';
 
+// Force dynamic rendering to avoid caching issues
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 const comprehensiveDictionary: Record<string, string[]> = {
   'عيد ميلاد': ['birthday celebration', 'birthday party', 'happy birthday'],
   'عيد ميلاد سعيد': ['happy birthday celebration', 'birthday wishes'],
@@ -146,3 +151,4 @@ async function getCuratedPhotos(apiKey: string, count: number): Promise<any[]> {
   } catch (e) {}
   return [];
 }
+
