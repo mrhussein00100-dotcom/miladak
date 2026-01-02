@@ -19,7 +19,7 @@ const nextConfig = {
     ignoreDuringBuilds: true, // تجاهل أخطاء ESLint أثناء البناء
   },
   images: {
-    domains: ['images.pexels.com', 'cdn.pexels.com'],
+    domains: ['images.pexels.com', 'cdn.pexels.com', 'images.unsplash.com'],
     remotePatterns: [
       {
         protocol: 'https',
@@ -28,6 +28,10 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'cdn.pexels.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
       },
     ],
   },
