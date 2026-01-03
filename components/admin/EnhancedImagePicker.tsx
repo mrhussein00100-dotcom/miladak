@@ -64,20 +64,24 @@ export default function EnhancedImagePicker({
     setUploading(false);
   };
 
-  // البحث عن صور من Pexels
+  // البحث عن صور من Pexels و Unsplash
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
     setLoading(true);
+    setSearchResults([]); // مسح النتائج السابقة
     try {
       const res = await fetch(
-        `/api/images/search?q=${encodeURIComponent(searchQuery)}`
+        `/api/search-images?q=${encodeURIComponent(searchQuery)}&count=15`
       );
       const data = await res.json();
-      if (data.success) {
-        setSearchResults(data.images || []);
+      console.log('[ImagePicker] Search response:', data);
+      if (data.success && data.images) {
+        setSearchResults(data.images);
+      } else {
+        console.error('[ImagePicker] Search failed:', data.error);
       }
     } catch (error) {
-      console.error('Search error:', error);
+      console.error('[ImagePicker] Search error:', error);
     }
     setLoading(false);
   };
@@ -245,11 +249,23 @@ export default function EnhancedImagePicker({
                 >
                   <img
                     src={url}
-                    alt=""
+                    alt={`نتيجة بحث ${idx + 1}`}
                     className="w-full h-full object-cover"
+                    onError={(e) => {
+                      // إخفاء الصورة التالفة
+                      (e.target as HTMLImageElement).style.display = 'none';
+                    }}
+                    loading="lazy"
                   />
                 </button>
               ))}
+            </div>
+          )}
+
+          {/* رسالة عدم وجود نتائج */}
+          {searchResults.length === 0 && !loading && searchQuery && (
+            <div className="text-center py-4 text-gray-500 dark:text-gray-400 text-sm">
+              لم يتم العثور على صور. جرب كلمات بحث مختلفة.
             </div>
           )}
         </div>

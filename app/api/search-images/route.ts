@@ -134,12 +134,17 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // تحويل الكائنات إلى روابط مباشرة للتوافق مع المكونات
+    const imageUrls = allImages.slice(0, count).map((img) => img.url);
+
     return NextResponse.json({
       success: true,
       query: query,
       englishQuery: englishQuery,
       total: allImages.length,
-      images: allImages.slice(0, count),
+      images: imageUrls,
+      // إضافة البيانات الكاملة للاستخدام المتقدم
+      imagesData: allImages.slice(0, count),
     });
   } catch (error) {
     console.error('[Search Images API] Error:', error);
