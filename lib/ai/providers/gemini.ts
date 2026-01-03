@@ -185,6 +185,7 @@ function getStyleDescription(style: string): string {
 }
 
 // توليد مقال باستخدام Gemini مع دعم مفاتيح API متعددة
+// v7.0: نهج جديد - طلب نص عادي بدلاً من JSON لتجنب مشاكل الاستخراج
 export async function generateArticle(
   request: GeminiGenerationRequest
 ): Promise<GeminiGenerationResponse> {
@@ -217,46 +218,25 @@ export async function generateArticle(
     ? `استخدم الكلمات المفتاحية التالية: ${request.includeKeywords.join(', ')}`
     : '';
 
-  // v6.1 - تحسين البرومبت لضمان توليد مقالات طويلة
-  const prompt = `أنت كاتب محتوى عربي محترف ومتخصص. مهمتك كتابة مقال شامل ومفصل.
+  // v7.0 - نهج جديد: طلب نص HTML مباشر بدون JSON
+  // هذا يتجنب كل مشاكل استخراج JSON من الرد
+  const prompt = `أنت كاتب محتوى عربي محترف. اكتب مقالاً شاملاً عن الموضوع التالي.
 
 الموضوع: ${request.topic}
 التصنيف: ${request.category || 'عام'}
 الأسلوب: ${styleDesc}
 ${keywordsText}
 
-⚠️ تعليمات صارمة جداً - يجب الالتزام بها:
-
-1. الطول المطلوب: ${wordCount.min} كلمة على الأقل (هذا إلزامي!)
-2. لا تتوقف حتى تكتب ${wordCount.min}+ كلمة
-
-هيكل المقال المطلوب:
-- عنوان رئيسي جذاب
-- مقدمة شاملة (4-5 فقرات طويلة)
-- 8-10 أقسام رئيسية بعناوين <h2>
-- كل قسم يحتوي على 4-6 فقرات مفصلة
-- قوائم نقطية <ul> أو مرقمة <ol> في كل قسم
-- خاتمة شاملة (3-4 فقرات)
-
-قواعد HTML:
+المتطلبات:
+- اكتب ${wordCount.min} كلمة على الأقل
+- ابدأ بعنوان رئيسي جذاب في السطر الأول (بدون HTML)
+- ثم اكتب المحتوى بتنسيق HTML
 - استخدم: <p>, <h2>, <h3>, <ul>, <ol>, <li>, <strong>, <em>
-- كل فقرة في <p>...</p>
-- أغلق كل التاغات
+- اكتب مقدمة شاملة
+- 6-8 أقسام رئيسية بعناوين <h2>
+- خاتمة شاملة
 
-مهم للغاية:
-- اكتب محتوى غني ومفصل
-- لا تختصر - اشرح كل نقطة بالتفصيل
-- أضف أمثلة وتفاصيل في كل قسم
-- المقال يجب أن يكون ${wordCount.min}+ كلمة (إلزامي!)
-
-⚠️ تعليمات الإخراج (مهمة جداً):
-- أرجع JSON فقط بدون أي نص أو شرح قبله أو بعده
-- لا تكتب أي كلمة قبل علامة {
-- لا تستخدم علامات الكود \`\`\`
-- ابدأ مباشرة بـ { وانتهِ بـ }
-
-الصيغة المطلوبة:
-{"title":"العنوان الرئيسي","content":"<p>المحتوى الكامل بHTML</p>","metaTitle":"عنوان الميتا","metaDescription":"وصف الميتا","keywords":["كلمة1","كلمة2","كلمة3"]}`;
+ابدأ الآن بكتابة العنوان ثم المحتوى مباشرة:`;
 
   const models = [DEFAULT_MODEL, ...FALLBACK_MODELS];
   let lastError = '';
@@ -404,111 +384,113 @@ ${keywordsText}
   );
 
   try {
-    // v6.5: تحسين استخراج JSON من الرد
-    console.log('📝 Gemini: طول الرد الخام:', aiResponse.length);
+    // v7.0: نهج جديد - معالجة النص مباشرة بدون JSON
+    console.log('📝 Gemini v7.0: طول الرد الخام:', aiResponse.length);
 
     // تنظيف الرد من علامات الكود
     let cleanedResponse = aiResponse
+      .replace(/^```html\s*/gi, '')
       .replace(/^```json\s*/gi, '')
       .replace(/^```\s*/gi, '')
       .replace(/```\s*$/gi, '')
-      .replace(/```json/gi, '')
       .replace(/```/g, '')
       .trim();
 
-    // محاولة 1: البحث عن JSON كامل
-    let jsonMatch = cleanedResponse.match(/\{[\s\S]*\}/);
+    // استخراج العنوان والمحتوى من النص
+    let title = '';
+    let content = '';
 
-    // محاولة 2: إذا لم يُعثر على JSON، جرب تنظيف أكثر
-    if (!jsonMatch) {
-      // إزالة أي نص قبل أول {
-      const firstBrace = cleanedResponse.indexOf('{');
-      if (firstBrace !== -1) {
-        cleanedResponse = cleanedResponse.substring(firstBrace);
-        jsonMatch = cleanedResponse.match(/\{[\s\S]*\}/);
+    // البحث عن العنوان في السطر الأول أو في <h1>
+    const lines = cleanedResponse.split('\n');
+    const h1Match = cleanedResponse.match(/<h1[^>]*>(.*?)<\/h1>/i);
+
+    if (h1Match) {
+      title = h1Match[1].replace(/<[^>]*>/g, '').trim();
+      content = cleanedResponse.replace(/<h1[^>]*>.*?<\/h1>/i, '').trim();
+    } else {
+      // السطر الأول هو العنوان
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (line.length > 5 && !line.startsWith('<')) {
+          title = line
+            .replace(/^#+\s*/, '')
+            .replace(/[*#]/g, '')
+            .trim();
+          content = lines
+            .slice(i + 1)
+            .join('\n')
+            .trim();
+          break;
+        }
       }
     }
 
-    // محاولة 3: إذا كان الرد يحتوي على JSON متعدد، خذ الأول
-    if (!jsonMatch) {
-      const jsonObjects = cleanedResponse.match(
-        /\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}/g
-      );
-      if (jsonObjects && jsonObjects.length > 0) {
-        // ابحث عن أكبر JSON (الأكثر احتمالاً أن يكون المحتوى)
-        jsonMatch = [
-          jsonObjects.reduce((a, b) => (a.length > b.length ? a : b)),
-        ];
-      }
+    // إذا لم نجد عنوان، استخدم الموضوع
+    if (!title || title.length < 3) {
+      title = request.topic;
     }
 
-    if (!jsonMatch) {
-      console.error('❌ Gemini: فشل في استخراج JSON');
-      console.error(
-        '📄 الرد المنظف (أول 500 حرف):',
-        cleanedResponse.substring(0, 500)
-      );
-      throw new Error(
-        'فشل في استخراج JSON من الرد - الرد لا يحتوي على JSON صالح'
-      );
+    // إذا لم نجد محتوى، استخدم الرد كاملاً
+    if (!content || content.length < 50) {
+      content = cleanedResponse;
     }
 
-    let jsonString = jsonMatch[0];
-
-    // إصلاح مشاكل JSON الشائعة
-    // 1. إزالة الفواصل الزائدة قبل }
-    jsonString = jsonString.replace(/,\s*}/g, '}');
-    // 2. إزالة الفواصل الزائدة قبل ]
-    jsonString = jsonString.replace(/,\s*]/g, ']');
-    // 3. إصلاح علامات الاقتباس المزدوجة داخل النص
-    // هذا معقد، لذا نتركه للـ JSON.parse
-
-    let result;
-    try {
-      result = JSON.parse(jsonString);
-    } catch (parseError) {
-      console.error('❌ Gemini: فشل في تحليل JSON:', parseError);
-      console.error(
-        '📄 JSON المستخرج (أول 500 حرف):',
-        jsonString.substring(0, 500)
-      );
-
-      // محاولة إصلاح JSON المكسور
-      try {
-        // إزالة أي أحرف غير صالحة
-        const sanitizedJson = jsonString
-          .replace(/[\x00-\x1F\x7F]/g, '') // إزالة أحرف التحكم
-          .replace(/\n/g, '\\n') // تحويل الأسطر الجديدة
-          .replace(/\r/g, '\\r')
-          .replace(/\t/g, '\\t');
-        result = JSON.parse(sanitizedJson);
-      } catch (secondError) {
-        throw new Error(`فشل في تحليل JSON من الرد: ${parseError}`);
-      }
-    }
-    const actualWordCount = result.content.split(/\s+/).length;
-
-    // v6.1: التحقق من طول المحتوى
-    const minRequired = wordCount.min * 0.5; // على الأقل 50% من الحد الأدنى
-    if (actualWordCount < minRequired) {
-      console.warn(
-        `⚠️ Gemini: المحتوى قصير جداً (${actualWordCount} كلمة، المطلوب ${wordCount.min}+)`
-      );
-      console.warn(
-        `⚠️ Gemini: قد يكون النموذج ${successfulModel} محدوداً - جرب نموذجاً آخر`
-      );
+    // تأكد من أن المحتوى يحتوي على HTML
+    if (!content.includes('<p>') && !content.includes('<h2>')) {
+      // تحويل النص العادي إلى HTML
+      const paragraphs = content.split(/\n\n+/);
+      content = paragraphs
+        .map((p) => {
+          p = p.trim();
+          if (!p) return '';
+          if (p.startsWith('#')) {
+            const level = (p.match(/^#+/) || [''])[0].length;
+            const text = p.replace(/^#+\s*/, '');
+            return level <= 2 ? `<h2>${text}</h2>` : `<h3>${text}</h3>`;
+          }
+          if (p.startsWith('-') || p.startsWith('*')) {
+            const items = p
+              .split('\n')
+              .map((item) => `<li>${item.replace(/^[-*]\s*/, '')}</li>`)
+              .join('');
+            return `<ul>${items}</ul>`;
+          }
+          return `<p>${p}</p>`;
+        })
+        .filter((p) => p)
+        .join('\n');
     }
 
-    console.log(
-      `📊 Gemini: تم توليد ${actualWordCount} كلمة (المطلوب: ${wordCount.min}-${wordCount.max})`
+    const actualWordCount = content
+      .split(/\s+/)
+      .filter((w) => w.length > 0).length;
+
+    // توليد الميتا تلقائياً
+    const plainText = content
+      .replace(/<[^>]*>/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    const metaTitle =
+      title.length > 60 ? title.substring(0, 57) + '...' : title;
+    const metaDescription =
+      plainText.length > 160
+        ? plainText.substring(0, 157) + '...'
+        : plainText.substring(0, 160);
+
+    // استخراج كلمات مفتاحية من العنوان والمحتوى
+    const keywords = extractKeywordsFromText(
+      title + ' ' + plainText.substring(0, 500)
     );
 
+    console.log(`📊 Gemini v7.0: تم توليد ${actualWordCount} كلمة`);
+    console.log(`📊 العنوان: ${title.substring(0, 50)}...`);
+
     return {
-      content: result.content,
-      title: result.title,
-      metaTitle: result.metaTitle,
-      metaDescription: result.metaDescription,
-      keywords: result.keywords || [],
+      content,
+      title,
+      metaTitle,
+      metaDescription,
+      keywords,
       wordCount: actualWordCount,
       provider: 'gemini',
       generationTime: Date.now() - startTime,
@@ -517,6 +499,23 @@ ${keywordsText}
     console.error('Gemini generation error:', error);
     throw error;
   }
+}
+
+// دالة مساعدة لاستخراج كلمات مفتاحية من النص
+function extractKeywordsFromText(text: string): string[] {
+  const arabicWords = text.match(/[\u0600-\u06FF]+/g) || [];
+  const wordFreq: Record<string, number> = {};
+
+  for (const word of arabicWords) {
+    if (word.length > 3) {
+      wordFreq[word] = (wordFreq[word] || 0) + 1;
+    }
+  }
+
+  return Object.entries(wordFreq)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10)
+    .map(([word]) => word);
 }
 
 // إعادة صياغة محتوى باستخدام Gemini مع دعم مفاتيح متعددة
