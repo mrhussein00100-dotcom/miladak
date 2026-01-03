@@ -20,16 +20,16 @@ export async function GET(request: NextRequest) {
     const params: any[] = [];
 
     if (month && day) {
-      sqlQuery += ' WHERE month = ? AND day = ?';
+      sqlQuery += ' WHERE month = $1 AND day = $2';
       params.push(parseInt(month), parseInt(day));
     } else if (month) {
-      sqlQuery += ' WHERE month = ?';
+      sqlQuery += ' WHERE month = $1';
       params.push(parseInt(month));
     }
 
     sqlQuery += ' ORDER BY month, day, birth_year DESC';
 
-    const celebrities = dbQuery<Celebrity>(sqlQuery, params);
+    const celebrities = await dbQuery<Celebrity>(sqlQuery, params);
 
     return NextResponse.json({
       success: true,
@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
     }
 
     const result = await execute(
-      'INSERT INTO daily_birthdays (day, month, birth_year, name, profession) VALUES (?, ?, ?, ?, ?)',
+      'INSERT INTO daily_birthdays (day, month, birth_year, name, profession) VALUES ($1, $2, $3, $4, $5)',
       [
         celebrity.day,
         celebrity.month,
@@ -109,7 +109,7 @@ export async function PUT(request: NextRequest) {
     }
 
     await execute(
-      'UPDATE daily_birthdays SET day = ?, month = ?, birth_year = ?, name = ?, profession = ? WHERE id = ?',
+      'UPDATE daily_birthdays SET day = $1, month = $2, birth_year = $3, name = $4, profession = $5 WHERE id = $6',
       [
         celebrity.day,
         celebrity.month,
@@ -151,7 +151,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    await execute('DELETE FROM daily_birthdays WHERE id = ?', [parseInt(id)]);
+    await execute('DELETE FROM daily_birthdays WHERE id = $1', [parseInt(id)]);
 
     return NextResponse.json({
       success: true,
