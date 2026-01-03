@@ -141,7 +141,7 @@ export class ImageSearchService {
 
     try {
       // البحث بالاستعلام المترجم أولاً
-      const response = await fetch('/api/images/search', {
+      const response = await fetch('/api/search-images', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -177,7 +177,7 @@ export class ImageSearchService {
 
       // إذا لم تنجح الترجمة، جرب الاستعلام الأصلي
       if (translatedQuery !== options.query) {
-        const fallbackResponse = await fetch('/api/images/search', {
+        const fallbackResponse = await fetch('/api/search-images', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

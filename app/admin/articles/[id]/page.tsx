@@ -152,7 +152,7 @@ export default function EditArticlePage({
       const searchTerm =
         title || content.replace(/<[^>]*>/g, '').substring(0, 100);
       const res = await fetch(
-        `/api/images/search?q=${encodeURIComponent(searchTerm)}&count=5`
+        `/api/search-images?q=${encodeURIComponent(searchTerm)}&count=5`
       );
       const data = await res.json();
 

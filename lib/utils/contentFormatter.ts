@@ -412,7 +412,7 @@ export async function fetchRelevantImages(
     } catch (enhancedError) {
       // العودة للطريقة العادية في حالة الخطأ
       const response = await fetch(
-        `/api/images/search?q=${encodeURIComponent(topic)}&count=${count}`
+        `/api/search-images?q=${encodeURIComponent(topic)}&count=${count}`
       );
       const data = await response.json();
       if (data.success && data.images) {

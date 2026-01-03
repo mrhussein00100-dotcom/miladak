@@ -241,7 +241,7 @@ export default function NewArticlePage() {
 
       // البحث عن صور من Pexels
       const res = await fetch(
-        `/api/images/search?q=${encodeURIComponent(searchTerm)}&count=5`
+        `/api/search-images?q=${encodeURIComponent(searchTerm)}&count=5`
       );
       const data = await res.json();
 

@@ -381,7 +381,7 @@ function ImageReplaceModal({
     setSearchLoading(true);
     try {
       const res = await fetch(
-        `/api/images/search?q=${encodeURIComponent(searchQuery)}`
+        `/api/search-images?q=${encodeURIComponent(searchQuery)}`
       );
       const data = await res.json();
       if (data.success) {

@@ -71,7 +71,7 @@ export default function EnhancedImagePicker({
     setSearchResults([]); // مسح النتائج السابقة
     try {
       const res = await fetch(
-        `/api/search-images?q=${encodeURIComponent(searchQuery)}&count=15`
+        `/api/images/search?q=${encodeURIComponent(searchQuery)}&count=15`
       );
       const data = await res.json();
       console.log('[ImagePicker] Search response:', data);

@@ -466,7 +466,7 @@ export default function EnhancedRichTextEditor({
     setSearchLoading(true);
     try {
       const res = await fetch(
-        `/api/images/search?q=${encodeURIComponent(searchQuery)}&count=24`
+        `/api/search-images?q=${encodeURIComponent(searchQuery)}&count=24`
       );
       const data = await res.json();
       if (data.success) {
@@ -767,7 +767,7 @@ export default function EnhancedRichTextEditor({
       const topic = text.substring(0, 100);
 
       const res = await fetch(
-        `/api/images/search?q=${encodeURIComponent(topic)}&count=5`
+        `/api/search-images?q=${encodeURIComponent(topic)}&count=5`
       );
       const data = await res.json();
 
