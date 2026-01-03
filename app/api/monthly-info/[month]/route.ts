@@ -92,13 +92,13 @@ export async function GET(
     let birthFlower = null;
 
     try {
-      birthstone = queryOne<Birthstone>(
-        'SELECT * FROM birthstones WHERE month = ?',
+      birthstone = await queryOne<Birthstone>(
+        'SELECT * FROM birthstones WHERE month = $1',
         [month]
       );
 
-      birthFlower = queryOne<BirthFlower>(
-        'SELECT * FROM birth_flowers WHERE month = ?',
+      birthFlower = await queryOne<BirthFlower>(
+        'SELECT * FROM birth_flowers WHERE month = $1',
         [month]
       );
     } catch (dbError) {

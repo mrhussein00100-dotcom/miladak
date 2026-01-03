@@ -1,0 +1,135 @@
+[
+  {
+    "id": 1,
+    "key": "articleLength",
+    "value": "comprehensive",
+    "description": "طول المقال الافتراضي",
+    "updated_at": "2025-12-27T07:27:57.796Z",
+    "updated_by": null
+  },
+  {
+    "id": 2,
+    "key": "wordCountTargets",
+    "value": {
+      "long": 2000,
+      "short": 500,
+      "medium": 1000,
+      "comprehensive": 3000
+    },
+    "description": "أهداف عدد الكلمات",
+    "updated_at": "2025-12-27T07:27:57.796Z",
+    "updated_by": null
+  },
+  {
+    "id": 3,
+    "key": "keywordDensity",
+    "value": 3,
+    "description": "كثافة الكلمات المفتاحية",
+    "updated_at": "2025-12-27T07:27:57.796Z",
+    "updated_by": null
+  },
+  {
+    "id": 14,
+    "key": "minKeywordOccurrences",
+    "value": 3,
+    "description": null,
+    "updated_at": "2025-12-27T07:40:25.904Z",
+    "updated_by": null
+  },
+  {
+    "id": 15,
+    "key": "maxKeywordOccurrences",
+    "value": 5,
+    "description": null,
+    "updated_at": "2025-12-27T07:40:25.904Z",
+    "updated_by": null
+  },
+  {
+    "id": 4,
+    "key": "minQualityScore",
+    "value": 70,
+    "description": "الحد الأدنى لدرجة الجودة",
+    "updated_at": "2025-12-27T07:27:57.796Z",
+    "updated_by": null
+  },
+  {
+    "id": 5,
+    "key": "maxRetries",
+    "value": 3,
+    "description": "الحد الأقصى للمحاولات",
+    "updated_at": "2025-12-27T07:27:57.796Z",
+    "updated_by": null
+  },
+  {
+    "id": 6,
+    "key": "diversityLevel",
+    "value": "high",
+    "description": "مستوى التنوع",
+    "updated_at": "2025-12-27T07:27:57.796Z",
+    "updated_by": null
+  },
+  {
+    "id": 19,
+    "key": "templateRotation",
+    "value": true,
+    "description": null,
+    "updated_at": "2025-12-27T07:40:25.904Z",
+    "updated_by": null
+  },
+  {
+    "id": 7,
+    "key": "enableSynonymReplacement",
+    "value": true,
+    "description": "تفعيل استبدال المرادفات",
+    "updated_at": "2025-12-27T07:27:57.796Z",
+    "updated_by": null
+  },
+  {
+    "id": 21,
+    "key": "enableSentenceVariation",
+    "value": true,
+    "description": null,
+    "updated_at": "2025-12-27T07:40:25.904Z",
+    "updated_by": null
+  },
+  {
+    "id": 8,
+    "key": "enableFAQGeneration",
+    "value": true,
+    "description": "تفعيل توليد الأسئلة الشائعة",
+    "updated_at": "2025-12-27T07:27:57.796Z",
+    "updated_by": null
+  },
+  {
+    "id": 9,
+    "key": "enableTipsGeneration",
+    "value": true,
+    "description": "تفعيل توليد النصائح",
+    "updated_at": "2025-12-27T07:27:57.796Z",
+    "updated_by": null
+  },
+  {
+    "id": 10,
+    "key": "enableCTAs",
+    "value": true,
+    "description": "تفعيل دعوات العمل",
+    "updated_at": "2025-12-27T07:27:57.796Z",
+    "updated_by": null
+  },
+  {
+    "id": 25,
+    "key": "excludedTemplates",
+    "value": [],
+    "description": null,
+    "updated_at": "2025-12-27T07:40:25.904Z",
+    "updated_by": null
+  },
+  {
+    "id": 26,
+    "key": "preferredTemplates",
+    "value": [],
+    "description": null,
+    "updated_at": "2025-12-27T07:40:25.904Z",
+    "updated_by": null
+  }
+]

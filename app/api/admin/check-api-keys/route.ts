@@ -85,14 +85,26 @@ export async function GET() {
       keyLength: (process.env.PEXELS_API_KEY || '').length,
       envVar: 'PEXELS_API_KEY',
     },
+    unsplash: {
+      name: 'Unsplash',
+      configured: !!process.env.UNSPLASH_ACCESS_KEY,
+      keyLength: (process.env.UNSPLASH_ACCESS_KEY || '').length,
+      envVar: 'UNSPLASH_ACCESS_KEY',
+    },
+    openai: {
+      name: 'OpenAI',
+      configured: !!process.env.OPENAI_API_KEY,
+      keyLength: (process.env.OPENAI_API_KEY || '').length,
+      envVar: 'OPENAI_API_KEY',
+    },
   };
 
   const summary = {
     total: Object.keys(keys).length,
     configured: Object.values(keys).filter((k) => k.configured).length,
     missing: Object.entries(keys)
-      .filter(([_, v]) => !v.configured)
-      .map(([k, v]) => v.name),
+      .filter(([, v]) => !v.configured)
+      .map(([, v]) => v.name),
     geminiKeysTotal: geminiStatus.total,
     geminiKeysAvailable: geminiStatus.available,
   };

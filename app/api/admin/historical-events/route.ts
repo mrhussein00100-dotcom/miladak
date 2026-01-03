@@ -17,24 +17,35 @@ export async function GET(request: NextRequest) {
     const month = searchParams.get('month');
     const day = searchParams.get('day');
 
-    let sqlQuery = 'SELECT * FROM daily_events';
+    // استخدام جدول daily_events (يحتوي على 698 سجل)
+    let sqlQuery = `
+      SELECT 
+        id,
+        day,
+        month,
+        year,
+        title,
+        description,
+        COALESCE(category, 'عام') as category
+      FROM daily_events
+    `;
     const params: any[] = [];
 
     if (month && day) {
-      sqlQuery += ' WHERE month = ? AND day = ?';
+      sqlQuery += ` WHERE month = $1 AND day = $2`;
       params.push(parseInt(month), parseInt(day));
     } else if (month) {
-      sqlQuery += ' WHERE month = ?';
+      sqlQuery += ` WHERE month = $1`;
       params.push(parseInt(month));
     }
 
-    sqlQuery += ' ORDER BY month, day';
+    sqlQuery += ' ORDER BY month, day, year';
 
-    const events = dbQuery<HistoricalEvent>(sqlQuery, params);
+    const events = await dbQuery<HistoricalEvent>(sqlQuery, params);
 
     return NextResponse.json({
       success: true,
-      data: events,
+      data: events || [],
     });
   } catch (error) {
     console.error('Error fetching historical events:', error);
@@ -42,6 +53,7 @@ export async function GET(request: NextRequest) {
       {
         success: false,
         error: 'فشل في جلب الأحداث التاريخية',
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     );
@@ -64,7 +76,9 @@ export async function POST(request: NextRequest) {
     }
 
     const result = await execute(
-      'INSERT INTO daily_events (day, month, year, title, description, category) VALUES (?, ?, ?, ?, ?, ?)',
+      `INSERT INTO daily_events (day, month, year, title, description, category) 
+       VALUES ($1, $2, $3, $4, $5, $6)
+       RETURNING id`,
       [
         event.day,
         event.month,
@@ -85,6 +99,7 @@ export async function POST(request: NextRequest) {
       {
         success: false,
         error: 'فشل في إضافة الحدث التاريخي',
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     );
@@ -106,7 +121,9 @@ export async function PUT(request: NextRequest) {
     }
 
     await execute(
-      'UPDATE daily_events SET day = ?, month = ?, year = ?, title = ?, description = ?, category = ? WHERE id = ?',
+      `UPDATE daily_events 
+       SET day = $1, month = $2, year = $3, title = $4, description = $5, category = $6 
+       WHERE id = $7`,
       [
         event.day,
         event.month,
@@ -128,6 +145,7 @@ export async function PUT(request: NextRequest) {
       {
         success: false,
         error: 'فشل في تحديث الحدث التاريخي',
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     );
@@ -149,7 +167,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    await execute('DELETE FROM daily_events WHERE id = ?', [parseInt(id)]);
+    await execute('DELETE FROM daily_events WHERE id = $1', [parseInt(id)]);
 
     return NextResponse.json({
       success: true,
@@ -161,6 +179,7 @@ export async function DELETE(request: NextRequest) {
       {
         success: false,
         error: 'فشل في حذف الحدث التاريخي',
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     );

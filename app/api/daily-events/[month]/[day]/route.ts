@@ -56,7 +56,7 @@ export async function GET(
     }
 
     // Query events for this date, sorted by year
-    const events = await queryDailyEvent>(
+    const events = await query<DailyEvent[]>(
       `SELECT id, day, month, year, title, description, category 
        FROM daily_events 
        WHERE month = ? AND day = ? 

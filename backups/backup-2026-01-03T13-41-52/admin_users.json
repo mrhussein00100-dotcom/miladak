@@ -1,0 +1,52 @@
+[
+  {
+    "id": 1,
+    "username": "admin",
+    "password_hash": "fe3d3abe12fb62eb6a85cc074ea5d96abe0575a3ff404e7cd73994e963cd4d7def3f60feef2787c917dd285cde8c754c9259bf62c884a390bf8e0d81a2ea7435",
+    "password_salt": "4077566d76d3ed683d3def528db0cf4b",
+    "role": "admin",
+    "active": 1,
+    "created_at": "2025-11-05T17:06:30.000Z",
+    "updated_at": "2025-11-06T03:31:24.000Z"
+  },
+  {
+    "id": 2,
+    "username": "user",
+    "password_hash": "d2b7e633fd3e65475d10cbf7dcc851fb2eea38436c2d4665c4833dfa2cffd5e1eb7cb9264314c1cdfe4543b6861ab0a911adc660cf574775404f1ba08f7f6a2d",
+    "password_salt": "bab23922375d8060d34c4e0758c9600f",
+    "role": "content_manager",
+    "active": 1,
+    "created_at": "2025-11-06T03:32:24.000Z",
+    "updated_at": "2025-11-06T03:32:24.000Z"
+  },
+  {
+    "id": 4,
+    "username": "writer",
+    "password_hash": "31b388653ef14bae5b57935ba1e7ce2ab513876d2e5f9138bd552ff43101fa4181883af7083039725fe1ec090b1e42c9ed243109020d9929ec5cf416404a63aa",
+    "password_salt": "8bb44b3af63b9414f568341bf4476247",
+    "role": "writer",
+    "active": 1,
+    "created_at": "2025-11-06T03:36:39.000Z",
+    "updated_at": "2025-11-06T03:36:39.000Z"
+  },
+  {
+    "id": 5,
+    "username": "support",
+    "password_hash": "8a0fa1d68444a852ff25cca36fcab9269057c21f7498e7a97b1f3fa72b5a8c0822737de20ccdff5be7bb668f68522bbd9beb98d87cec07be0242d5d86a5c4c1b",
+    "password_salt": "67ba7ba7fc62d386ee8f536dd7eff735",
+    "role": "support",
+    "active": 1,
+    "created_at": "2025-11-06T04:43:42.000Z",
+    "updated_at": "2025-11-06T04:43:42.000Z"
+  },
+  {
+    "id": 3,
+    "username": "editor",
+    "password_hash": "c6883e5d57abc8cfbb416d951635155d349dfed39af5651184160830542e51df8660f71872c2d1332e1bb15027ace74542a79d18d8ab80917c0a48987fab0492",
+    "password_salt": "71f7fddb300ffdc3827b23c850535c6f",
+    "role": "editor",
+    "active": 1,
+    "created_at": "2025-11-06T03:35:10.000Z",
+    "updated_at": "2025-12-22T03:06:22.890Z"
+  }
+]
