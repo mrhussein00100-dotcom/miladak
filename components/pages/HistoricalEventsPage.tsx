@@ -160,7 +160,7 @@ export default function HistoricalEventsPageClient() {
       const response = await fetch('/api/articles?category=تاريخ&limit=6');
       if (response.ok) {
         const data = await response.json();
-        setArticles(data.articles || []);
+        setArticles(data.data?.items || []);
       }
     } catch (err) {
       console.error('Error fetching articles:', err);
