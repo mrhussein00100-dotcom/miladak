@@ -37,6 +37,7 @@ export { default as analyzer } from './analyzer';
 export { default as enhancer } from './enhancer';
 export { default as cache } from './cache';
 export { default as usage } from './usage';
+export { default as lexicon, lexiconAPI, ArabicLexiconAPI } from './lexicon';
 
 // Main functions
 import orchestrator from './orchestrator';
@@ -46,6 +47,7 @@ import analyzer from './analyzer';
 import enhancer from './enhancer';
 import cache from './cache';
 import usage from './usage';
+import lexicon from './lexicon';
 import {
   GenerationRequest,
   OrchestratorResult,
@@ -161,4 +163,5 @@ export default {
   enhancer,
   cache,
   usage,
+  lexicon,
 };
