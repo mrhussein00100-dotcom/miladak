@@ -6,31 +6,36 @@
  */
 
 // النموذج الافتراضي - تم التحديث يناير 2026
-// v6.3: استخدام gemini-2.5-flash كنموذج افتراضي (الأحدث والأسرع)
+// v6.4: استخدام gemini-2.5-flash كنموذج افتراضي (الأحدث والأسرع)
+// ملاحظة: نماذج 1.5 تم إزالتها من Google API
 const DEFAULT_MODEL = 'gemini-2.5-flash';
 const FALLBACK_MODELS = [
-  // نماذج 2.x - الأحدث
+  // نماذج 2.5 - الأحدث والأكثر استقراراً
+  'gemini-2.5-pro',
+  'gemini-2.5-flash-lite',
+  // نماذج 2.0 - احتياطية
   'gemini-2.0-flash',
-  // نماذج 1.5 - الأكثر استقراراً
-  'gemini-1.5-flash',
-  'gemini-1.5-pro',
-  'gemini-1.5-flash-latest',
+  'gemini-2.0-flash-lite',
+  // نماذج تجريبية
+  'gemini-flash-latest',
 ];
 
 // الحصول على جميع مفاتيح Gemini API المتاحة
+// v6.4: تحسين ترتيب المفاتيح - المفاتيح الإضافية أولاً لأن الأساسي غالباً مستنفد
 function getAllGeminiApiKeys(): string[] {
   const keys: string[] = [];
 
-  // المفتاح الأساسي
-  const primaryKey =
-    process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_API_KEY;
-  if (primaryKey) keys.push(primaryKey);
-
-  // المفاتيح الإضافية (GEMINI_API_KEY_2, GEMINI_API_KEY_3, ...)
+  // المفاتيح الإضافية أولاً (GEMINI_API_KEY_2, GEMINI_API_KEY_3, ...)
+  // لأن المفتاح الأساسي غالباً ما يكون مستنفداً
   for (let i = 2; i <= 10; i++) {
     const key = process.env[`GEMINI_API_KEY_${i}`];
     if (key) keys.push(key);
   }
+
+  // المفتاح الأساسي في النهاية
+  const primaryKey =
+    process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_API_KEY;
+  if (primaryKey) keys.push(primaryKey);
 
   return keys;
 }
