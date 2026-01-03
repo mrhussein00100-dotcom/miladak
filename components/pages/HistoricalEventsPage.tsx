@@ -158,10 +158,13 @@ export default function HistoricalEventsPageClient() {
     setArticlesLoading(true);
     try {
       // جلب أحدث المقالات (بدون تحديد فئة معينة)
-      const response = await fetch('/api/articles?limit=6');
+      const response = await fetch('/api/articles?limit=12');
       if (response.ok) {
         const data = await response.json();
-        setArticles(data.data?.items || []);
+        const items = data.data?.items || [];
+        // تقليب المقالات عشوائياً واختيار 6 منها
+        const shuffled = items.sort(() => Math.random() - 0.5).slice(0, 6);
+        setArticles(shuffled);
       }
     } catch (err) {
       console.error('Error fetching articles:', err);
