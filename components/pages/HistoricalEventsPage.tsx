@@ -157,7 +157,8 @@ export default function HistoricalEventsPageClient() {
   const fetchRelatedArticles = async () => {
     setArticlesLoading(true);
     try {
-      const response = await fetch('/api/articles?category=تاريخ&limit=6');
+      // جلب أحدث المقالات (بدون تحديد فئة معينة)
+      const response = await fetch('/api/articles?limit=6');
       if (response.ok) {
         const data = await response.json();
         setArticles(data.data?.items || []);
@@ -621,15 +622,15 @@ export default function HistoricalEventsPageClient() {
                 </div>
                 <div>
                   <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
-                    مقالات ذات صلة
+                    مقالات قد تهمك
                   </h2>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    اقرأ المزيد عن التاريخ
+                    اقرأ المزيد من المقالات
                   </p>
                 </div>
               </div>
               <Link
-                href="/articles?category=تاريخ"
+                href="/articles"
                 className="flex items-center gap-2 px-4 py-2 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400
                          rounded-xl hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors font-medium"
               >
