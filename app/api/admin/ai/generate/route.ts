@@ -13,6 +13,8 @@ import {
 } from '@/lib/ai/generator';
 
 export async function POST(request: NextRequest) {
+  let requestedProvider = 'unknown';
+
   try {
     const body = await request.json();
 
@@ -25,6 +27,7 @@ export async function POST(request: NextRequest) {
     }
 
     const provider = (body.provider || 'groq') as AIProvider;
+    requestedProvider = provider; // حفظ المزود للاستخدام في catch
     const length = (body.length || 'medium') as ContentLength;
     const style = body.style as ContentStyle | undefined;
 
@@ -115,7 +118,7 @@ export async function POST(request: NextRequest) {
         success: false,
         error: userFriendlyError,
         details: errorMessage, // دائماً أرجع التفاصيل للمساعدة في التشخيص
-        provider: body?.provider || 'unknown',
+        provider: requestedProvider,
       },
       { status: 500 }
     );
