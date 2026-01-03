@@ -215,7 +215,7 @@ export async function generateArticle(
     'sona-v6',
   ];
 
-  // إذا تم طلب إجبار استخدام المزود المختار فقط
+  // إذا تم طلب إجبار استخدام المزود المختار فقط (بدون fallback)
   if (request.forceSingleProvider) {
     providers = [request.provider];
     console.log(
@@ -226,17 +226,21 @@ export async function generateArticle(
     console.log(`🔧 [DEBUG] مزود محلي - بدون fallback`);
   } else if (request.provider === 'gemini') {
     // Gemini: استخدم Gemini فقط بدون fallback
-    // إذا فشل Gemini، سيتم إرجاع خطأ واضح للمستخدم
+    // لإظهار رسالة خطأ واضحة للمستخدم إذا فشل
     providers = ['gemini'];
-    console.log('🔧 [DEBUG] Gemini فقط - بدون fallback');
+    console.log('🔧 [DEBUG] Gemini فقط - بدون fallback تلقائي');
   } else if (request.provider === 'groq') {
     // Groq: استخدم Groq فقط بدون fallback
     providers = ['groq'];
-    console.log('🔧 [DEBUG] Groq فقط - بدون fallback');
+    console.log('🔧 [DEBUG] Groq فقط - بدون fallback تلقائي');
+  } else if (request.provider === 'cohere') {
+    // Cohere: استخدم Cohere فقط بدون fallback
+    providers = ['cohere'];
+    console.log('🔧 [DEBUG] Cohere فقط - بدون fallback تلقائي');
   } else {
-    // باقي المزودين: المزود المطلوب فقط بدون fallback
+    // باقي المزودين: المزود المطلوب فقط
     providers = [request.provider];
-    console.log(`🔧 [DEBUG] استخدام ${request.provider} فقط - بدون fallback`);
+    console.log(`🔧 [DEBUG] ${request.provider} فقط - بدون fallback تلقائي`);
   }
 
   console.log(`📋 [DEBUG] قائمة المزودين النهائية: [${providers.join(' → ')}]`);

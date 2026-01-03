@@ -48,6 +48,12 @@ const API_KEYS_CONFIG: ApiKeysMap = {
     required: false,
     testEndpoint: 'https://api.pexels.com/v1/search',
   },
+  unsplash: {
+    key: process.env.UNSPLASH_ACCESS_KEY || '',
+    name: 'Unsplash',
+    required: false,
+    testEndpoint: 'https://api.unsplash.com/photos',
+  },
   openai: {
     key: process.env.OPENAI_API_KEY || '',
     name: 'OpenAI',
