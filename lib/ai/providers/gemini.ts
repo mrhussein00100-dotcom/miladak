@@ -249,14 +249,14 @@ ${keywordsText}
 - أضف أمثلة وتفاصيل في كل قسم
 - المقال يجب أن يكون ${wordCount.min}+ كلمة (إلزامي!)
 
-الناتج (JSON فقط - بدون أي نص قبله أو بعده):
-{
-  "title": "العنوان الرئيسي",
-  "content": "<p>المحتوى الكامل بHTML</p>",
-  "metaTitle": "عنوان الميتا (60 حرف)",
-  "metaDescription": "وصف الميتا (160 حرف)",
-  "keywords": ["كلمة1", "كلمة2", "كلمة3", "كلمة4", "كلمة5"]
-}`;
+⚠️ تعليمات الإخراج (مهمة جداً):
+- أرجع JSON فقط بدون أي نص أو شرح قبله أو بعده
+- لا تكتب أي كلمة قبل علامة {
+- لا تستخدم علامات الكود \`\`\`
+- ابدأ مباشرة بـ { وانتهِ بـ }
+
+الصيغة المطلوبة:
+{"title":"العنوان الرئيسي","content":"<p>المحتوى الكامل بHTML</p>","metaTitle":"عنوان الميتا","metaDescription":"وصف الميتا","keywords":["كلمة1","كلمة2","كلمة3"]}`;
 
   const models = [DEFAULT_MODEL, ...FALLBACK_MODELS];
   let lastError = '';
@@ -404,18 +404,88 @@ ${keywordsText}
   );
 
   try {
-    aiResponse = aiResponse
+    // v6.5: تحسين استخراج JSON من الرد
+    console.log('📝 Gemini: طول الرد الخام:', aiResponse.length);
+
+    // تنظيف الرد من علامات الكود
+    let cleanedResponse = aiResponse
       .replace(/^```json\s*/gi, '')
       .replace(/^```\s*/gi, '')
       .replace(/```\s*$/gi, '')
+      .replace(/```json/gi, '')
+      .replace(/```/g, '')
       .trim();
 
-    const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
+    // محاولة 1: البحث عن JSON كامل
+    let jsonMatch = cleanedResponse.match(/\{[\s\S]*\}/);
+
+    // محاولة 2: إذا لم يُعثر على JSON، جرب تنظيف أكثر
     if (!jsonMatch) {
-      throw new Error('فشل في استخراج JSON من الرد');
+      // إزالة أي نص قبل أول {
+      const firstBrace = cleanedResponse.indexOf('{');
+      if (firstBrace !== -1) {
+        cleanedResponse = cleanedResponse.substring(firstBrace);
+        jsonMatch = cleanedResponse.match(/\{[\s\S]*\}/);
+      }
     }
 
-    const result = JSON.parse(jsonMatch[0]);
+    // محاولة 3: إذا كان الرد يحتوي على JSON متعدد، خذ الأول
+    if (!jsonMatch) {
+      const jsonObjects = cleanedResponse.match(
+        /\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}/g
+      );
+      if (jsonObjects && jsonObjects.length > 0) {
+        // ابحث عن أكبر JSON (الأكثر احتمالاً أن يكون المحتوى)
+        jsonMatch = [
+          jsonObjects.reduce((a, b) => (a.length > b.length ? a : b)),
+        ];
+      }
+    }
+
+    if (!jsonMatch) {
+      console.error('❌ Gemini: فشل في استخراج JSON');
+      console.error(
+        '📄 الرد المنظف (أول 500 حرف):',
+        cleanedResponse.substring(0, 500)
+      );
+      throw new Error(
+        'فشل في استخراج JSON من الرد - الرد لا يحتوي على JSON صالح'
+      );
+    }
+
+    let jsonString = jsonMatch[0];
+
+    // إصلاح مشاكل JSON الشائعة
+    // 1. إزالة الفواصل الزائدة قبل }
+    jsonString = jsonString.replace(/,\s*}/g, '}');
+    // 2. إزالة الفواصل الزائدة قبل ]
+    jsonString = jsonString.replace(/,\s*]/g, ']');
+    // 3. إصلاح علامات الاقتباس المزدوجة داخل النص
+    // هذا معقد، لذا نتركه للـ JSON.parse
+
+    let result;
+    try {
+      result = JSON.parse(jsonString);
+    } catch (parseError) {
+      console.error('❌ Gemini: فشل في تحليل JSON:', parseError);
+      console.error(
+        '📄 JSON المستخرج (أول 500 حرف):',
+        jsonString.substring(0, 500)
+      );
+
+      // محاولة إصلاح JSON المكسور
+      try {
+        // إزالة أي أحرف غير صالحة
+        const sanitizedJson = jsonString
+          .replace(/[\x00-\x1F\x7F]/g, '') // إزالة أحرف التحكم
+          .replace(/\n/g, '\\n') // تحويل الأسطر الجديدة
+          .replace(/\r/g, '\\r')
+          .replace(/\t/g, '\\t');
+        result = JSON.parse(sanitizedJson);
+      } catch (secondError) {
+        throw new Error(`فشل في تحليل JSON من الرد: ${parseError}`);
+      }
+    }
     const actualWordCount = result.content.split(/\s+/).length;
 
     // v6.1: التحقق من طول المحتوى
