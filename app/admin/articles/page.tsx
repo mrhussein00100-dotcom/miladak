@@ -265,7 +265,7 @@ export default function ArticlesPage() {
                       </span>
                       <span>
                         {new Date(article.created_at).toLocaleDateString(
-                          'ar-SA'
+                          'ar-EG'
                         )}
                       </span>
                     </div>
@@ -367,7 +367,7 @@ export default function ArticlesPage() {
                         </td>
                         <td className="px-4 lg:px-6 py-4 text-gray-400 text-sm whitespace-nowrap">
                           {new Date(article.created_at).toLocaleDateString(
-                            'ar-SA'
+                            'ar-EG'
                           )}
                         </td>
                         <td className="px-4 lg:px-6 py-4">

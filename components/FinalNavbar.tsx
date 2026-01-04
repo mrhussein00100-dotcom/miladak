@@ -56,6 +56,59 @@ const themes = [
   { value: 'system', icon: '🖥️', label: 'النظام' },
 ] as const;
 
+// مكون القسم القابل للطي في الموبايل
+function MobileAccordionSection({
+  title,
+  icon,
+  children,
+  defaultOpen = false,
+}: {
+  title: string;
+  icon: string;
+  children: React.ReactNode;
+  defaultOpen?: boolean;
+}) {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+
+  return (
+    <div className="border-b border-border/50 last:border-b-0">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between px-4 py-3 hover:bg-muted/50 transition-colors"
+      >
+        <div className="flex items-center gap-3">
+          <span className="text-lg">{icon}</span>
+          <span className="font-semibold text-sm">{title}</span>
+        </div>
+        <svg
+          className={cn(
+            'w-4 h-4 transition-transform duration-300',
+            isOpen && 'rotate-180'
+          )}
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 9l-7 7-7-7"
+          />
+        </svg>
+      </button>
+      <div
+        className={cn(
+          'overflow-hidden transition-all duration-300 ease-in-out',
+          isOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+        )}
+      >
+        <div className="px-4 pb-3 space-y-1">{children}</div>
+      </div>
+    </div>
+  );
+}
+
 export function FinalNavbar() {
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
@@ -77,7 +130,7 @@ export function FinalNavbar() {
   const handleMouseLeave = () => {
     closeTimeoutRef.current = setTimeout(() => {
       setOpenDropdown(null);
-    }, 300); // تأخير 300ms
+    }, 300);
   };
 
   const handleMouseEnter = (dropdown: string) => {
@@ -328,7 +381,6 @@ export function FinalNavbar() {
                             🎯 معالم الحياة المهمة
                           </Link>
                         </div>
-                        {/* رابط المزيد للمقالات */}
                         <div className="border-t border-border mt-2 pt-2">
                           <Link
                             href="/articles"
@@ -364,7 +416,6 @@ export function FinalNavbar() {
                             </Link>
                           ))}
                         </div>
-                        {/* رابط المزيد للتصنيفات */}
                         <div className="border-t border-border mt-2 pt-2">
                           <Link
                             href="/categories"
@@ -474,7 +525,7 @@ export function FinalNavbar() {
                           }
                         }}
                         placeholder="ابحث في الموقع..."
-                        className="w-full px-4 py-2 pr-10 rounded-lg bg-muted border-0 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+                        className="w-full px-4 py-2 pr-10 rounded-lg bg-white dark:bg-gray-800 border border-border/50 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 placeholder:text-gray-500 dark:placeholder:text-gray-400"
                         autoFocus
                       />
                       <button
@@ -567,7 +618,7 @@ export function FinalNavbar() {
                 )}
               </div>
 
-              {/* Mobile Menu */}
+              {/* Mobile Menu Button */}
               <button
                 onClick={() => setIsMobileOpen(true)}
                 className="lg:hidden w-10 h-10 rounded-lg hover:bg-muted flex items-center justify-center text-foreground hover:text-primary transition-colors"
@@ -594,20 +645,26 @@ export function FinalNavbar() {
         </div>
       </nav>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu - تصميم محسّن مع أقسام قابلة للطي */}
       {isMobileOpen && (
         <>
+          {/* Overlay */}
           <div
-            className="fixed inset-0 z-[60] bg-black/50"
+            className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm"
             onClick={() => setIsMobileOpen(false)}
           />
-          <div className="mobile-menu-slide fixed top-0 right-0 bottom-0 z-[70] w-72 bg-background shadow-xl overflow-y-auto text-foreground">
+
+          {/* Menu Panel */}
+          <div className="mobile-menu-slide fixed top-0 right-0 bottom-0 z-[70] w-[85%] max-w-[320px] bg-background shadow-2xl overflow-hidden flex flex-col">
             {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-border">
-              <span className="font-bold text-lg gradient-text">ميلادك</span>
+            <div className="flex items-center justify-between p-4 border-b border-border bg-gradient-to-l from-primary/5 to-transparent">
+              <div className="flex items-center gap-3">
+                <AnimatedLogo className="h-8 w-8" />
+                <span className="font-bold text-lg gradient-text">ميلادك</span>
+              </div>
               <button
                 onClick={() => setIsMobileOpen(false)}
-                className="w-9 h-9 rounded-lg hover:bg-muted flex items-center justify-center text-foreground hover:text-primary transition-colors"
+                className="w-10 h-10 rounded-full bg-muted/50 hover:bg-muted flex items-center justify-center text-foreground hover:text-primary transition-all hover:rotate-90"
               >
                 <svg
                   className="w-5 h-5"
@@ -625,114 +682,152 @@ export function FinalNavbar() {
               </button>
             </div>
 
-            {/* Content */}
-            <div className="p-4 space-y-4">
-              {/* Search */}
-              <form onSubmit={handleSearch}>
+            {/* Search */}
+            <div className="p-4 border-b border-border/50">
+              <form onSubmit={handleSearch} className="relative">
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="ابحث..."
-                  className="w-full px-4 py-2 rounded-lg bg-muted text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  placeholder="ابحث في الموقع..."
+                  className="w-full px-4 py-3 pr-12 rounded-xl bg-white/90 dark:bg-gray-800/90 border border-border/50 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400"
                 />
+                <button
+                  type="submit"
+                  className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-lg bg-primary hover:bg-primary-hover text-white flex items-center justify-center transition-colors"
+                >
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
+                  </svg>
+                </button>
               </form>
+            </div>
 
-              {/* Main Nav */}
-              {mainNav.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cn(
-                    'flex items-center gap-3 px-4 py-3 rounded-lg transition-all',
-                    isActive(item.href)
-                      ? 'bg-primary/10 text-primary'
-                      : 'hover:bg-muted'
-                  )}
-                >
-                  <span className="text-xl">{item.icon}</span>
-                  <span className="font-medium">{item.name}</span>
-                </Link>
-              ))}
-
-              {/* Tools */}
-              <div className="space-y-2">
-                <div className="px-2 text-xs font-semibold text-muted-foreground">
-                  🛠️ الأدوات
-                </div>
-                {topTools.map((tool) => (
-                  <Link
-                    key={tool.href}
-                    href={tool.href}
-                    className="flex items-center gap-3 px-4 py-2 rounded-lg text-sm hover:bg-muted"
-                  >
-                    <span>{tool.icon}</span>
-                    <span>{tool.name}</span>
-                  </Link>
-                ))}
-                <Link
-                  href="/tools"
-                  className="flex items-center justify-center gap-2 px-4 py-2 text-sm text-primary hover:bg-primary/10 rounded-lg font-medium"
-                >
-                  <span>المزيد</span>
-                  <span>→</span>
-                </Link>
-              </div>
-
-              {/* Articles */}
-              <div className="space-y-2">
-                <div className="px-2 text-xs font-semibold text-muted-foreground">
-                  📚 المقالات والتصنيفات
-                </div>
-                {topArticleCategories.map((cat) => (
-                  <Link
-                    key={cat.href}
-                    href={cat.href}
-                    className="flex items-center gap-3 px-4 py-2 rounded-lg text-sm hover:bg-muted"
-                  >
-                    <span>{cat.icon}</span>
-                    <span>{cat.name}</span>
-                  </Link>
-                ))}
-                <div className="flex gap-2 mt-2">
-                  <Link
-                    href="/articles"
-                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-xs text-primary hover:bg-primary/10 rounded-lg font-medium"
-                  >
-                    <span>المقالات</span>
-                    <span>→</span>
-                  </Link>
-                  <Link
-                    href="/categories"
-                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-xs text-secondary hover:bg-secondary/10 rounded-lg font-medium"
-                  >
-                    <span>التصنيفات</span>
-                    <span>→</span>
-                  </Link>
-                </div>
-              </div>
-
-              {/* Explore */}
-              <div className="space-y-2">
-                <div className="px-2 text-xs font-semibold text-muted-foreground">
-                  🔍 استكشف
-                </div>
-                {exploreItems.map((item) => (
+            {/* Scrollable Content */}
+            <div className="flex-1 overflow-y-auto">
+              {/* Quick Links - الروابط الرئيسية */}
+              <div className="p-4 space-y-2">
+                {mainNav.map((item) => (
                   <Link
                     key={item.href}
                     href={item.href}
-                    className="flex items-center gap-3 px-4 py-2 rounded-lg text-sm hover:bg-muted"
+                    className={cn(
+                      'flex items-center gap-3 px-4 py-3 rounded-xl transition-all',
+                      isActive(item.href)
+                        ? 'bg-gradient-to-l from-primary/20 to-primary/5 text-primary border border-primary/20'
+                        : 'hover:bg-muted/50 border border-transparent'
+                    )}
                   >
-                    <span>{item.icon}</span>
-                    <span>{item.name}</span>
+                    <span className="text-xl">{item.icon}</span>
+                    <span className="font-medium">{item.name}</span>
+                    {isActive(item.href) && (
+                      <span className="mr-auto text-primary">●</span>
+                    )}
                   </Link>
                 ))}
               </div>
 
-              {/* Theme */}
-              <div className="pt-4 border-t">
-                <div className="px-2 text-xs font-semibold text-muted-foreground mb-2">
-                  المظهر
+              {/* Accordion Sections */}
+              <div className="border-t border-border/50">
+                {/* الأدوات */}
+                <MobileAccordionSection
+                  title="الأدوات"
+                  icon="🛠️"
+                  defaultOpen={pathname.startsWith('/tools')}
+                >
+                  {topTools.map((tool) => (
+                    <Link
+                      key={tool.href}
+                      href={tool.href}
+                      className={cn(
+                        'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all',
+                        isActive(tool.href)
+                          ? 'bg-primary/10 text-primary'
+                          : 'hover:bg-muted/50'
+                      )}
+                    >
+                      <span>{tool.icon}</span>
+                      <span>{tool.name}</span>
+                    </Link>
+                  ))}
+                  <Link
+                    href="/tools"
+                    className="flex items-center justify-center gap-2 px-3 py-2.5 mt-2 text-sm text-primary bg-primary/5 hover:bg-primary/10 rounded-lg font-medium transition-colors"
+                  >
+                    <span>عرض جميع الأدوات</span>
+                    <span>←</span>
+                  </Link>
+                </MobileAccordionSection>
+
+                {/* المقالات */}
+                <MobileAccordionSection
+                  title="المقالات"
+                  icon="📚"
+                  defaultOpen={pathname.startsWith('/articles')}
+                >
+                  {topArticleCategories.map((cat) => (
+                    <Link
+                      key={cat.href}
+                      href={cat.href}
+                      className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm hover:bg-muted/50 transition-colors"
+                    >
+                      <span>{cat.icon}</span>
+                      <span>{cat.name}</span>
+                    </Link>
+                  ))}
+                  <div className="flex gap-2 mt-2">
+                    <Link
+                      href="/articles"
+                      className="flex-1 flex items-center justify-center gap-1 px-3 py-2.5 text-xs text-primary bg-primary/5 hover:bg-primary/10 rounded-lg font-medium transition-colors"
+                    >
+                      <span>المقالات</span>
+                      <span>←</span>
+                    </Link>
+                    <Link
+                      href="/categories"
+                      className="flex-1 flex items-center justify-center gap-1 px-3 py-2.5 text-xs text-secondary bg-secondary/5 hover:bg-secondary/10 rounded-lg font-medium transition-colors"
+                    >
+                      <span>التصنيفات</span>
+                      <span>←</span>
+                    </Link>
+                  </div>
+                </MobileAccordionSection>
+
+                {/* استكشف */}
+                <MobileAccordionSection title="استكشف" icon="🔍">
+                  {exploreItems.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={cn(
+                        'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all',
+                        isActive(item.href)
+                          ? 'bg-primary/10 text-primary'
+                          : 'hover:bg-muted/50'
+                      )}
+                    >
+                      <span>{item.icon}</span>
+                      <span>{item.name}</span>
+                    </Link>
+                  ))}
+                </MobileAccordionSection>
+              </div>
+
+              {/* Theme Selector */}
+              <div className="p-4 border-t border-border/50">
+                <div className="text-xs font-semibold text-muted-foreground mb-3 flex items-center gap-2">
+                  <span>🎨</span>
+                  <span>المظهر</span>
                 </div>
                 <div className="grid grid-cols-4 gap-2">
                   {themes.map((t) => (
@@ -740,24 +835,33 @@ export function FinalNavbar() {
                       key={t.value}
                       onClick={() => setTheme(t.value)}
                       className={cn(
-                        'flex flex-col items-center gap-1 p-2 rounded-lg text-xs transition-all',
-                        theme === t.value ? 'bg-primary text-white' : 'bg-muted'
+                        'flex flex-col items-center gap-1.5 p-3 rounded-xl text-xs transition-all',
+                        theme === t.value
+                          ? 'bg-gradient-to-b from-primary/20 to-primary/5 text-primary border border-primary/30 shadow-sm'
+                          : 'bg-muted/30 hover:bg-muted/50 border border-transparent'
                       )}
                     >
-                      <span>{t.icon}</span>
-                      <span className="text-[10px]">{t.label}</span>
+                      <span className="text-lg">{t.icon}</span>
+                      <span className="text-[10px] font-medium">{t.label}</span>
                     </button>
                   ))}
                 </div>
               </div>
+            </div>
+
+            {/* Footer */}
+            <div className="p-4 border-t border-border/50 bg-muted/20">
+              <p className="text-center text-xs text-muted-foreground">
+                © {new Date().getFullYear()} ميلادك - جميع الحقوق محفوظة
+              </p>
             </div>
           </div>
         </>
       )}
 
       {/* Bottom Nav - Mobile */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-background border-t">
-        <div className="flex items-center justify-around h-16">
+      <div className="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-background/95 backdrop-blur-xl border-t border-border shadow-lg">
+        <div className="flex items-center justify-around h-16 safe-area-bottom">
           {[
             { name: 'الرئيسية', href: '/', icon: '🏠' },
             { name: 'الأصدقاء', href: '/friends', icon: '👥' },
@@ -769,17 +873,34 @@ export function FinalNavbar() {
               key={item.href}
               href={item.href}
               className={cn(
-                'flex flex-col items-center justify-center gap-1 w-full h-full',
-                isActive(item.href) ? 'text-primary' : 'text-foreground/60'
+                'flex flex-col items-center justify-center gap-0.5 w-full h-full transition-all',
+                isActive(item.href)
+                  ? 'text-primary scale-105'
+                  : 'text-foreground/50 hover:text-foreground/70'
               )}
             >
-              <span className="text-xl">{item.icon}</span>
-              <span className="text-[10px]">{item.name}</span>
+              <span
+                className={cn(
+                  'text-xl transition-transform',
+                  isActive(item.href) && 'animate-bounce-subtle'
+                )}
+              >
+                {item.icon}
+              </span>
+              <span
+                className={cn(
+                  'text-[10px] font-medium',
+                  isActive(item.href) && 'font-bold'
+                )}
+              >
+                {item.name}
+              </span>
             </Link>
           ))}
         </div>
       </div>
 
+      {/* Spacer for fixed navbar */}
       <div className="h-16" />
     </>
   );
