@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { AgeData } from '@/types';
+import { AgeData } from '@/lib/calculations/ageCalculations';
 import { formatArabicNumber } from '@/lib/formatArabic';
 
 interface Props {
@@ -315,7 +315,7 @@ function getFunFacts(ageData: AgeData) {
     {
       icon: '👣',
       fact: `مشيت تقريباً ${formatArabicNumber(
-        Math.floor(totalDays * 8000)
+        Math.floor(totalDays * 5000)
       )} خطوة`,
     },
     {
@@ -397,8 +397,7 @@ export default function LifeJourney({ ageData }: Props) {
               <h4 className="font-bold text-lg">الإنجاز القادم 🎯</h4>
               <p className="text-muted-foreground">{nextMilestone.label}</p>
               <p className="text-sm text-amber-600 dark:text-amber-400 mt-1">
-                متبقي {formatArabicNumber(nextMilestone.remaining || 0)}{' '}
-                {nextMilestone.type === 'days' ? 'يوم' : 'سنة'}
+                متبقي {formatArabicNumber(nextMilestone.remaining || 0)} يوم
               </p>
             </div>
             <motion.div
