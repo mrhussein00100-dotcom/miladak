@@ -111,8 +111,7 @@ function generateArabicVariations(text: string): string[] {
   });
 
   // استبدال الألف الأولى فقط بأشكال مختلفة (مهم للكلمات مثل "احجار" -> "أحجار")
-  const firstAlefMatch = text.match(/^[أإآٱا]/);
-  if (firstAlefMatch) {
+  if (/^[أإآٱا]/.test(text)) {
     alefForms.forEach((alef) => {
       const newVar = text.replace(/^[أإآٱا]/, alef);
       if (newVar !== text && !variations.includes(newVar)) {
