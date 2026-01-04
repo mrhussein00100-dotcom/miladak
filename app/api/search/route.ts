@@ -308,7 +308,7 @@ export async function GET(request: NextRequest) {
           const articles = await query<SearchArticle>(
             `SELECT a.id, a.title, a.excerpt, a.slug, a.image, c.name as category_name
              FROM articles a
-             LEFT JOIN article_categories c ON a.category_id = c.id
+             LEFT JOIN article_categories c ON CAST(a.category_id AS INTEGER) = c.id
              WHERE CAST(a.published AS TEXT) IN ('1', 'true', 't') AND (a.title LIKE ? OR a.excerpt LIKE ? OR a.content LIKE ?)
              ORDER BY a.created_at DESC
              LIMIT 20`,
