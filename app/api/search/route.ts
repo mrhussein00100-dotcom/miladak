@@ -16,6 +16,7 @@ interface SearchArticle {
   excerpt: string | null;
   slug: string;
   image: string | null;
+  featured_image: string | null;
   category_name: string | null;
 }
 
@@ -305,7 +306,7 @@ export async function GET(request: NextRequest) {
         // البحث بكل الأنماط
         for (const pattern of searchPatterns) {
           const articles = await query<SearchArticle>(
-            `SELECT a.id, a.title, a.excerpt, a.slug, a.image, c.name as category_name
+            `SELECT a.id, a.title, a.excerpt, a.slug, a.image, a.featured_image, c.name as category_name
              FROM articles a
              LEFT JOIN article_categories c ON CAST(a.category_id AS INTEGER) = c.id
              WHERE CAST(a.published AS TEXT) IN ('1', 'true', 't') AND (a.title LIKE ? OR a.excerpt LIKE ? OR a.content LIKE ?)
@@ -317,12 +318,14 @@ export async function GET(request: NextRequest) {
           articles.forEach((article) => {
             if (!seenArticleIds.has(article.id)) {
               seenArticleIds.add(article.id);
+              // استخدام featured_image أولاً، ثم image كبديل
+              const articleImage = article.featured_image || article.image;
               results.push({
                 id: article.id,
                 title: article.title,
                 slug: article.slug,
                 excerpt: article.excerpt || undefined,
-                image: article.image || undefined,
+                image: articleImage || undefined,
                 type: 'article',
                 category: article.category_name || undefined,
               });
