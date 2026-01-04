@@ -52,7 +52,7 @@ interface Props {
 
 export default function ArticlePageClient({ article, relatedArticles }: Props) {
   const formatDate = (d: string) =>
-    new Date(d).toLocaleDateString('ar-SA', {
+    new Date(d).toLocaleDateString('ar-EG-u-ca-gregory', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
