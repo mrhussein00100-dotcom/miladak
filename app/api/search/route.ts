@@ -175,6 +175,7 @@ function generateArabicVariations(text: string): string[] {
  * إنشاء أنماط بحث متعددة للنص العربي
  * يشمل البحث بالهمزات وبدونها في الاتجاهين
  * ويشمل البحث بدون علامات الترقيم
+ * ويشمل البحث بالكلمات المنفصلة
  */
 function createSearchPatterns(searchQuery: string): string[] {
   const patterns: string[] = [];
@@ -207,6 +208,22 @@ function createSearchPatterns(searchQuery: string): string[] {
     const cleanVariations = generateArabicVariations(withoutPunctuation);
     cleanVariations.forEach((v) => {
       patterns.push(`%${v}%`);
+    });
+  }
+
+  // البحث بالكلمات المنفصلة (للبحث الجزئي)
+  const words = withoutPunctuation.split(/\s+/).filter((w) => w.length >= 2);
+  if (words.length > 1) {
+    // إضافة كل كلمة كنمط منفصل
+    words.forEach((word) => {
+      patterns.push(`%${word}%`);
+      // إضافة تباديل لكل كلمة
+      const wordVariations = generateArabicVariations(word);
+      wordVariations.forEach((v) => {
+        if (v !== word) {
+          patterns.push(`%${v}%`);
+        }
+      });
     });
   }
 
@@ -254,12 +271,12 @@ export async function GET(request: NextRequest) {
         // البحث بكل الأنماط
         for (const pattern of searchPatterns) {
           const tools = await query<SearchTool>(
-            `SELECT t.id, t.title, t.description, t.slug, t.icon, c.name as category_name
+            `SELECT t.id, t.title, t.description, t.name as slug, t.icon, c.name as category_name
              FROM tools t
              LEFT JOIN tool_categories c ON t.category_id = c.id
-             WHERE CAST(t.active AS TEXT) IN ('1', 'true', 't') AND (t.title LIKE ? OR t.description LIKE ? OR t.slug LIKE ?)
+             WHERE CAST(t.is_active AS TEXT) IN ('1', 'true', 't') AND (t.title LIKE ? OR t.description LIKE ? OR t.name LIKE ?)
              ORDER BY t.sort_order ASC
-             LIMIT 20`,
+             LIMIT 30`,
             [pattern, pattern, pattern]
           );
 
@@ -318,8 +335,16 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Sort results: tools first, then articles
+    // Sort results: by relevance (exact matches first), then tools first, then articles
+    const normalizedQuery = normalizeArabicText(q);
     results.sort((a, b) => {
+      // حساب درجة التطابق
+      const scoreA = calculateRelevanceScore(a, normalizedQuery);
+      const scoreB = calculateRelevanceScore(b, normalizedQuery);
+
+      if (scoreA !== scoreB) return scoreB - scoreA;
+
+      // إذا كانت الدرجة متساوية، الأدوات أولاً
       if (a.type === 'tool' && b.type === 'article') return -1;
       if (a.type === 'article' && b.type === 'tool') return 1;
       return 0;
@@ -345,4 +370,37 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+/**
+ * حساب درجة صلة النتيجة بالبحث
+ */
+function calculateRelevanceScore(
+  result: SearchResult,
+  normalizedQuery: string
+): number {
+  let score = 0;
+  const normalizedTitle = normalizeArabicText(result.title);
+  const normalizedDesc = normalizeArabicText(
+    result.description || result.excerpt || ''
+  );
+
+  // تطابق تام في العنوان
+  if (normalizedTitle === normalizedQuery) score += 100;
+  // العنوان يبدأ بالبحث
+  else if (normalizedTitle.startsWith(normalizedQuery)) score += 80;
+  // العنوان يحتوي على البحث
+  else if (normalizedTitle.includes(normalizedQuery)) score += 60;
+
+  // الوصف يحتوي على البحث
+  if (normalizedDesc.includes(normalizedQuery)) score += 20;
+
+  // البحث بالكلمات المنفصلة
+  const queryWords = normalizedQuery.split(/\s+/).filter((w) => w.length >= 2);
+  queryWords.forEach((word) => {
+    if (normalizedTitle.includes(word)) score += 10;
+    if (normalizedDesc.includes(word)) score += 5;
+  });
+
+  return score;
 }
