@@ -63,6 +63,19 @@ const MONTHS = [
   'ديسمبر',
 ];
 
+// دالة لحساب عدد أيام الشهر
+function getDaysInMonth(month: number): number {
+  // الأشهر ذات 31 يوم: يناير، مارس، مايو، يوليو، أغسطس، أكتوبر، ديسمبر
+  const months31 = [1, 3, 5, 7, 8, 10, 12];
+  // الأشهر ذات 30 يوم: أبريل، يونيو، سبتمبر، نوفمبر
+  const months30 = [4, 6, 9, 11];
+
+  if (months31.includes(month)) return 31;
+  if (months30.includes(month)) return 30;
+  // فبراير - نستخدم 29 للسماح بالسنوات الكبيسة
+  return 29;
+}
+
 const CATEGORIES = [
   { id: 'all', name: 'الكل', icon: Globe, color: 'from-blue-500 to-cyan-500' },
   {
@@ -131,6 +144,14 @@ export default function HistoricalEventsPageClient() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [articles, setArticles] = useState<Article[]>([]);
   const [articlesLoading, setArticlesLoading] = useState(false);
+
+  // تعديل اليوم تلقائياً عند تغيير الشهر إذا كان أكبر من عدد أيام الشهر
+  useEffect(() => {
+    const maxDays = getDaysInMonth(month);
+    if (day > maxDays) {
+      setDay(maxDays);
+    }
+  }, [month, day]);
 
   // جلب الأحداث
   const fetchEvents = async () => {
@@ -342,25 +363,30 @@ export default function HistoricalEventsPageClient() {
               </div>
 
               {/* اختيار اليوم */}
-              <div>
+              <div className="relative">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   اليوم
                 </label>
-                <input
-                  type="number"
-                  min="1"
-                  max="31"
-                  value={day}
-                  onChange={(e) =>
-                    setDay(
-                      Math.min(31, Math.max(1, parseInt(e.target.value) || 1))
-                    )
-                  }
-                  className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl 
-                           bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-white
-                           focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500
-                           transition-all duration-300"
-                />
+                <div className="relative">
+                  <select
+                    value={day}
+                    onChange={(e) => setDay(parseInt(e.target.value))}
+                    className="w-full appearance-none px-4 py-3 pr-10 border-2 border-gray-200 dark:border-gray-600 rounded-xl 
+                             bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-white
+                             focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500
+                             transition-all duration-300 cursor-pointer"
+                  >
+                    {Array.from(
+                      { length: getDaysInMonth(month) },
+                      (_, i) => i + 1
+                    ).map((d) => (
+                      <option key={d} value={d}>
+                        {d}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                </div>
               </div>
 
               {/* البحث */}
