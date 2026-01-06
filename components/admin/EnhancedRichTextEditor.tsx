@@ -353,12 +353,20 @@ export default function EnhancedRichTextEditor({
 
   // مزامنة المحتوى مع المحرر - مع منع الكتابة فوق التغييرات الجديدة
   const lastUpdateRef = useRef<number>(0);
+  // علم لمنع المزامنة أثناء عمليات استبدال الصور
+  const isImageReplacingRef = useRef<boolean>(false);
 
   useEffect(() => {
     if (editorRef.current && editorRef.current.innerHTML !== value) {
-      // تجنب الكتابة فوق التغييرات الحديثة (خلال 500ms)
+      // تجنب الكتابة فوق التغييرات أثناء استبدال الصور
+      if (isImageReplacingRef.current) {
+        console.log('[Sync] Skipping sync - image replacement in progress');
+        return;
+      }
+
+      // تجنب الكتابة فوق التغييرات الحديثة (خلال 1000ms)
       const now = Date.now();
-      if (now - lastUpdateRef.current < 500) {
+      if (now - lastUpdateRef.current < 1000) {
         console.log('[Sync] Skipping sync - recent update detected');
         return;
       }
@@ -863,6 +871,9 @@ export default function EnhancedRichTextEditor({
       if (!editorRef.current) return;
 
       try {
+        // تفعيل علم منع المزامنة
+        isImageReplacingRef.current = true;
+
         // استخدام المرجع المحفوظ للصورة
         const imgElement = selectedImageRef.current || selectedImageElement;
 
@@ -879,12 +890,24 @@ export default function EnhancedRichTextEditor({
         // إذا كان لدينا URL جديد وصورة محددة، نحدث الصورة مباشرة في DOM
         if (newImageUrl && imgElement) {
           console.log('[ImageUpdate] Updating image src directly in DOM');
+          // حفظ الـ src القديم قبل التحديث
+          const oldSrc = imgElement.src;
+          imgElement.setAttribute('data-old-src', oldSrc);
           imgElement.src = newImageUrl;
+
+          // التأكد من تحديث DOM
+          console.log(
+            '[ImageUpdate] DOM updated, new src:',
+            imgElement.src?.substring(0, 80)
+          );
         }
 
         // انتظار لضمان تحديث DOM
         setTimeout(() => {
-          if (!editorRef.current) return;
+          if (!editorRef.current) {
+            isImageReplacingRef.current = false;
+            return;
+          }
 
           // تحديث وقت آخر تعديل مرة أخرى
           lastUpdateRef.current = Date.now();
@@ -907,15 +930,36 @@ export default function EnhancedRichTextEditor({
             if (imgElement) {
               const oldSrc = imgElement.getAttribute('data-old-src') || '';
               if (oldSrc && finalContent.includes(oldSrc)) {
-                finalContent = finalContent.replace(oldSrc, newImageUrl);
-                console.log('[ImageUpdate] Replaced old src with new src');
-              } else {
-                // محاولة استبدال أول صورة
                 finalContent = finalContent.replace(
-                  /(<img[^>]*src=")[^"]*("[^>]*>)/i,
-                  `$1${newImageUrl}$2`
+                  new RegExp(
+                    oldSrc.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
+                    'g'
+                  ),
+                  newImageUrl
                 );
-                console.log('[ImageUpdate] Replaced first image src');
+                console.log(
+                  '[ImageUpdate] Replaced old src with new src using regex'
+                );
+              } else {
+                // محاولة البحث عن أي صورة وتحديثها
+                const imgRegex = /<img([^>]*?)src="([^"]*)"([^>]*?)>/gi;
+                let found = false;
+                finalContent = finalContent.replace(
+                  imgRegex,
+                  (match, before, src, after) => {
+                    if (!found && src !== newImageUrl) {
+                      found = true;
+                      console.log(
+                        '[ImageUpdate] Replacing image src:',
+                        src?.substring(0, 50),
+                        '->',
+                        newImageUrl?.substring(0, 50)
+                      );
+                      return `<img${before}src="${newImageUrl}"${after}>`;
+                    }
+                    return match;
+                  }
+                );
               }
             }
           }
@@ -935,14 +979,22 @@ export default function EnhancedRichTextEditor({
           if (imgElement) {
             imgElement.style.outline = '';
             imgElement.style.outlineOffset = '';
+            imgElement.removeAttribute('data-old-src');
           }
           setSelectedImageElement(null);
           selectedImageRef.current = null;
 
           console.log('[ImageUpdate] Update completed successfully');
-        }, 100);
+
+          // إلغاء تفعيل علم منع المزامنة بعد فترة كافية
+          setTimeout(() => {
+            isImageReplacingRef.current = false;
+            lastUpdateRef.current = Date.now();
+          }, 500);
+        }, 150);
       } catch (error) {
         console.error('[ImageUpdate] Error:', error);
+        isImageReplacingRef.current = false;
         alert('حدث خطأ أثناء تحديث الصورة. يرجى المحاولة مرة أخرى.');
       }
     },

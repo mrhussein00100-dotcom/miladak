@@ -368,10 +368,13 @@ export default function ImageToolbar({
             setShowReplaceModal(false);
 
             // تأخير أطول قبل استدعاء onUpdate للتأكد من تحديث DOM
-            setTimeout(() => {
-              console.log('[ImageToolbar] Calling onUpdate after delay');
-              onUpdate(newUrl);
-            }, 300);
+            // واستخدام requestAnimationFrame لضمان اكتمال الرسم
+            requestAnimationFrame(() => {
+              setTimeout(() => {
+                console.log('[ImageToolbar] Calling onUpdate after delay');
+                onUpdate(newUrl);
+              }, 200);
+            });
           }}
           onClose={() => setShowReplaceModal(false)}
         />
