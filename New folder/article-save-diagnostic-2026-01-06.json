@@ -1,0 +1,368 @@
+[
+  {
+    "timestamp": "2026-01-06T15:56:46.162Z",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/143.0.7499.151 Mobile/15E148 Safari/604.1",
+    "contentLength": 687,
+    "imageCount": 3,
+    "duplicateImages": [
+      {
+        "url": "https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg",
+        "count": 3
+      }
+    ],
+    "saveAttempt": {
+      "success": true,
+      "responseTime": 1014
+    },
+    "debugInfo": {
+      "contentSample": "\n<h2>اختبار تشخيصي للصور</h2>\n<p>هذا محتوى تجريبي لاختبار مشكلة حفظ المقالات.</p>\n\n<figure class=\"my-6\">\n  <img src=\"https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg\" alt=\"صورة تجريب...",
+      "sanitizedSample": "\n<h2>اختبار تشخيصي للصور</h2>\n<p>هذا محتوى تجريبي لاختبار مشكلة حفظ المقالات.</p>\n\n<figure class=\"my-6\">\n  <img src=\"https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg\" alt=\"صورة تجريب...",
+      "validationResult": {
+        "success": true,
+        "data": {
+          "original": {
+            "contentLength": 687,
+            "imageCount": 3,
+            "images": [
+              {
+                "index": 1,
+                "html": "<img src=\"https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg\" alt=\"صورة تجريبية 1\" class=\"w-full rounded-xl\" />",
+                "src": "https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg",
+                "srcLength": 66,
+                "hasSpecialChars": false,
+                "contextBefore": " مشكلة حفظ المقالات.</p>\n\n<figure class=\"my-6\">\n  ",
+                "contextAfter": "\n  <figcaption>صورة في figure</figcaption>\n</figur",
+                "inFigure": true,
+                "inDiv": false
+              },
+              {
+                "index": 2,
+                "html": "<img src=\"https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg\" alt=\"صورة تجريبية 2\" class=\"rounded-lg shadow-lg\" />",
+                "src": "https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg",
+                "srcLength": 66,
+                "hasSpecialChars": false,
+                "contextBefore": "ن الصورتين.</p>\n\n<div class=\"text-center my-6\">\n  ",
+                "contextAfter": "\n</div>\n\n<h3>قسم آخر</h3>\n<p>نص قبل الصورة الثالثة",
+                "inFigure": false,
+                "inDiv": true
+              },
+              {
+                "index": 3,
+                "html": "<img src=\"https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg\" alt=\"صورة تجريبية 3\" class=\"w-full rounded-xl my-6\" />",
+                "src": "https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg",
+                "srcLength": 66,
+                "hasSpecialChars": false,
+                "contextBefore": ">\n\n<h3>قسم آخر</h3>\n<p>نص قبل الصورة الثالثة.</p>\n",
+                "contextAfter": "\n<p>نص في النهاية.</p>\n",
+                "inFigure": false,
+                "inDiv": false
+              }
+            ],
+            "duplicates": [
+              {
+                "url": "https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg",
+                "count": 3
+              }
+            ]
+          },
+          "sanitized": {
+            "contentLength": 687,
+            "imageCount": 3,
+            "images": [
+              {
+                "index": 1,
+                "html": "<img src=\"https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg\" alt=\"صورة تجريبية 1\" class=\"w-full rounded-xl\" />",
+                "src": "https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg",
+                "srcLength": 66,
+                "hasSpecialChars": false,
+                "contextBefore": " مشكلة حفظ المقالات.</p>\n\n<figure class=\"my-6\">\n  ",
+                "contextAfter": "\n  <figcaption>صورة في figure</figcaption>\n</figur",
+                "inFigure": true,
+                "inDiv": false
+              },
+              {
+                "index": 2,
+                "html": "<img src=\"https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg\" alt=\"صورة تجريبية 2\" class=\"rounded-lg shadow-lg\" />",
+                "src": "https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg",
+                "srcLength": 66,
+                "hasSpecialChars": false,
+                "contextBefore": "ن الصورتين.</p>\n\n<div class=\"text-center my-6\">\n  ",
+                "contextAfter": "\n</div>\n\n<h3>قسم آخر</h3>\n<p>نص قبل الصورة الثالثة",
+                "inFigure": false,
+                "inDiv": true
+              },
+              {
+                "index": 3,
+                "html": "<img src=\"https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg\" alt=\"صورة تجريبية 3\" class=\"w-full rounded-xl my-6\" />",
+                "src": "https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg",
+                "srcLength": 66,
+                "hasSpecialChars": false,
+                "contextBefore": ">\n\n<h3>قسم آخر</h3>\n<p>نص قبل الصورة الثالثة.</p>\n",
+                "contextAfter": "\n<p>نص في النهاية.</p>\n",
+                "inFigure": false,
+                "inDiv": false
+              }
+            ],
+            "duplicates": [
+              {
+                "url": "https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg",
+                "count": 3
+              }
+            ]
+          },
+          "comparison": {
+            "lengthDifference": 0,
+            "contentChanged": false,
+            "imageCountChanged": false
+          },
+          "originalSample": "\n<h2>اختبار تشخيصي للصور</h2>\n<p>هذا محتوى تجريبي لاختبار مشكلة حفظ المقالات.</p>\n\n<figure class=\"my-6\">\n  <img src=\"https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg\" alt=\"صورة تجريبية 1\" class=\"w-full rounded-xl\" />\n  <figcaption>صورة في figure</figcaption>\n</figure>\n\n<p>نص بين الصورتين.</p>\n\n<div class=\"text-center my-6\">\n  <img src=\"https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg\" alt=\"صورة تجريبية 2\" class=\"rounded-lg shadow-lg\" />\n</div>\n\n<h3>قسم آخر</h3",
+          "sanitizedSample": "\n<h2>اختبار تشخيصي للصور</h2>\n<p>هذا محتوى تجريبي لاختبار مشكلة حفظ المقالات.</p>\n\n<figure class=\"my-6\">\n  <img src=\"https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg\" alt=\"صورة تجريبية 1\" class=\"w-full rounded-xl\" />\n  <figcaption>صورة في figure</figcaption>\n</figure>\n\n<p>نص بين الصورتين.</p>\n\n<div class=\"text-center my-6\">\n  <img src=\"https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg\" alt=\"صورة تجريبية 2\" class=\"rounded-lg shadow-lg\" />\n</div>\n\n<h3>قسم آخر</h3"
+        }
+      }
+    }
+  },
+  {
+    "timestamp": "2026-01-06T15:56:41.781Z",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/143.0.7499.151 Mobile/15E148 Safari/604.1",
+    "contentLength": 687,
+    "imageCount": 3,
+    "duplicateImages": [
+      {
+        "url": "https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg",
+        "count": 3
+      }
+    ],
+    "saveAttempt": {
+      "success": true,
+      "responseTime": 1093
+    },
+    "debugInfo": {
+      "contentSample": "\n<h2>اختبار تشخيصي للصور</h2>\n<p>هذا محتوى تجريبي لاختبار مشكلة حفظ المقالات.</p>\n\n<figure class=\"my-6\">\n  <img src=\"https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg\" alt=\"صورة تجريب...",
+      "sanitizedSample": "\n<h2>اختبار تشخيصي للصور</h2>\n<p>هذا محتوى تجريبي لاختبار مشكلة حفظ المقالات.</p>\n\n<figure class=\"my-6\">\n  <img src=\"https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg\" alt=\"صورة تجريب...",
+      "validationResult": {
+        "success": true,
+        "data": {
+          "original": {
+            "contentLength": 687,
+            "imageCount": 3,
+            "images": [
+              {
+                "index": 1,
+                "html": "<img src=\"https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg\" alt=\"صورة تجريبية 1\" class=\"w-full rounded-xl\" />",
+                "src": "https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg",
+                "srcLength": 66,
+                "hasSpecialChars": false,
+                "contextBefore": " مشكلة حفظ المقالات.</p>\n\n<figure class=\"my-6\">\n  ",
+                "contextAfter": "\n  <figcaption>صورة في figure</figcaption>\n</figur",
+                "inFigure": true,
+                "inDiv": false
+              },
+              {
+                "index": 2,
+                "html": "<img src=\"https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg\" alt=\"صورة تجريبية 2\" class=\"rounded-lg shadow-lg\" />",
+                "src": "https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg",
+                "srcLength": 66,
+                "hasSpecialChars": false,
+                "contextBefore": "ن الصورتين.</p>\n\n<div class=\"text-center my-6\">\n  ",
+                "contextAfter": "\n</div>\n\n<h3>قسم آخر</h3>\n<p>نص قبل الصورة الثالثة",
+                "inFigure": false,
+                "inDiv": true
+              },
+              {
+                "index": 3,
+                "html": "<img src=\"https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg\" alt=\"صورة تجريبية 3\" class=\"w-full rounded-xl my-6\" />",
+                "src": "https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg",
+                "srcLength": 66,
+                "hasSpecialChars": false,
+                "contextBefore": ">\n\n<h3>قسم آخر</h3>\n<p>نص قبل الصورة الثالثة.</p>\n",
+                "contextAfter": "\n<p>نص في النهاية.</p>\n",
+                "inFigure": false,
+                "inDiv": false
+              }
+            ],
+            "duplicates": [
+              {
+                "url": "https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg",
+                "count": 3
+              }
+            ]
+          },
+          "sanitized": {
+            "contentLength": 687,
+            "imageCount": 3,
+            "images": [
+              {
+                "index": 1,
+                "html": "<img src=\"https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg\" alt=\"صورة تجريبية 1\" class=\"w-full rounded-xl\" />",
+                "src": "https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg",
+                "srcLength": 66,
+                "hasSpecialChars": false,
+                "contextBefore": " مشكلة حفظ المقالات.</p>\n\n<figure class=\"my-6\">\n  ",
+                "contextAfter": "\n  <figcaption>صورة في figure</figcaption>\n</figur",
+                "inFigure": true,
+                "inDiv": false
+              },
+              {
+                "index": 2,
+                "html": "<img src=\"https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg\" alt=\"صورة تجريبية 2\" class=\"rounded-lg shadow-lg\" />",
+                "src": "https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg",
+                "srcLength": 66,
+                "hasSpecialChars": false,
+                "contextBefore": "ن الصورتين.</p>\n\n<div class=\"text-center my-6\">\n  ",
+                "contextAfter": "\n</div>\n\n<h3>قسم آخر</h3>\n<p>نص قبل الصورة الثالثة",
+                "inFigure": false,
+                "inDiv": true
+              },
+              {
+                "index": 3,
+                "html": "<img src=\"https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg\" alt=\"صورة تجريبية 3\" class=\"w-full rounded-xl my-6\" />",
+                "src": "https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg",
+                "srcLength": 66,
+                "hasSpecialChars": false,
+                "contextBefore": ">\n\n<h3>قسم آخر</h3>\n<p>نص قبل الصورة الثالثة.</p>\n",
+                "contextAfter": "\n<p>نص في النهاية.</p>\n",
+                "inFigure": false,
+                "inDiv": false
+              }
+            ],
+            "duplicates": [
+              {
+                "url": "https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg",
+                "count": 3
+              }
+            ]
+          },
+          "comparison": {
+            "lengthDifference": 0,
+            "contentChanged": false,
+            "imageCountChanged": false
+          },
+          "originalSample": "\n<h2>اختبار تشخيصي للصور</h2>\n<p>هذا محتوى تجريبي لاختبار مشكلة حفظ المقالات.</p>\n\n<figure class=\"my-6\">\n  <img src=\"https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg\" alt=\"صورة تجريبية 1\" class=\"w-full rounded-xl\" />\n  <figcaption>صورة في figure</figcaption>\n</figure>\n\n<p>نص بين الصورتين.</p>\n\n<div class=\"text-center my-6\">\n  <img src=\"https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg\" alt=\"صورة تجريبية 2\" class=\"rounded-lg shadow-lg\" />\n</div>\n\n<h3>قسم آخر</h3",
+          "sanitizedSample": "\n<h2>اختبار تشخيصي للصور</h2>\n<p>هذا محتوى تجريبي لاختبار مشكلة حفظ المقالات.</p>\n\n<figure class=\"my-6\">\n  <img src=\"https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg\" alt=\"صورة تجريبية 1\" class=\"w-full rounded-xl\" />\n  <figcaption>صورة في figure</figcaption>\n</figure>\n\n<p>نص بين الصورتين.</p>\n\n<div class=\"text-center my-6\">\n  <img src=\"https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg\" alt=\"صورة تجريبية 2\" class=\"rounded-lg shadow-lg\" />\n</div>\n\n<h3>قسم آخر</h3"
+        }
+      }
+    }
+  },
+  {
+    "timestamp": "2026-01-06T15:55:20.881Z",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/143.0.7499.151 Mobile/15E148 Safari/604.1",
+    "contentLength": 687,
+    "imageCount": 3,
+    "duplicateImages": [
+      {
+        "url": "https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg",
+        "count": 3
+      }
+    ],
+    "saveAttempt": {
+      "success": true,
+      "responseTime": 1074
+    },
+    "debugInfo": {
+      "contentSample": "\n<h2>اختبار تشخيصي للصور</h2>\n<p>هذا محتوى تجريبي لاختبار مشكلة حفظ المقالات.</p>\n\n<figure class=\"my-6\">\n  <img src=\"https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg\" alt=\"صورة تجريب...",
+      "sanitizedSample": "\n<h2>اختبار تشخيصي للصور</h2>\n<p>هذا محتوى تجريبي لاختبار مشكلة حفظ المقالات.</p>\n\n<figure class=\"my-6\">\n  <img src=\"https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg\" alt=\"صورة تجريب...",
+      "validationResult": {
+        "success": true,
+        "data": {
+          "original": {
+            "contentLength": 687,
+            "imageCount": 3,
+            "images": [
+              {
+                "index": 1,
+                "html": "<img src=\"https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg\" alt=\"صورة تجريبية 1\" class=\"w-full rounded-xl\" />",
+                "src": "https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg",
+                "srcLength": 66,
+                "hasSpecialChars": false,
+                "contextBefore": " مشكلة حفظ المقالات.</p>\n\n<figure class=\"my-6\">\n  ",
+                "contextAfter": "\n  <figcaption>صورة في figure</figcaption>\n</figur",
+                "inFigure": true,
+                "inDiv": false
+              },
+              {
+                "index": 2,
+                "html": "<img src=\"https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg\" alt=\"صورة تجريبية 2\" class=\"rounded-lg shadow-lg\" />",
+                "src": "https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg",
+                "srcLength": 66,
+                "hasSpecialChars": false,
+                "contextBefore": "ن الصورتين.</p>\n\n<div class=\"text-center my-6\">\n  ",
+                "contextAfter": "\n</div>\n\n<h3>قسم آخر</h3>\n<p>نص قبل الصورة الثالثة",
+                "inFigure": false,
+                "inDiv": true
+              },
+              {
+                "index": 3,
+                "html": "<img src=\"https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg\" alt=\"صورة تجريبية 3\" class=\"w-full rounded-xl my-6\" />",
+                "src": "https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg",
+                "srcLength": 66,
+                "hasSpecialChars": false,
+                "contextBefore": ">\n\n<h3>قسم آخر</h3>\n<p>نص قبل الصورة الثالثة.</p>\n",
+                "contextAfter": "\n<p>نص في النهاية.</p>\n",
+                "inFigure": false,
+                "inDiv": false
+              }
+            ],
+            "duplicates": [
+              {
+                "url": "https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg",
+                "count": 3
+              }
+            ]
+          },
+          "sanitized": {
+            "contentLength": 687,
+            "imageCount": 3,
+            "images": [
+              {
+                "index": 1,
+                "html": "<img src=\"https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg\" alt=\"صورة تجريبية 1\" class=\"w-full rounded-xl\" />",
+                "src": "https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg",
+                "srcLength": 66,
+                "hasSpecialChars": false,
+                "contextBefore": " مشكلة حفظ المقالات.</p>\n\n<figure class=\"my-6\">\n  ",
+                "contextAfter": "\n  <figcaption>صورة في figure</figcaption>\n</figur",
+                "inFigure": true,
+                "inDiv": false
+              },
+              {
+                "index": 2,
+                "html": "<img src=\"https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg\" alt=\"صورة تجريبية 2\" class=\"rounded-lg shadow-lg\" />",
+                "src": "https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg",
+                "srcLength": 66,
+                "hasSpecialChars": false,
+                "contextBefore": "ن الصورتين.</p>\n\n<div class=\"text-center my-6\">\n  ",
+                "contextAfter": "\n</div>\n\n<h3>قسم آخر</h3>\n<p>نص قبل الصورة الثالثة",
+                "inFigure": false,
+                "inDiv": true
+              },
+              {
+                "index": 3,
+                "html": "<img src=\"https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg\" alt=\"صورة تجريبية 3\" class=\"w-full rounded-xl my-6\" />",
+                "src": "https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg",
+                "srcLength": 66,
+                "hasSpecialChars": false,
+                "contextBefore": ">\n\n<h3>قسم آخر</h3>\n<p>نص قبل الصورة الثالثة.</p>\n",
+                "contextAfter": "\n<p>نص في النهاية.</p>\n",
+                "inFigure": false,
+                "inDiv": false
+              }
+            ],
+            "duplicates": [
+              {
+                "url": "https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg",
+                "count": 3
+              }
+            ]
+          },
+          "comparison": {
+            "lengthDifference": 0,
+            "contentChanged": false,
+            "imageCountChanged": false
+          },
+          "originalSample": "\n<h2>اختبار تشخيصي للصور</h2>\n<p>هذا محتوى تجريبي لاختبار مشكلة حفظ المقالات.</p>\n\n<figure class=\"my-6\">\n  <img src=\"https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg\" alt=\"صورة تجريبية 1\" class=\"w-full rounded-xl\" />\n  <figcaption>صورة في figure</figcaption>\n</figure>\n\n<p>نص بين الصورتين.</p>\n\n<div class=\"text-center my-6\">\n  <img src=\"https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg\" alt=\"صورة تجريبية 2\" class=\"rounded-lg shadow-lg\" />\n</div>\n\n<h3>قسم آخر</h3",
+          "sanitizedSample": "\n<h2>اختبار تشخيصي للصور</h2>\n<p>هذا محتوى تجريبي لاختبار مشكلة حفظ المقالات.</p>\n\n<figure class=\"my-6\">\n  <img src=\"https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg\" alt=\"صورة تجريبية 1\" class=\"w-full rounded-xl\" />\n  <figcaption>صورة في figure</figcaption>\n</figure>\n\n<p>نص بين الصورتين.</p>\n\n<div class=\"text-center my-6\">\n  <img src=\"https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg\" alt=\"صورة تجريبية 2\" class=\"rounded-lg shadow-lg\" />\n</div>\n\n<h3>قسم آخر</h3"
+        }
+      }
+    }
+  }
+]

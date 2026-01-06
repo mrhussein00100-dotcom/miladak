@@ -205,41 +205,12 @@ function validateImageHtml(content: string): {
   try {
     let sanitized = content;
 
-    // البحث عن الصور المكررة في نفس المكان
+    // البحث عن الصور المكررة في نفس المكان (فقط إذا كانت متتالية مباشرة)
     const imageMatches = content.match(/<img[^>]*>/gi) || [];
-    const imageUrls = new Map<string, number>();
 
-    for (const imgTag of imageMatches) {
-      const srcMatch = imgTag.match(/src="([^"]*)"/i);
-      if (srcMatch) {
-        const url = srcMatch[1];
-        const count = imageUrls.get(url) || 0;
-        imageUrls.set(url, count + 1);
+    console.log(`[validateImageHtml] Found ${imageMatches.length} images`);
 
-        // إذا كانت نفس الصورة مكررة أكثر من 3 مرات في مكان قريب
-        if (count > 2) {
-          const imgIndex = content.indexOf(imgTag);
-          const surroundingText = content.substring(
-            Math.max(0, imgIndex - 200),
-            Math.min(content.length, imgIndex + imgTag.length + 200)
-          );
-
-          // إذا كانت الصور المكررة في نفس الفقرة أو القسم
-          const duplicateCount = (
-            surroundingText.match(new RegExp(escapeRegExp(url), 'gi')) || []
-          ).length;
-          if (duplicateCount > 2) {
-            return {
-              valid: false,
-              error: `تم العثور على نفس الصورة مكررة ${duplicateCount} مرات في نفس المكان. يرجى إزالة الصور المكررة.`,
-              sanitized: content,
-            };
-          }
-        }
-      }
-    }
-
-    // إصلاح الصور المكسورة في السياق
+    // إصلاح الصور المكسورة في السياق - صور مكررة متتالية داخل figure
     sanitized = sanitized.replace(
       /(<figure[^>]*>)\s*(<img[^>]*>)\s*(<img[^>]*>)\s*(<\/figure>)/gi,
       (match, figureStart, img1, img2, figureEnd) => {
@@ -247,9 +218,19 @@ function validateImageHtml(content: string): {
         const src1 = img1.match(/src="([^"]*)"/i)?.[1];
         const src2 = img2.match(/src="([^"]*)"/i)?.[1];
         if (src1 === src2) {
+          console.log('[validateImageHtml] Removed duplicate image in figure');
           return figureStart + img1 + figureEnd;
         }
         return match;
+      }
+    );
+
+    // إزالة الصور المكررة المتتالية مباشرة (نفس الصورة مرتين متتاليتين)
+    sanitized = sanitized.replace(
+      /(<img[^>]*src="([^"]*)"[^>]*>)\s*(<img[^>]*src="\2"[^>]*>)/gi,
+      (match, img1, src, img2) => {
+        console.log('[validateImageHtml] Removed consecutive duplicate image');
+        return img1;
       }
     );
 
@@ -351,6 +332,17 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         `[Article Update] Original content length: ${body.content.length}`
       );
 
+      // تسجيل معلومات الصور للتشخيص
+      const imageMatches = body.content.match(/<img[^>]*>/gi) || [];
+      console.log(`[Article Update] Image count: ${imageMatches.length}`);
+      imageMatches.forEach((img: string, idx: number) => {
+        const srcMatch = img.match(/src="([^"]*)"/i);
+        const src = srcMatch ? srcMatch[1] : 'no-src';
+        console.log(
+          `[Article Update] Image ${idx + 1}: ${src.substring(0, 80)}...`
+        );
+      });
+
       const validation = validateContent(body.content);
       if (!validation.valid) {
         console.error(
@@ -365,6 +357,16 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       console.log(
         `[Article Update] Content sanitized, new length: ${validation.sanitized.length}`
       );
+
+      // التحقق من أن الصور لم تتغير بشكل غير متوقع
+      const sanitizedImageMatches =
+        validation.sanitized.match(/<img[^>]*>/gi) || [];
+      if (sanitizedImageMatches.length !== imageMatches.length) {
+        console.warn(
+          `[Article Update] Image count changed after sanitization: ${imageMatches.length} -> ${sanitizedImageMatches.length}`
+        );
+      }
+
       body.content = validation.sanitized;
     }
 

@@ -844,41 +844,107 @@ export default function EnhancedRichTextEditor({
   const handleImageUpdate = useCallback(
     (newImageUrl?: string) => {
       if (editorRef.current) {
-        // إذا تم تمرير URL جديد للصورة (من استبدال الصورة)
-        if (newImageUrl && selectedImageElement) {
-          // الحصول على src القديم
-          const oldSrc = selectedImageElement.src;
+        try {
+          // إذا تم تمرير URL جديد للصورة (من استبدال الصورة)
+          if (newImageUrl && selectedImageElement) {
+            console.log('[ImageUpdate] Replacing image:', {
+              oldSrc: selectedImageElement.src?.substring(0, 50),
+              newSrc: newImageUrl?.substring(0, 50),
+              parentTag: selectedImageElement.parentElement?.tagName,
+              grandParentTag:
+                selectedImageElement.parentElement?.parentElement?.tagName,
+            });
 
-          // تحديث الصورة في DOM أولاً
-          selectedImageElement.src = newImageUrl;
+            // التحقق من أن الصورة لا تزال موجودة في DOM
+            if (!editorRef.current.contains(selectedImageElement)) {
+              console.error('[ImageUpdate] Image element no longer in DOM');
+              // محاولة البحث عن الصورة بالـ src القديم
+              const oldSrc = selectedImageElement.src;
+              const images = editorRef.current.querySelectorAll('img');
+              let foundImage: HTMLImageElement | null = null;
+              images.forEach((img) => {
+                if ((img as HTMLImageElement).src === oldSrc) {
+                  foundImage = img as HTMLImageElement;
+                }
+              });
 
-          // قراءة المحتوى الجديد من المحرر
-          const newContent = editorRef.current.innerHTML;
+              if (foundImage) {
+                (foundImage as HTMLImageElement).src = newImageUrl;
+              } else {
+                console.error('[ImageUpdate] Could not find image to replace');
+                alert(
+                  'حدث خطأ: لم يتم العثور على الصورة. يرجى المحاولة مرة أخرى.'
+                );
+                return;
+              }
+            } else {
+              // تحديث الصورة في DOM
+              selectedImageElement.src = newImageUrl;
+            }
 
-          // تحديث React state مباشرة
-          onChange(newContent);
+            // انتظار قليلاً للتأكد من تحديث DOM
+            requestAnimationFrame(() => {
+              if (editorRef.current) {
+                // قراءة المحتوى الجديد من المحرر
+                const newContent = editorRef.current.innerHTML;
 
-          // تحديث التاريخ للتراجع
-          setHistory((prev) => ({
-            past: [...prev.past.slice(-50), prev.present],
-            present: newContent,
-            future: [],
-          }));
+                console.log(
+                  '[ImageUpdate] Content updated, length:',
+                  newContent.length
+                );
 
-          // إزالة تحديد الصورة
-          selectedImageElement.style.outline = '';
-          selectedImageElement.style.outlineOffset = '';
-          setSelectedImageElement(null);
-        } else {
-          // للتعديلات الأخرى (الحجم، المحاذاة، الحذف، النص البديل)
-          const newContent = editorRef.current.innerHTML;
-          onChange(newContent);
-          // تحديث التاريخ للتراجع
-          setHistory((prev) => ({
-            past: [...prev.past.slice(-50), prev.present],
-            present: newContent,
-            future: [],
-          }));
+                // التحقق من أن URL الجديد موجود في المحتوى
+                if (!newContent.includes(newImageUrl)) {
+                  console.error('[ImageUpdate] New URL not found in content!');
+                  // محاولة إصلاح يدوية
+                  const oldSrc =
+                    selectedImageElement?.getAttribute('data-old-src') || '';
+                  if (oldSrc) {
+                    const fixedContent = newContent.replace(
+                      oldSrc,
+                      newImageUrl
+                    );
+                    onChange(fixedContent);
+                    setHistory((prev) => ({
+                      past: [...prev.past.slice(-50), prev.present],
+                      present: fixedContent,
+                      future: [],
+                    }));
+                  }
+                } else {
+                  // تحديث React state مباشرة
+                  onChange(newContent);
+
+                  // تحديث التاريخ للتراجع
+                  setHistory((prev) => ({
+                    past: [...prev.past.slice(-50), prev.present],
+                    present: newContent,
+                    future: [],
+                  }));
+                }
+              }
+            });
+
+            // إزالة تحديد الصورة
+            if (selectedImageElement) {
+              selectedImageElement.style.outline = '';
+              selectedImageElement.style.outlineOffset = '';
+            }
+            setSelectedImageElement(null);
+          } else {
+            // للتعديلات الأخرى (الحجم، المحاذاة، الحذف، النص البديل)
+            const newContent = editorRef.current.innerHTML;
+            onChange(newContent);
+            // تحديث التاريخ للتراجع
+            setHistory((prev) => ({
+              past: [...prev.past.slice(-50), prev.present],
+              present: newContent,
+              future: [],
+            }));
+          }
+        } catch (error) {
+          console.error('[ImageUpdate] Error:', error);
+          alert('حدث خطأ أثناء تحديث الصورة. يرجى المحاولة مرة أخرى.');
         }
       }
     },
