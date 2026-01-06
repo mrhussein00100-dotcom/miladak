@@ -849,97 +849,101 @@ export default function EnhancedRichTextEditor({
     }
   }, [selectedImageElement]);
 
+  // مرجع للصورة المحددة حالياً - للحفاظ عليها أثناء عمليات الاستبدال
+  const selectedImageRef = useRef<HTMLImageElement | null>(null);
+
+  // تحديث المرجع عند تغيير الصورة المحددة
+  useEffect(() => {
+    selectedImageRef.current = selectedImageElement;
+  }, [selectedImageElement]);
+
   // تحديث المحتوى بعد تعديل الصورة - حل جذري لمشكلة استبدال الصور
   const handleImageUpdate = useCallback(
     (newImageUrl?: string) => {
-      if (editorRef.current) {
-        try {
-          console.log('[ImageUpdate] Called with:', {
-            hasNewUrl: !!newImageUrl,
-            hasSelectedImage: !!selectedImageElement,
-          });
+      if (!editorRef.current) return;
 
-          // تحديث وقت آخر تعديل لمنع الكتابة فوق التغييرات
+      try {
+        // استخدام المرجع المحفوظ للصورة
+        const imgElement = selectedImageRef.current || selectedImageElement;
+
+        console.log('[ImageUpdate] Called with:', {
+          hasNewUrl: !!newImageUrl,
+          newUrl: newImageUrl?.substring(0, 80),
+          hasSelectedImage: !!imgElement,
+          imgSrc: imgElement?.src?.substring(0, 80),
+        });
+
+        // تحديث وقت آخر تعديل لمنع الكتابة فوق التغييرات
+        lastUpdateRef.current = Date.now();
+
+        // إذا كان لدينا URL جديد وصورة محددة، نحدث الصورة مباشرة في DOM
+        if (newImageUrl && imgElement) {
+          console.log('[ImageUpdate] Updating image src directly in DOM');
+          imgElement.src = newImageUrl;
+        }
+
+        // انتظار لضمان تحديث DOM
+        setTimeout(() => {
+          if (!editorRef.current) return;
+
+          // تحديث وقت آخر تعديل مرة أخرى
           lastUpdateRef.current = Date.now();
 
-          // قراءة المحتوى مباشرة من DOM
-          const currentDOMContent = editorRef.current.innerHTML;
+          // قراءة المحتوى من DOM
+          let finalContent = editorRef.current.innerHTML;
 
-          console.log('[ImageUpdate] Current DOM content:', {
-            length: currentDOMContent.length,
-            hasNewUrl: newImageUrl
-              ? currentDOMContent.includes(newImageUrl)
-              : 'N/A',
+          console.log('[ImageUpdate] Content from DOM:', {
+            length: finalContent.length,
+            hasNewUrl: newImageUrl ? finalContent.includes(newImageUrl) : 'N/A',
           });
 
-          // إذا كان لدينا URL جديد ولم يكن موجوداً في DOM، نحتاج لتحديثه يدوياً
-          if (
-            newImageUrl &&
-            !currentDOMContent.includes(newImageUrl) &&
-            selectedImageElement
-          ) {
-            console.log('[ImageUpdate] Forcing image src update in DOM');
-            selectedImageElement.src = newImageUrl;
+          // التحقق من أن الصورة الجديدة موجودة في المحتوى
+          if (newImageUrl && !finalContent.includes(newImageUrl)) {
+            console.warn(
+              '[ImageUpdate] New URL not found in DOM, forcing update'
+            );
+
+            // البحث عن الصورة القديمة واستبدالها
+            if (imgElement) {
+              const oldSrc = imgElement.getAttribute('data-old-src') || '';
+              if (oldSrc && finalContent.includes(oldSrc)) {
+                finalContent = finalContent.replace(oldSrc, newImageUrl);
+                console.log('[ImageUpdate] Replaced old src with new src');
+              } else {
+                // محاولة استبدال أول صورة
+                finalContent = finalContent.replace(
+                  /(<img[^>]*src=")[^"]*("[^>]*>)/i,
+                  `$1${newImageUrl}$2`
+                );
+                console.log('[ImageUpdate] Replaced first image src');
+              }
+            }
           }
 
-          // انتظار قليلاً للتأكد من تحديث DOM بالكامل
-          requestAnimationFrame(() => {
-            if (!editorRef.current) return;
+          // تحديث React state
+          console.log('[ImageUpdate] Calling onChange with updated content');
+          onChange(finalContent);
 
-            // تحديث وقت آخر تعديل مرة أخرى
-            lastUpdateRef.current = Date.now();
+          // تحديث التاريخ للتراجع
+          setHistory((prev) => ({
+            past: [...prev.past.slice(-50), prev.present],
+            present: finalContent,
+            future: [],
+          }));
 
-            // قراءة المحتوى النهائي من DOM
-            const finalContent = editorRef.current.innerHTML;
+          // إزالة تحديد الصورة
+          if (imgElement) {
+            imgElement.style.outline = '';
+            imgElement.style.outlineOffset = '';
+          }
+          setSelectedImageElement(null);
+          selectedImageRef.current = null;
 
-            console.log('[ImageUpdate] Final content from DOM:', {
-              length: finalContent.length,
-              hasNewUrl: newImageUrl
-                ? finalContent.includes(newImageUrl)
-                : 'N/A',
-            });
-
-            // التحقق من أن الصورة الجديدة موجودة في المحتوى
-            if (newImageUrl && !finalContent.includes(newImageUrl)) {
-              console.error(
-                '[ImageUpdate] New URL still not found in content after update'
-              );
-              // محاولة أخيرة: تحديث المحتوى يدوياً
-              const updatedContent = finalContent.replace(
-                /<img([^>]*?)src="[^"]*"([^>]*?)>/i,
-                `<img$1src="${newImageUrl}"$2>`
-              );
-              onChange(updatedContent);
-              setHistory((prev) => ({
-                past: [...prev.past.slice(-50), prev.present],
-                present: updatedContent,
-                future: [],
-              }));
-            } else {
-              // تحديث React state
-              onChange(finalContent);
-
-              // تحديث التاريخ للتراجع
-              setHistory((prev) => ({
-                past: [...prev.past.slice(-50), prev.present],
-                present: finalContent,
-                future: [],
-              }));
-            }
-
-            // إزالة تحديد الصورة
-            if (selectedImageElement) {
-              selectedImageElement.style.outline = '';
-              selectedImageElement.style.outlineOffset = '';
-            }
-            setSelectedImageElement(null);
-
-            console.log('[ImageUpdate] Update completed successfully');
-          });
-        } catch (error) {
-          console.error('[ImageUpdate] Error:', error);
-          alert('حدث خطأ أثناء تحديث الصورة. يرجى المحاولة مرة أخرى.');
-        }
+          console.log('[ImageUpdate] Update completed successfully');
+        }, 100);
+      } catch (error) {
+        console.error('[ImageUpdate] Error:', error);
+        alert('حدث خطأ أثناء تحديث الصورة. يرجى المحاولة مرة أخرى.');
       }
     },
     [onChange, selectedImageElement]

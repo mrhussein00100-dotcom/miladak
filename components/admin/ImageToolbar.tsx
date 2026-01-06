@@ -345,12 +345,15 @@ export default function ImageToolbar({
         <ImageReplaceModal
           currentSrc={imageElement.src}
           onReplace={(newUrl) => {
-            // حفظ الـ src القديم قبل إغلاق Modal
+            // حفظ الـ src القديم كـ data attribute قبل التحديث
             const oldSrc = imageElement.src;
             console.log('[ImageToolbar] Replacing image:', {
               oldSrc: oldSrc?.substring(0, 50),
               newSrc: newUrl?.substring(0, 50),
             });
+
+            // حفظ الـ src القديم للاستخدام لاحقاً
+            imageElement.setAttribute('data-old-src', oldSrc);
 
             // تحديث الصورة في DOM مباشرة
             imageElement.src = newUrl;
@@ -368,7 +371,7 @@ export default function ImageToolbar({
             setTimeout(() => {
               console.log('[ImageToolbar] Calling onUpdate after delay');
               onUpdate(newUrl);
-            }, 200);
+            }, 300);
           }}
           onClose={() => setShowReplaceModal(false)}
         />
