@@ -55,6 +55,47 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 }
 
 /**
+ * تحويل صور base64 إلى placeholder أو إزالتها لتقليل حجم المحتوى
+ * صور base64 تسبب مشاكل كبيرة في الحفظ والأداء
+ */
+function removeBase64Images(content: string): string {
+  if (!content) return content;
+
+  let result = content;
+  let base64Count = 0;
+
+  // البحث عن صور base64 واستبدالها بصورة placeholder أو إزالتها
+  result = result.replace(
+    /<img([^>]*?)src="data:image\/[^"]*"([^>]*?)>/gi,
+    (match, before, after) => {
+      base64Count++;
+      console.log(`[removeBase64Images] Found base64 image #${base64Count}`);
+
+      // استخراج alt إذا وجد
+      const altMatch = match.match(/alt="([^"]*)"/i);
+      const alt = altMatch ? altMatch[1] : 'صورة';
+
+      // إزالة الصورة base64 تماماً - يمكن للمستخدم إضافة صورة جديدة
+      // أو استبدالها بصورة placeholder
+      const placeholderUrl =
+        'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=800';
+
+      // تنظيف before و after
+      const cleanBefore = before.replace(/[\u0000-\u001F\u007F]/g, '');
+      const cleanAfter = after.replace(/[\u0000-\u001F\u007F]/g, '');
+
+      return `<img${cleanBefore}src="${placeholderUrl}" alt="${alt}"${cleanAfter}>`;
+    }
+  );
+
+  if (base64Count > 0) {
+    console.log(`[removeBase64Images] Replaced ${base64Count} base64 images`);
+  }
+
+  return result;
+}
+
+/**
  * تنظيف وتصحيح URLs الصور في المحتوى - نسخة محسنة
  */
 function sanitizeImageUrls(content: string): string {
@@ -63,12 +104,20 @@ function sanitizeImageUrls(content: string): string {
   let sanitized = content;
 
   try {
+    // أولاً: إزالة/استبدال صور base64 لتقليل الحجم
+    sanitized = removeBase64Images(sanitized);
+
     // إصلاح الصور المكسورة أو غير المكتملة
     // 1. إصلاح الصور التي تحتوي على علامات اقتباس مزدوجة داخل src
     sanitized = sanitized.replace(
       /<img([^>]*?)src="([^"]*)"([^>]*?)>/gi,
       (match, before, src, after) => {
         try {
+          // تجاهل صور base64 (تم معالجتها أعلاه)
+          if (src.startsWith('data:')) {
+            return match;
+          }
+
           // تنظيف URL من الأحرف الخاصة
           let cleanSrc = src
             .replace(/[\u0000-\u001F\u007F]/g, '') // إزالة أحرف التحكم فقط
@@ -81,8 +130,7 @@ function sanitizeImageUrls(content: string): string {
           if (
             cleanSrc.startsWith('http://') ||
             cleanSrc.startsWith('https://') ||
-            cleanSrc.startsWith('/') ||
-            cleanSrc.startsWith('data:')
+            cleanSrc.startsWith('/')
           ) {
             // تنظيف before و after من أحرف التحكم فقط
             const cleanBefore = before.replace(/[\u0000-\u001F\u007F]/g, '');

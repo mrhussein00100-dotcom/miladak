@@ -851,15 +851,16 @@ export default function EnhancedRichTextEditor({
               oldSrc: selectedImageElement.src?.substring(0, 50),
               newSrc: newImageUrl?.substring(0, 50),
               parentTag: selectedImageElement.parentElement?.tagName,
-              grandParentTag:
-                selectedImageElement.parentElement?.parentElement?.tagName,
             });
+
+            // حفظ الـ src القديم قبل التغيير
+            const oldSrc = selectedImageElement.src;
 
             // التحقق من أن الصورة لا تزال موجودة في DOM
             if (!editorRef.current.contains(selectedImageElement)) {
               console.error('[ImageUpdate] Image element no longer in DOM');
+
               // محاولة البحث عن الصورة بالـ src القديم
-              const oldSrc = selectedImageElement.src;
               const images = editorRef.current.querySelectorAll('img');
               let foundImage: HTMLImageElement | null = null;
               images.forEach((img) => {
@@ -870,6 +871,7 @@ export default function EnhancedRichTextEditor({
 
               if (foundImage) {
                 (foundImage as HTMLImageElement).src = newImageUrl;
+                console.log('[ImageUpdate] Found and updated image by src');
               } else {
                 console.error('[ImageUpdate] Could not find image to replace');
                 alert(
@@ -878,28 +880,31 @@ export default function EnhancedRichTextEditor({
                 return;
               }
             } else {
-              // تحديث الصورة في DOM
+              // تحديث الصورة في DOM مباشرة
               selectedImageElement.src = newImageUrl;
+              console.log('[ImageUpdate] Updated image src directly');
             }
 
-            // انتظار قليلاً للتأكد من تحديث DOM
-            requestAnimationFrame(() => {
+            // استخدام setTimeout بدلاً من requestAnimationFrame للتأكد من تحديث DOM
+            setTimeout(() => {
               if (editorRef.current) {
                 // قراءة المحتوى الجديد من المحرر
                 const newContent = editorRef.current.innerHTML;
 
+                console.log('[ImageUpdate] Content length:', newContent.length);
                 console.log(
-                  '[ImageUpdate] Content updated, length:',
-                  newContent.length
+                  '[ImageUpdate] New URL in content:',
+                  newContent.includes(newImageUrl)
                 );
 
                 // التحقق من أن URL الجديد موجود في المحتوى
                 if (!newContent.includes(newImageUrl)) {
-                  console.error('[ImageUpdate] New URL not found in content!');
-                  // محاولة إصلاح يدوية
-                  const oldSrc =
-                    selectedImageElement?.getAttribute('data-old-src') || '';
-                  if (oldSrc) {
+                  console.warn(
+                    '[ImageUpdate] New URL not found, trying manual replace'
+                  );
+
+                  // محاولة استبدال يدوي في المحتوى
+                  if (oldSrc && newContent.includes(oldSrc)) {
                     const fixedContent = newContent.replace(
                       oldSrc,
                       newImageUrl
@@ -910,20 +915,37 @@ export default function EnhancedRichTextEditor({
                       present: fixedContent,
                       future: [],
                     }));
+                    console.log('[ImageUpdate] Manual replace successful');
+                  } else {
+                    // إذا فشل كل شيء، أعد قراءة المحتوى من DOM
+                    editorRef.current.innerHTML = newContent.replace(
+                      new RegExp(
+                        oldSrc.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
+                        'g'
+                      ),
+                      newImageUrl
+                    );
+                    const finalContent = editorRef.current.innerHTML;
+                    onChange(finalContent);
+                    setHistory((prev) => ({
+                      past: [...prev.past.slice(-50), prev.present],
+                      present: finalContent,
+                      future: [],
+                    }));
+                    console.log('[ImageUpdate] Fallback replace completed');
                   }
                 } else {
                   // تحديث React state مباشرة
                   onChange(newContent);
-
-                  // تحديث التاريخ للتراجع
                   setHistory((prev) => ({
                     past: [...prev.past.slice(-50), prev.present],
                     present: newContent,
                     future: [],
                   }));
+                  console.log('[ImageUpdate] Direct update successful');
                 }
               }
-            });
+            }, 50); // انتظار 50ms للتأكد من تحديث DOM
 
             // إزالة تحديد الصورة
             if (selectedImageElement) {
