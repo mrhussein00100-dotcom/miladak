@@ -83,7 +83,33 @@ export default function EditArticlePage({
           const article = articleData.data;
           setTitle(article.title);
           setSlug(article.slug);
-          setContent(article.content);
+
+          // تنظيف صور base64 من المحتوى لتحسين الأداء
+          let cleanContent = article.content || '';
+          const base64Regex = /<img([^>]*?)src="data:image\/[^"]*"([^>]*?)>/gi;
+          const base64Count = (cleanContent.match(base64Regex) || []).length;
+
+          if (base64Count > 0) {
+            console.log(
+              `[EditArticle] Found ${base64Count} base64 images, cleaning...`
+            );
+            // استبدال صور base64 بصورة placeholder
+            cleanContent = cleanContent.replace(
+              base64Regex,
+              (match: string, before: string, after: string) => {
+                const altMatch = match.match(/alt="([^"]*)"/i);
+                const alt = altMatch ? altMatch[1] : 'صورة';
+                const placeholder =
+                  'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=800';
+                return `<img${before}src="${placeholder}" alt="${alt}"${after}>`;
+              }
+            );
+            console.log(
+              `[EditArticle] Content cleaned. Old size: ${article.content?.length}, New size: ${cleanContent.length}`
+            );
+          }
+
+          setContent(cleanContent);
           setExcerpt(article.excerpt || '');
           setCategoryId(article.category_id);
           setPublished(article.published === 1);
