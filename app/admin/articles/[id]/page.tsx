@@ -22,6 +22,7 @@ import EnhancedImagePicker from '@/components/admin/EnhancedImagePicker';
 import RichTextEditor from '@/components/admin/RichTextEditor';
 import EnhancedRichTextEditor from '@/components/admin/EnhancedRichTextEditor';
 import ContentDebugger from '@/components/admin/ContentDebugger';
+import ArticleSaveDiagnostic from '@/components/admin/ArticleSaveDiagnostic';
 import { processContent, extractHeadings } from '@/lib/utils/contentFormatter';
 
 interface Category {
@@ -567,6 +568,9 @@ export default function EditArticlePage({
               content={content}
               onContentFixed={(fixedContent) => setContent(fixedContent)}
             />
+
+            {/* Article Save Diagnostic */}
+            <ArticleSaveDiagnostic />
 
             {/* Excerpt */}
             <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm">
