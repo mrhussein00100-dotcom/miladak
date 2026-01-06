@@ -348,11 +348,16 @@ export function formatContent(content: string): string {
     </blockquote>`
   );
 
-  // 10. تنسيق الصور
-  formatted = formatted.replace(
-    /<img([^>]*)>/gi,
-    '<img$1 class="rounded-xl shadow-lg my-6 w-full">'
-  );
+  // 10. تنسيق الصور - بحذر لتجنب إفساد HTML
+  formatted = formatted.replace(/<img([^>]*?)>/gi, (match, attrs) => {
+    // تجنب إضافة class إذا كان موجوداً بالفعل
+    if (attrs.includes('class=')) {
+      return match;
+    }
+    // تنظيف attrs من الأحرف الخاصة
+    const cleanAttrs = attrs.replace(/[\u0000-\u001F\u007F-\u009F]/g, '');
+    return `<img${cleanAttrs} class="rounded-xl shadow-lg my-6 w-full">`;
+  });
 
   // 11. إضافة IDs للعناوين
   formatted = addHeadingIds(formatted);

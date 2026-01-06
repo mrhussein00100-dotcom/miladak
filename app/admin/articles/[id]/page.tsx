@@ -217,15 +217,9 @@ export default function EditArticlePage({
 
     setSaving(true);
     try {
-      // تنسيق المحتوى قبل الحفظ إذا كان الخيار مفعلاً
+      // استخدام المحتوى كما هو بدون تنسيق إضافي عند الحفظ
+      // التنسيق يتم فقط عند الضغط على زر "تنسيق المحتوى" يدوياً
       let finalContent = content;
-      if (autoFormat) {
-        finalContent = processContent(content, {
-          addTOC,
-          formatStyles: true,
-          useEnhancedFormatting: true,
-        });
-      }
 
       // التحقق من حجم المحتوى
       const contentSize = finalContent.length;

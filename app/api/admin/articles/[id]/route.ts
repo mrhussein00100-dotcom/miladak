@@ -60,46 +60,67 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 function sanitizeImageUrls(content: string): string {
   if (!content) return content;
 
-  // تنظيف URLs الصور من الأحرف الخاصة المشكلة
   let sanitized = content;
 
-  // إصلاح الصور التي تحتوي على أحرف خاصة في src
+  // إصلاح الصور المكسورة أو غير المكتملة
+  // 1. إصلاح الصور التي تحتوي على علامات اقتباس مزدوجة داخل src
   sanitized = sanitized.replace(
     /<img([^>]*?)src="([^"]*)"([^>]*?)>/gi,
     (match, before, src, after) => {
       try {
-        // تنظيف URL
+        // تنظيف URL من الأحرف الخاصة
         let cleanSrc = src
           .replace(/[\u0000-\u001F\u007F-\u009F]/g, '') // إزالة أحرف التحكم
           .replace(/\s+/g, '%20') // استبدال المسافات
+          .replace(/"/g, '%22') // استبدال علامات الاقتباس
+          .replace(/'/g, '%27') // استبدال الفاصلة العليا
+          .replace(/</g, '%3C') // استبدال أقواس HTML
+          .replace(/>/g, '%3E')
           .trim();
 
         // التحقق من صحة URL
         if (
           cleanSrc.startsWith('http://') ||
           cleanSrc.startsWith('https://') ||
-          cleanSrc.startsWith('/')
+          cleanSrc.startsWith('/') ||
+          cleanSrc.startsWith('data:')
         ) {
-          return `<img${before}src="${cleanSrc}"${after}>`;
+          // تنظيف before و after من الأحرف الخاصة
+          const cleanBefore = before.replace(
+            /[\u0000-\u001F\u007F-\u009F]/g,
+            ''
+          );
+          const cleanAfter = after.replace(/[\u0000-\u001F\u007F-\u009F]/g, '');
+          return `<img${cleanBefore}src="${cleanSrc}"${cleanAfter}>`;
         }
 
         // إذا كان URL غير صالح، نحاول إصلاحه
-        if (cleanSrc && !cleanSrc.startsWith('data:')) {
+        if (cleanSrc && cleanSrc.length > 5) {
           cleanSrc = 'https://' + cleanSrc.replace(/^\/+/, '');
+          const cleanBefore = before.replace(
+            /[\u0000-\u001F\u007F-\u009F]/g,
+            ''
+          );
+          const cleanAfter = after.replace(/[\u0000-\u001F\u007F-\u009F]/g, '');
+          return `<img${cleanBefore}src="${cleanSrc}"${cleanAfter}>`;
         }
 
-        return `<img${before}src="${cleanSrc}"${after}>`;
+        // URL غير صالح تماماً - إزالة الصورة
+        return '';
       } catch (e) {
-        // في حالة الخطأ، نعيد الصورة كما هي
+        console.error('[sanitizeImageUrls] Error processing image:', e);
         return match;
       }
     }
   );
 
-  // إزالة الصور التي تحتوي على URLs فارغة أو غير صالحة
+  // 2. إزالة الصور التي تحتوي على URLs فارغة أو غير صالحة
   sanitized = sanitized.replace(/<img[^>]*src=""[^>]*>/gi, '');
   sanitized = sanitized.replace(/<img[^>]*src="undefined"[^>]*>/gi, '');
   sanitized = sanitized.replace(/<img[^>]*src="null"[^>]*>/gi, '');
+
+  // 3. إصلاح علامات img غير المغلقة
+  sanitized = sanitized.replace(/<img([^>]*[^\/])>(?!<\/img>)/gi, '<img$1 />');
 
   return sanitized;
 }
@@ -118,6 +139,9 @@ function validateContent(content: string): {
 
   // تنظيف المحتوى
   let sanitized = sanitizeImageUrls(content);
+
+  // إصلاح HTML المكسور
+  sanitized = fixBrokenHtml(sanitized);
 
   // التحقق من وجود أحرف غير صالحة
   const invalidChars = sanitized.match(
@@ -142,6 +166,54 @@ function validateContent(content: string): {
   }
 
   return { valid: true, sanitized };
+}
+
+/**
+ * إصلاح HTML المكسور
+ */
+function fixBrokenHtml(content: string): string {
+  let fixed = content;
+
+  // 1. إصلاح علامات figure غير المغلقة
+  const figureOpens = (fixed.match(/<figure/gi) || []).length;
+  const figureCloses = (fixed.match(/<\/figure>/gi) || []).length;
+  if (figureOpens > figureCloses) {
+    for (let i = 0; i < figureOpens - figureCloses; i++) {
+      fixed += '</figure>';
+    }
+  }
+
+  // 2. إصلاح علامات div غير المغلقة
+  const divOpens = (fixed.match(/<div/gi) || []).length;
+  const divCloses = (fixed.match(/<\/div>/gi) || []).length;
+  if (divOpens > divCloses) {
+    for (let i = 0; i < divOpens - divCloses; i++) {
+      fixed += '</div>';
+    }
+  }
+
+  // 3. إصلاح علامات p غير المغلقة
+  const pOpens = (fixed.match(/<p[^>]*>/gi) || []).length;
+  const pCloses = (fixed.match(/<\/p>/gi) || []).length;
+  if (pOpens > pCloses) {
+    for (let i = 0; i < pOpens - pCloses; i++) {
+      fixed += '</p>';
+    }
+  }
+
+  // 4. إزالة علامات HTML المكسورة (مثل < بدون >)
+  fixed = fixed.replace(/<(?![a-zA-Z\/!])/g, '&lt;');
+
+  // 5. إصلاح الـ attributes المكسورة في الصور
+  fixed = fixed.replace(
+    /<img([^>]*?)class="([^"]*)"([^>]*?)class="([^"]*)"([^>]*?)>/gi,
+    (match, b1, c1, b2, c2, b3) => {
+      // دمج الـ classes
+      return `<img${b1}class="${c1} ${c2}"${b2}${b3}>`;
+    }
+  );
+
+  return fixed;
 }
 
 // PUT - تحديث مقال
