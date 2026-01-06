@@ -72,7 +72,9 @@ export default function EditArticlePage({
     const fetchData = async () => {
       try {
         const [articleRes, categoriesRes] = await Promise.all([
-          fetch(`/api/admin/articles/${id}`),
+          fetch(`/api/admin/articles/${id}?t=${Date.now()}`, {
+            headers: { 'Cache-Control': 'no-cache' },
+          }),
           fetch('/api/admin/categories'),
         ]);
 
@@ -291,9 +293,12 @@ export default function EditArticlePage({
         return;
       }
 
-      const res = await fetch(`/api/admin/articles/${id}`, {
+      const res = await fetch(`/api/admin/articles/${id}?t=${Date.now()}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache',
+        },
         body: JSON.stringify({
           title,
           slug,
@@ -317,7 +322,31 @@ export default function EditArticlePage({
       });
 
       if (data.success) {
-        alert('تم حفظ المقال بنجاح');
+        // إعادة تحميل البيانات من السيرفر للتأكد من الحفظ
+        console.log('[handleSave] Reloading article data...');
+        try {
+          const reloadRes = await fetch(
+            `/api/admin/articles/${id}?t=${Date.now()}`,
+            {
+              headers: { 'Cache-Control': 'no-cache' },
+            }
+          );
+          const reloadData = await reloadRes.json();
+          if (reloadData.success && reloadData.data) {
+            // تحديث المحتوى من السيرفر
+            setContent(reloadData.data.content || '');
+            setFeaturedImage(
+              reloadData.data.featured_image || reloadData.data.image || ''
+            );
+            console.log('[handleSave] Article data reloaded successfully');
+          }
+        } catch (reloadError) {
+          console.warn(
+            '[handleSave] Could not reload article data:',
+            reloadError
+          );
+        }
+        alert('تم حفظ المقال بنجاح ✓');
       } else {
         // عرض رسالة خطأ مفصلة
         const errorMsg = data.error || 'فشل في حفظ المقال';
