@@ -840,13 +840,37 @@ export default function EnhancedRichTextEditor({
     }
   }, [selectedImageElement]);
 
-  // تحديث المحتوى بعد تعديل الصورة - محسّن لضمان المزامنة
-  const handleImageUpdate = useCallback(() => {
-    if (editorRef.current) {
-      // استخدام setTimeout لضمان تحديث DOM قبل قراءة innerHTML
-      // هذا يحل مشكلة عدم حفظ التغييرات عند استبدال الصور
-      setTimeout(() => {
-        if (editorRef.current) {
+  // تحديث المحتوى بعد تعديل الصورة - حل جذري لمشكلة استبدال الصور
+  const handleImageUpdate = useCallback(
+    (newImageUrl?: string) => {
+      if (editorRef.current) {
+        // إذا تم تمرير URL جديد للصورة (من استبدال الصورة)
+        if (newImageUrl && selectedImageElement) {
+          // الحصول على src القديم
+          const oldSrc = selectedImageElement.src;
+
+          // تحديث الصورة في DOM أولاً
+          selectedImageElement.src = newImageUrl;
+
+          // قراءة المحتوى الجديد من المحرر
+          const newContent = editorRef.current.innerHTML;
+
+          // تحديث React state مباشرة
+          onChange(newContent);
+
+          // تحديث التاريخ للتراجع
+          setHistory((prev) => ({
+            past: [...prev.past.slice(-50), prev.present],
+            present: newContent,
+            future: [],
+          }));
+
+          // إزالة تحديد الصورة
+          selectedImageElement.style.outline = '';
+          selectedImageElement.style.outlineOffset = '';
+          setSelectedImageElement(null);
+        } else {
+          // للتعديلات الأخرى (الحجم، المحاذاة، الحذف، النص البديل)
           const newContent = editorRef.current.innerHTML;
           onChange(newContent);
           // تحديث التاريخ للتراجع
@@ -856,9 +880,10 @@ export default function EnhancedRichTextEditor({
             future: [],
           }));
         }
-      }, 50);
-    }
-  }, [onChange]);
+      }
+    },
+    [onChange, selectedImageElement]
+  );
 
   // أزرار شريط الأدوات المحسن مع معرفات فردية
   const toolbarGroups = [

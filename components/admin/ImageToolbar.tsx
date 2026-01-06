@@ -21,7 +21,7 @@ import {
 interface ImageToolbarProps {
   imageElement: HTMLImageElement;
   onClose: () => void;
-  onUpdate: () => void;
+  onUpdate: (newImageUrl?: string) => void;
 }
 
 type ImageSize = 'small' | 'medium' | 'large' | 'full';
@@ -345,13 +345,10 @@ export default function ImageToolbar({
         <ImageReplaceModal
           currentSrc={imageElement.src}
           onReplace={(newUrl) => {
-            // تحديث src الصورة
-            imageElement.src = newUrl;
-            // إضافة تأخير صغير لضمان تحديث DOM قبل استدعاء onUpdate
-            setTimeout(() => {
-              setShowReplaceModal(false);
-              onUpdate();
-            }, 100);
+            // لا نغير imageElement.src مباشرة - بدلاً من ذلك نمرر URL للمحرر
+            // هذا يضمن تحديث React state بشكل صحيح
+            setShowReplaceModal(false);
+            onUpdate(newUrl);
           }}
           onClose={() => setShowReplaceModal(false)}
         />
