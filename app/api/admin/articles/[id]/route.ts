@@ -67,7 +67,35 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    const body = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch (parseError) {
+      console.error('JSON parse error:', parseError);
+      return NextResponse.json(
+        { success: false, error: 'خطأ في تنسيق البيانات المرسلة' },
+        { status: 400 }
+      );
+    }
+
+    // التحقق من حجم المحتوى
+    const contentSize = body.content ? body.content.length : 0;
+    console.log(
+      `[Article Update] ID: ${articleId}, Content size: ${contentSize} chars`
+    );
+
+    // تحذير إذا كان المحتوى كبير جداً
+    if (contentSize > 5000000) {
+      // 5MB
+      console.warn(`[Article Update] Content too large: ${contentSize} chars`);
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'حجم المحتوى كبير جداً. يرجى تقليل عدد الصور أو حجم المحتوى.',
+        },
+        { status: 413 }
+      );
+    }
 
     const input: Partial<ArticleInput> = {};
 
@@ -100,6 +128,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     const updatedArticle = await getArticleById(articleId);
 
+    console.log(`[Article Update] Success for ID: ${articleId}`);
     return NextResponse.json({
       success: true,
       data: updatedArticle,
@@ -108,10 +137,39 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
   } catch (error) {
     console.error('Error updating article:', error);
 
-    if (String(error).includes('UNIQUE constraint failed')) {
+    const errorMessage = String(error);
+
+    if (errorMessage.includes('UNIQUE constraint failed')) {
       return NextResponse.json(
         { success: false, error: 'يوجد مقال بنفس الـ slug' },
         { status: 409 }
+      );
+    }
+
+    // معالجة أخطاء قاعدة البيانات
+    if (
+      errorMessage.includes('too long') ||
+      errorMessage.includes('value too long')
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'المحتوى أو أحد الحقول طويل جداً. يرجى تقليل حجم المحتوى.',
+        },
+        { status: 400 }
+      );
+    }
+
+    if (
+      errorMessage.includes('invalid byte sequence') ||
+      errorMessage.includes('encoding')
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'يوجد أحرف غير صالحة في المحتوى. يرجى إزالة الأحرف الخاصة.',
+        },
+        { status: 400 }
       );
     }
 
@@ -120,7 +178,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         success: false,
         error: 'فشل في تحديث المقال',
         details:
-          process.env.NODE_ENV === 'development' ? String(error) : undefined,
+          process.env.NODE_ENV === 'development' ? errorMessage : undefined,
       },
       { status: 500 }
     );

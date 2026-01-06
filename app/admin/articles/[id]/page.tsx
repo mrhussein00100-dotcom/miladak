@@ -227,6 +227,14 @@ export default function EditArticlePage({
         });
       }
 
+      // التحقق من حجم المحتوى
+      const contentSize = finalContent.length;
+      if (contentSize > 5000000) {
+        alert('حجم المحتوى كبير جداً. يرجى تقليل عدد الصور أو حجم المحتوى.');
+        setSaving(false);
+        return;
+      }
+
       const res = await fetch(`/api/admin/articles/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -249,11 +257,14 @@ export default function EditArticlePage({
       if (data.success) {
         alert('تم حفظ المقال بنجاح');
       } else {
-        alert(data.error || 'فشل في حفظ المقال');
+        // عرض رسالة خطأ مفصلة
+        const errorMsg = data.error || 'فشل في حفظ المقال';
+        const details = data.details ? `\n\nتفاصيل: ${data.details}` : '';
+        alert(errorMsg + details);
       }
     } catch (error) {
       console.error('Save error:', error);
-      alert('حدث خطأ أثناء الحفظ');
+      alert('حدث خطأ أثناء الحفظ. يرجى المحاولة مرة أخرى.');
     }
     setSaving(false);
   };
