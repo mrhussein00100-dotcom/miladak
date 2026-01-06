@@ -1,7 +1,7 @@
 /**
  * AI Generator الرئيسي مع Fallback
  * يدير جميع مزودي الذكاء الاصطناعي مع سلسلة احتياطية
- * Version: 3.0 - Updated to use SONA v4
+ * Version: 4.0 - Enhanced with Content Enhancer
  */
 
 import * as gemini from './providers/gemini';
@@ -25,6 +25,16 @@ import type {
 } from '../sona/types';
 import type { EnhancedGenerationRequest } from '../sona/enhancedGenerator';
 import { addSmartImagesToArticle } from '../images/pexels';
+// Content Enhancer - تحسين المحتوى
+import {
+  enhanceContent,
+  generateDiverseSEOTitle,
+  formatParagraphs,
+  validateArticleCompleteness,
+  fixTruncatedArticle,
+} from './content-enhancer';
+// Smart Image Search - بحث ذكي عن الصور
+import { detectTopicCategory } from '../images/smart-image-search';
 
 export type AIProvider =
   | 'gemini'
@@ -476,19 +486,52 @@ export async function generateArticle(
   throw lastError || new Error('فشل التوليد مع جميع المزودين');
 }
 
-// توليد مقال مع صور (محسّن - الإصدار 3.1)
+// توليد مقال مع صور (محسّن - الإصدار 4.0)
+// يشمل: تحسين الفقرات، تنوع العناوين، منع القطع
 export async function generateArticleWithImages(
   request: GenerationRequest
 ): Promise<GenerationResponse> {
   // توليد المقال أولاً
-  const article = await generateArticle(request);
+  let article = await generateArticle(request);
+
+  // === تطبيق التحسينات الجديدة (v4.0) ===
+  console.log('✨ [Generator v4.0] بدء تحسين المحتوى...');
+
+  // 1. تحديد فئة الموضوع
+  const category = detectTopicCategory(request.topic);
+  console.log(`📂 [Generator v4.0] فئة الموضوع: ${category}`);
+
+  // 2. تنسيق الفقرات
+  article.content = formatParagraphs(article.content);
+  console.log('📝 [Generator v4.0] تم تنسيق الفقرات');
+
+  // 3. التحقق من اكتمال المقال وإصلاحه إذا لزم الأمر
+  const validation = validateArticleCompleteness(article.content);
+  if (!validation.isComplete) {
+    console.log('⚠️ [Generator v4.0] المقال غير مكتمل، جاري الإصلاح...');
+    console.log('   المشاكل:', validation.issues);
+    article.content = fixTruncatedArticle(article.content, request.topic);
+    console.log('✅ [Generator v4.0] تم إصلاح المقال');
+  }
+
+  // 4. توليد عنوان SEO متنوع (إذا كان العنوان الحالي عام جداً)
+  const diverseTitle = generateDiverseSEOTitle(request.topic, category);
+  // استخدام العنوان المتنوع إذا كان العنوان الحالي قصير أو عام
+  if (
+    article.title.length < 30 ||
+    !article.title.includes(request.topic.substring(0, 10))
+  ) {
+    article.title = diverseTitle;
+    article.metaTitle = diverseTitle.substring(0, 60);
+    console.log(`📌 [Generator v4.0] عنوان جديد: ${diverseTitle}`);
+  }
 
   // إضافة الصور إذا طُلب ذلك
   if (request.includeImages !== false) {
     try {
-      console.log('🖼️ [Generator v3.1] بدء إضافة الصور الذكية للمقال...');
+      console.log('🖼️ [Generator v4.0] بدء إضافة الصور الذكية للمقال...');
       console.log(
-        `📝 [Generator v3.1] عدد الصور المطلوب: ${
+        `📝 [Generator v4.0] عدد الصور المطلوب: ${
           request.imageCount || 'تلقائي'
         }`
       );
@@ -510,20 +553,20 @@ export async function generateArticleWithImages(
       if (articleWithImages.featuredImage) {
         article.coverImage = articleWithImages.featuredImage;
         console.log(
-          `✅ [Generator v3.1] تم تعيين الصورة البارزة: ${article.coverImage.substring(
+          `✅ [Generator v4.0] تم تعيين الصورة البارزة: ${article.coverImage.substring(
             0,
             60
           )}...`
         );
       } else {
-        console.warn(`⚠️ [Generator v3.1] لم يتم العثور على صورة بارزة`);
+        console.warn(`⚠️ [Generator v4.0] لم يتم العثور على صورة بارزة`);
       }
 
       console.log(
-        `✅ [Generator v3.1] تم إضافة ${articleWithImages.imagesAdded} صور للمحتوى`
+        `✅ [Generator v4.0] تم إضافة ${articleWithImages.imagesAdded} صور للمحتوى`
       );
     } catch (error) {
-      console.error('❌ [Generator v3.1] فشل في إضافة الصور:', error);
+      console.error('❌ [Generator v4.0] فشل في إضافة الصور:', error);
       // نستمر بدون صور
     }
   }
