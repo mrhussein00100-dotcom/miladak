@@ -223,6 +223,12 @@ export default function EditArticlePage({
       // التنسيق يتم فقط عند الضغط على زر "تنسيق المحتوى" يدوياً
       let finalContent = content;
 
+      // تسجيل معلومات للتشخيص
+      console.log('[handleSave] Starting save:', {
+        contentLength: content.length,
+        imageCount: (content.match(/<img[^>]*>/gi) || []).length,
+      });
+
       // تطبيق تنظيف أساسي فقط للأمان - بدون تنسيق
       if (finalContent) {
         // إزالة أحرف التحكم الخطيرة فقط
@@ -248,6 +254,11 @@ export default function EditArticlePage({
 
       // التحقق من حجم المحتوى
       const contentSize = finalContent.length;
+      console.log('[handleSave] After cleanup:', {
+        finalContentLength: finalContent.length,
+        imageCount: (finalContent.match(/<img[^>]*>/gi) || []).length,
+      });
+
       if (contentSize > 5000000) {
         alert('حجم المحتوى كبير جداً. يرجى تقليل عدد الصور أو حجم المحتوى.');
         setSaving(false);
@@ -273,16 +284,23 @@ export default function EditArticlePage({
       });
 
       const data = await res.json();
+      console.log('[handleSave] Response:', {
+        success: data.success,
+        error: data.error,
+        status: res.status,
+      });
+
       if (data.success) {
         alert('تم حفظ المقال بنجاح');
       } else {
         // عرض رسالة خطأ مفصلة
         const errorMsg = data.error || 'فشل في حفظ المقال';
         const details = data.details ? `\n\nتفاصيل: ${data.details}` : '';
+        console.error('[handleSave] Save failed:', { errorMsg, details });
         alert(errorMsg + details);
       }
     } catch (error) {
-      console.error('Save error:', error);
+      console.error('[handleSave] Exception:', error);
       alert('حدث خطأ أثناء الحفظ. يرجى المحاولة مرة أخرى.');
     }
     setSaving(false);
