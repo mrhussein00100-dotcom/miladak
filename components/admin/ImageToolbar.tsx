@@ -345,9 +345,19 @@ export default function ImageToolbar({
         <ImageReplaceModal
           currentSrc={imageElement.src}
           onReplace={(newUrl) => {
-            // لا نغير imageElement.src مباشرة - بدلاً من ذلك نمرر URL للمحرر
-            // هذا يضمن تحديث React state بشكل صحيح
+            // حفظ الـ src القديم قبل إغلاق Modal
+            const oldSrc = imageElement.src;
+            console.log('[ImageToolbar] Replacing image:', {
+              oldSrc: oldSrc?.substring(0, 50),
+              newSrc: newUrl?.substring(0, 50),
+            });
+
+            // تحديث الصورة في DOM مباشرة قبل إغلاق Modal
+            imageElement.src = newUrl;
+
             setShowReplaceModal(false);
+
+            // تمرير كلا الـ URLs للمحرر
             onUpdate(newUrl);
           }}
           onClose={() => setShowReplaceModal(false)}
@@ -374,6 +384,7 @@ function ImageReplaceModal({
   const [searchLoading, setSearchLoading] = useState(false);
   const [selectedImage, setSelectedImage] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [replacing, setReplacing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // البحث عن صور
@@ -435,7 +446,15 @@ function ImageReplaceModal({
   const handleConfirm = () => {
     const url = mode === 'url' ? imageUrl : selectedImage;
     if (url) {
-      onReplace(url);
+      setReplacing(true);
+      console.log('[ImageReplaceModal] Replacing image:', {
+        oldSrc: currentSrc?.substring(0, 50),
+        newSrc: url?.substring(0, 50),
+      });
+      // تأخير بسيط للتأكد من إغلاق Modal قبل التحديث
+      setTimeout(() => {
+        onReplace(url);
+      }, 100);
     }
   };
 
@@ -615,16 +634,24 @@ function ImageReplaceModal({
         <div className="flex gap-3 p-4 border-t border-gray-200 dark:border-gray-700">
           <button
             onClick={onClose}
-            className="flex-1 px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700"
+            disabled={replacing}
+            className="flex-1 px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50"
           >
             إلغاء
           </button>
           <button
             onClick={handleConfirm}
-            disabled={!selectedImage && !imageUrl}
-            className="flex-1 px-4 py-2 rounded-xl bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-50"
+            disabled={(!selectedImage && !imageUrl) || replacing}
+            className="flex-1 px-4 py-2 rounded-xl bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-50 flex items-center justify-center gap-2"
           >
-            استبدال
+            {replacing ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                جاري الاستبدال...
+              </>
+            ) : (
+              'استبدال'
+            )}
           </button>
         </div>
       </div>
