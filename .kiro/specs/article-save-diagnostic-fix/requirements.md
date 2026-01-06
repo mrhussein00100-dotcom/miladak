@@ -2,9 +2,25 @@
 
 ## Overview
 
-User is experiencing article save issues despite previous fixes. The diagnostic tool is failing to connect to the test API, indicating deeper infrastructure or authentication issues that need to be resolved.
+User is experiencing article save issues where image replacements in the editor are not being persisted. When editing an article and replacing an image (e.g., under "خلاصة وتوصيات" heading), the save shows success but changes are not actually saved.
 
 ## Problem Analysis
+
+### Root Cause Identified (January 2026)
+
+After thorough investigation, the root cause was identified:
+
+1. **Backend API works correctly** - Direct API tests confirm images ARE saved properly via API calls
+2. **Problem is in frontend synchronization** - The issue is between DOM and React state in `EnhancedRichTextEditor.tsx`
+3. **Specific Issue**: The `useEffect` that syncs content was overwriting DOM changes before they could be saved
+
+### Technical Details
+
+- When user replaces an image via `ImageToolbar`, the DOM is updated directly
+- The sync `useEffect` was immediately overwriting these DOM changes with the old React state
+- This caused the new image URL to be lost before `handleSave` could read it
+
+## Problem Analysis (Previous - Diagnostic API Issues)
 
 Based on the diagnostic report and existing code:
 

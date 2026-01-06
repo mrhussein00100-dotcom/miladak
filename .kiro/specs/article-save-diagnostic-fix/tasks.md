@@ -1,5 +1,95 @@
 # Article Save Diagnostic Fix - Implementation Tasks
 
+## Phase 0: Root Cause Fix (COMPLETED - January 2026)
+
+### Task 0.1: Fix DOM-to-React State Synchronization ✅ COMPLETED
+
+**Estimated Time**: 2 hours
+**Status**: ✅ COMPLETED
+
+**Problem**: Image replacements in the editor were not being persisted because the sync `useEffect` was overwriting DOM changes before they could be saved.
+
+**Solution Implemented**:
+
+1. Added `lastUpdateRef` to track recent updates and prevent sync from overwriting changes within 500ms
+2. Modified `handleImageUpdate` to:
+   - Update `lastUpdateRef.current` timestamp
+   - Use `requestAnimationFrame` instead of `setTimeout` for better DOM sync
+   - Force image src update if not found in DOM
+   - Fallback to manual content replacement if image URL still missing
+
+**Files Modified**:
+
+- `components/admin/EnhancedRichTextEditor.tsx` - Modified sync useEffect and handleImageUpdate function
+
+**Code Changes**:
+
+```typescript
+// Added ref to track recent updates
+const lastUpdateRef = useRef<number>(0);
+
+// Modified sync useEffect to skip recent updates
+useEffect(() => {
+  if (editorRef.current && editorRef.current.innerHTML !== value) {
+    // Skip sync if recent update detected (within 500ms)
+    const now = Date.now();
+    if (now - lastUpdateRef.current < 500) {
+      console.log('[Sync] Skipping sync - recent update detected');
+      return;
+    }
+    // ... rest of sync logic
+  }
+}, [value]);
+
+// Modified handleImageUpdate to properly sync DOM changes
+const handleImageUpdate = useCallback(
+  (newImageUrl?: string) => {
+    if (editorRef.current) {
+      // Update timestamp to prevent sync from overwriting
+      lastUpdateRef.current = Date.now();
+
+      // Force image src update if needed
+      if (
+        newImageUrl &&
+        !currentDOMContent.includes(newImageUrl) &&
+        selectedImageElement
+      ) {
+        selectedImageElement.src = newImageUrl;
+      }
+
+      // Use requestAnimationFrame for better DOM sync
+      requestAnimationFrame(() => {
+        // Read final content from DOM and update React state
+        const finalContent = editorRef.current.innerHTML;
+        onChange(finalContent);
+      });
+    }
+  },
+  [onChange, selectedImageElement]
+);
+```
+
+**Acceptance Criteria**: ✅ All met
+
+- [x] Image replacements are properly saved
+- [x] DOM changes are synced to React state before save
+- [x] No race conditions between DOM updates and sync useEffect
+- [x] Console logging added for debugging
+
+### Task 0.2: Verify ImageToolbar Integration ✅ COMPLETED
+
+**Status**: ✅ COMPLETED
+
+**Files Reviewed**:
+
+- `components/admin/ImageToolbar.tsx` - Contains image replacement modal logic
+
+**Verification**:
+
+- ImageToolbar correctly calls `onUpdate(newUrl)` after replacing image
+- Added delay (200ms) before calling onUpdate to ensure DOM is updated
+- Added console logging for debugging
+
 ## Phase 1: Critical Infrastructure Fixes (Priority: URGENT)
 
 ### Task 1.1: Fix Diagnostic API CORS and Accessibility

@@ -351,9 +351,18 @@ export default function EnhancedRichTextEditor({
     return () => clearTimeout(autoSaveTimer);
   }, [value]);
 
-  // مزامنة المحتوى مع المحرر
+  // مزامنة المحتوى مع المحرر - مع منع الكتابة فوق التغييرات الجديدة
+  const lastUpdateRef = useRef<number>(0);
+
   useEffect(() => {
     if (editorRef.current && editorRef.current.innerHTML !== value) {
+      // تجنب الكتابة فوق التغييرات الحديثة (خلال 500ms)
+      const now = Date.now();
+      if (now - lastUpdateRef.current < 500) {
+        console.log('[Sync] Skipping sync - recent update detected');
+        return;
+      }
+
       // حفظ موضع المؤشر
       const selection = window.getSelection();
       const range = selection?.rangeCount ? selection.getRangeAt(0) : null;
@@ -850,45 +859,70 @@ export default function EnhancedRichTextEditor({
             hasSelectedImage: !!selectedImageElement,
           });
 
-          // انتظار قليلاً للتأكد من تحديث DOM
-          setTimeout(() => {
+          // تحديث وقت آخر تعديل لمنع الكتابة فوق التغييرات
+          lastUpdateRef.current = Date.now();
+
+          // قراءة المحتوى مباشرة من DOM
+          const currentDOMContent = editorRef.current.innerHTML;
+
+          console.log('[ImageUpdate] Current DOM content:', {
+            length: currentDOMContent.length,
+            hasNewUrl: newImageUrl
+              ? currentDOMContent.includes(newImageUrl)
+              : 'N/A',
+          });
+
+          // إذا كان لدينا URL جديد ولم يكن موجوداً في DOM، نحتاج لتحديثه يدوياً
+          if (
+            newImageUrl &&
+            !currentDOMContent.includes(newImageUrl) &&
+            selectedImageElement
+          ) {
+            console.log('[ImageUpdate] Forcing image src update in DOM');
+            selectedImageElement.src = newImageUrl;
+          }
+
+          // انتظار قليلاً للتأكد من تحديث DOM بالكامل
+          requestAnimationFrame(() => {
             if (!editorRef.current) return;
 
-            // قراءة المحتوى الجديد من DOM (بعد تحديث الصورة)
-            const newContent = editorRef.current.innerHTML;
+            // تحديث وقت آخر تعديل مرة أخرى
+            lastUpdateRef.current = Date.now();
 
-            console.log('[ImageUpdate] Content from DOM:', {
-              newLength: newContent.length,
-              hasNewUrl: newImageUrl ? newContent.includes(newImageUrl) : 'N/A',
+            // قراءة المحتوى النهائي من DOM
+            const finalContent = editorRef.current.innerHTML;
+
+            console.log('[ImageUpdate] Final content from DOM:', {
+              length: finalContent.length,
+              hasNewUrl: newImageUrl
+                ? finalContent.includes(newImageUrl)
+                : 'N/A',
             });
 
             // التحقق من أن الصورة الجديدة موجودة في المحتوى
-            if (newImageUrl && !newContent.includes(newImageUrl)) {
-              console.warn(
-                '[ImageUpdate] New URL not found in content, forcing update'
+            if (newImageUrl && !finalContent.includes(newImageUrl)) {
+              console.error(
+                '[ImageUpdate] New URL still not found in content after update'
               );
-              // إذا لم تكن الصورة موجودة، قد يكون هناك مشكلة في التزامن
-              // نحاول إعادة قراءة المحتوى
-              const retryContent = editorRef.current.innerHTML;
-              if (retryContent.includes(newImageUrl)) {
-                onChange(retryContent);
-                setHistory((prev) => ({
-                  past: [...prev.past.slice(-50), prev.present],
-                  present: retryContent,
-                  future: [],
-                }));
-              } else {
-                // الصورة لم تُحدث في DOM - نحتاج لتحديثها يدوياً
-                console.error('[ImageUpdate] Image not updated in DOM');
-              }
+              // محاولة أخيرة: تحديث المحتوى يدوياً
+              const updatedContent = finalContent.replace(
+                /<img([^>]*?)src="[^"]*"([^>]*?)>/i,
+                `<img$1src="${newImageUrl}"$2>`
+              );
+              onChange(updatedContent);
+              setHistory((prev) => ({
+                past: [...prev.past.slice(-50), prev.present],
+                present: updatedContent,
+                future: [],
+              }));
             } else {
               // تحديث React state
-              onChange(newContent);
+              onChange(finalContent);
 
               // تحديث التاريخ للتراجع
               setHistory((prev) => ({
                 past: [...prev.past.slice(-50), prev.present],
-                present: newContent,
+                present: finalContent,
                 future: [],
               }));
             }
@@ -901,7 +935,7 @@ export default function EnhancedRichTextEditor({
             setSelectedImageElement(null);
 
             console.log('[ImageUpdate] Update completed successfully');
-          }, 150); // تأخير أطول للتأكد من تحديث DOM
+          });
         } catch (error) {
           console.error('[ImageUpdate] Error:', error);
           alert('حدث خطأ أثناء تحديث الصورة. يرجى المحاولة مرة أخرى.');
