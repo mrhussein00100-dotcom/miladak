@@ -840,10 +840,23 @@ export default function EnhancedRichTextEditor({
     }
   }, [selectedImageElement]);
 
-  // تحديث المحتوى بعد تعديل الصورة
+  // تحديث المحتوى بعد تعديل الصورة - محسّن لضمان المزامنة
   const handleImageUpdate = useCallback(() => {
     if (editorRef.current) {
-      onChange(editorRef.current.innerHTML);
+      // استخدام setTimeout لضمان تحديث DOM قبل قراءة innerHTML
+      // هذا يحل مشكلة عدم حفظ التغييرات عند استبدال الصور
+      setTimeout(() => {
+        if (editorRef.current) {
+          const newContent = editorRef.current.innerHTML;
+          onChange(newContent);
+          // تحديث التاريخ للتراجع
+          setHistory((prev) => ({
+            past: [...prev.past.slice(-50), prev.present],
+            present: newContent,
+            future: [],
+          }));
+        }
+      }, 50);
     }
   }, [onChange]);
 

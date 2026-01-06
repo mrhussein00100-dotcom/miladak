@@ -345,9 +345,13 @@ export default function ImageToolbar({
         <ImageReplaceModal
           currentSrc={imageElement.src}
           onReplace={(newUrl) => {
+            // تحديث src الصورة
             imageElement.src = newUrl;
-            setShowReplaceModal(false);
-            onUpdate();
+            // إضافة تأخير صغير لضمان تحديث DOM قبل استدعاء onUpdate
+            setTimeout(() => {
+              setShowReplaceModal(false);
+              onUpdate();
+            }, 100);
           }}
           onClose={() => setShowReplaceModal(false)}
         />
