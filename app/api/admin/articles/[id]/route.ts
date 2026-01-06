@@ -54,6 +54,96 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   }
 }
 
+/**
+ * تنظيف وتصحيح URLs الصور في المحتوى
+ */
+function sanitizeImageUrls(content: string): string {
+  if (!content) return content;
+
+  // تنظيف URLs الصور من الأحرف الخاصة المشكلة
+  let sanitized = content;
+
+  // إصلاح الصور التي تحتوي على أحرف خاصة في src
+  sanitized = sanitized.replace(
+    /<img([^>]*?)src="([^"]*)"([^>]*?)>/gi,
+    (match, before, src, after) => {
+      try {
+        // تنظيف URL
+        let cleanSrc = src
+          .replace(/[\u0000-\u001F\u007F-\u009F]/g, '') // إزالة أحرف التحكم
+          .replace(/\s+/g, '%20') // استبدال المسافات
+          .trim();
+
+        // التحقق من صحة URL
+        if (
+          cleanSrc.startsWith('http://') ||
+          cleanSrc.startsWith('https://') ||
+          cleanSrc.startsWith('/')
+        ) {
+          return `<img${before}src="${cleanSrc}"${after}>`;
+        }
+
+        // إذا كان URL غير صالح، نحاول إصلاحه
+        if (cleanSrc && !cleanSrc.startsWith('data:')) {
+          cleanSrc = 'https://' + cleanSrc.replace(/^\/+/, '');
+        }
+
+        return `<img${before}src="${cleanSrc}"${after}>`;
+      } catch (e) {
+        // في حالة الخطأ، نعيد الصورة كما هي
+        return match;
+      }
+    }
+  );
+
+  // إزالة الصور التي تحتوي على URLs فارغة أو غير صالحة
+  sanitized = sanitized.replace(/<img[^>]*src=""[^>]*>/gi, '');
+  sanitized = sanitized.replace(/<img[^>]*src="undefined"[^>]*>/gi, '');
+  sanitized = sanitized.replace(/<img[^>]*src="null"[^>]*>/gi, '');
+
+  return sanitized;
+}
+
+/**
+ * التحقق من صحة المحتوى قبل الحفظ
+ */
+function validateContent(content: string): {
+  valid: boolean;
+  error?: string;
+  sanitized: string;
+} {
+  if (!content) {
+    return { valid: true, sanitized: '' };
+  }
+
+  // تنظيف المحتوى
+  let sanitized = sanitizeImageUrls(content);
+
+  // التحقق من وجود أحرف غير صالحة
+  const invalidChars = sanitized.match(
+    /[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g
+  );
+  if (invalidChars) {
+    // إزالة الأحرف غير الصالحة
+    sanitized = sanitized.replace(
+      /[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g,
+      ''
+    );
+  }
+
+  // التحقق من حجم المحتوى
+  if (sanitized.length > 10000000) {
+    // 10MB
+    return {
+      valid: false,
+      error: 'حجم المحتوى كبير جداً (أكثر من 10MB)',
+      sanitized,
+    };
+  }
+
+  return { valid: true, sanitized };
+}
+
 // PUT - تحديث مقال
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
@@ -73,9 +163,24 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     } catch (parseError) {
       console.error('JSON parse error:', parseError);
       return NextResponse.json(
-        { success: false, error: 'خطأ في تنسيق البيانات المرسلة' },
+        {
+          success: false,
+          error: 'خطأ في تنسيق البيانات المرسلة. تأكد من صحة المحتوى.',
+        },
         { status: 400 }
       );
+    }
+
+    // تنظيف والتحقق من المحتوى
+    if (body.content) {
+      const validation = validateContent(body.content);
+      if (!validation.valid) {
+        return NextResponse.json(
+          { success: false, error: validation.error },
+          { status: 400 }
+        );
+      }
+      body.content = validation.sanitized;
     }
 
     // التحقق من حجم المحتوى
@@ -117,7 +222,45 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     if (body.publish_date !== undefined) input.publish_date = body.publish_date;
     if (body.author !== undefined) input.author = body.author;
 
-    const success = await updateArticle(articleId, input);
+    let success;
+    try {
+      success = await updateArticle(articleId, input);
+    } catch (dbError) {
+      console.error('[Article Update] Database error:', dbError);
+      const dbErrorMsg = String(dbError);
+
+      // تحليل نوع الخطأ
+      if (
+        dbErrorMsg.includes('invalid byte sequence') ||
+        dbErrorMsg.includes('encoding')
+      ) {
+        return NextResponse.json(
+          {
+            success: false,
+            error:
+              'يوجد أحرف غير صالحة في المحتوى. جرب إزالة الصور وإعادة إضافتها.',
+            details: 'مشكلة في ترميز الأحرف',
+          },
+          { status: 400 }
+        );
+      }
+
+      if (
+        dbErrorMsg.includes('value too long') ||
+        dbErrorMsg.includes('too long')
+      ) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'أحد الحقول طويل جداً. جرب تقليل حجم المحتوى أو عدد الصور.',
+            details: 'تجاوز الحد المسموح',
+          },
+          { status: 400 }
+        );
+      }
+
+      throw dbError;
+    }
 
     if (!success) {
       return NextResponse.json(
