@@ -21,6 +21,7 @@ import {
 import EnhancedImagePicker from '@/components/admin/EnhancedImagePicker';
 import RichTextEditor from '@/components/admin/RichTextEditor';
 import EnhancedRichTextEditor from '@/components/admin/EnhancedRichTextEditor';
+import ContentDebugger from '@/components/admin/ContentDebugger';
 import { processContent, extractHeadings } from '@/lib/utils/contentFormatter';
 
 interface Category {
@@ -220,6 +221,29 @@ export default function EditArticlePage({
       // استخدام المحتوى كما هو بدون تنسيق إضافي عند الحفظ
       // التنسيق يتم فقط عند الضغط على زر "تنسيق المحتوى" يدوياً
       let finalContent = content;
+
+      // تطبيق تنظيف أساسي فقط للأمان - بدون تنسيق
+      if (finalContent) {
+        // إزالة أحرف التحكم الخطيرة فقط
+        finalContent = finalContent.replace(
+          /[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g,
+          ''
+        );
+
+        // إصلاح الصور المكسورة البسيطة فقط
+        finalContent = finalContent.replace(
+          /<img([^>]*[^\/])>(?!<\/img>)/gi,
+          '<img$1 />'
+        );
+
+        // إزالة الصور الفارغة
+        finalContent = finalContent.replace(/<img[^>]*src=""[^>]*>/gi, '');
+        finalContent = finalContent.replace(
+          /<img[^>]*src="undefined"[^>]*>/gi,
+          ''
+        );
+        finalContent = finalContent.replace(/<img[^>]*src="null"[^>]*>/gi, '');
+      }
 
       // التحقق من حجم المحتوى
       const contentSize = finalContent.length;
@@ -537,6 +561,12 @@ export default function EditArticlePage({
                 />
               )}
             </div>
+
+            {/* Content Debugger */}
+            <ContentDebugger
+              content={content}
+              onContentFixed={(fixedContent) => setContent(fixedContent)}
+            />
 
             {/* Excerpt */}
             <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm">

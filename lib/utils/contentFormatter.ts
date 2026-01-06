@@ -354,9 +354,43 @@ export function formatContent(content: string): string {
     if (attrs.includes('class=')) {
       return match;
     }
-    // تنظيف attrs من الأحرف الخاصة
-    const cleanAttrs = attrs.replace(/[\u0000-\u001F\u007F-\u009F]/g, '');
-    return `<img${cleanAttrs} class="rounded-xl shadow-lg my-6 w-full">`;
+
+    // التحقق من أن الصورة ليست داخل figure أو div منسق بالفعل
+    const imgIndex = formatted.indexOf(match);
+    const beforeImg = formatted.substring(
+      Math.max(0, imgIndex - 100),
+      imgIndex
+    );
+    const afterImg = formatted.substring(
+      imgIndex + match.length,
+      Math.min(formatted.length, imgIndex + match.length + 100)
+    );
+
+    // إذا كانت الصورة داخل figure أو div منسق، لا نغيرها
+    if (beforeImg.includes('<figure') && afterImg.includes('</figure>')) {
+      return match;
+    }
+    if (beforeImg.includes('<div class=') && afterImg.includes('</div>')) {
+      return match;
+    }
+
+    // تنظيف attrs من الأحرف الخاصة بحذر أكبر
+    let cleanAttrs = attrs;
+    try {
+      // إزالة أحرف التحكم فقط، وليس كل الأحرف الخاصة
+      cleanAttrs = attrs.replace(/[\u0000-\u001F\u007F]/g, '');
+
+      // التأكد من وجود مسافة قبل class
+      if (cleanAttrs && !cleanAttrs.startsWith(' ')) {
+        cleanAttrs = ' ' + cleanAttrs;
+      }
+
+      return `<img${cleanAttrs} class="rounded-xl shadow-lg my-6 w-full">`;
+    } catch (error) {
+      // في حالة الخطأ، نعيد الصورة كما هي
+      console.warn('Error processing image attributes:', error);
+      return match;
+    }
   });
 
   // 11. إضافة IDs للعناوين

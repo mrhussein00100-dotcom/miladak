@@ -55,78 +55,85 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 }
 
 /**
- * تنظيف وتصحيح URLs الصور في المحتوى
+ * تنظيف وتصحيح URLs الصور في المحتوى - نسخة محسنة
  */
 function sanitizeImageUrls(content: string): string {
   if (!content) return content;
 
   let sanitized = content;
 
-  // إصلاح الصور المكسورة أو غير المكتملة
-  // 1. إصلاح الصور التي تحتوي على علامات اقتباس مزدوجة داخل src
-  sanitized = sanitized.replace(
-    /<img([^>]*?)src="([^"]*)"([^>]*?)>/gi,
-    (match, before, src, after) => {
-      try {
-        // تنظيف URL من الأحرف الخاصة
-        let cleanSrc = src
-          .replace(/[\u0000-\u001F\u007F-\u009F]/g, '') // إزالة أحرف التحكم
-          .replace(/\s+/g, '%20') // استبدال المسافات
-          .replace(/"/g, '%22') // استبدال علامات الاقتباس
-          .replace(/'/g, '%27') // استبدال الفاصلة العليا
-          .replace(/</g, '%3C') // استبدال أقواس HTML
-          .replace(/>/g, '%3E')
-          .trim();
+  try {
+    // إصلاح الصور المكسورة أو غير المكتملة
+    // 1. إصلاح الصور التي تحتوي على علامات اقتباس مزدوجة داخل src
+    sanitized = sanitized.replace(
+      /<img([^>]*?)src="([^"]*)"([^>]*?)>/gi,
+      (match, before, src, after) => {
+        try {
+          // تنظيف URL من الأحرف الخاصة
+          let cleanSrc = src
+            .replace(/[\u0000-\u001F\u007F]/g, '') // إزالة أحرف التحكم فقط
+            .replace(/\s+/g, '%20') // استبدال المسافات
+            .replace(/"/g, '%22') // استبدال علامات الاقتباس
+            .replace(/'/g, '%27') // استبدال الفاصلة العليا
+            .trim();
 
-        // التحقق من صحة URL
-        if (
-          cleanSrc.startsWith('http://') ||
-          cleanSrc.startsWith('https://') ||
-          cleanSrc.startsWith('/') ||
-          cleanSrc.startsWith('data:')
-        ) {
-          // تنظيف before و after من الأحرف الخاصة
-          const cleanBefore = before.replace(
-            /[\u0000-\u001F\u007F-\u009F]/g,
-            ''
-          );
-          const cleanAfter = after.replace(/[\u0000-\u001F\u007F-\u009F]/g, '');
-          return `<img${cleanBefore}src="${cleanSrc}"${cleanAfter}>`;
+          // التحقق من صحة URL
+          if (
+            cleanSrc.startsWith('http://') ||
+            cleanSrc.startsWith('https://') ||
+            cleanSrc.startsWith('/') ||
+            cleanSrc.startsWith('data:')
+          ) {
+            // تنظيف before و after من أحرف التحكم فقط
+            const cleanBefore = before.replace(/[\u0000-\u001F\u007F]/g, '');
+            const cleanAfter = after.replace(/[\u0000-\u001F\u007F]/g, '');
+            return `<img${cleanBefore}src="${cleanSrc}"${cleanAfter}>`;
+          }
+
+          // إذا كان URL غير صالح، نحاول إصلاحه
+          if (cleanSrc && cleanSrc.length > 5) {
+            cleanSrc = 'https://' + cleanSrc.replace(/^\/+/, '');
+            const cleanBefore = before.replace(/[\u0000-\u001F\u007F]/g, '');
+            const cleanAfter = after.replace(/[\u0000-\u001F\u007F]/g, '');
+            return `<img${cleanBefore}src="${cleanSrc}"${cleanAfter}>`;
+          }
+
+          // URL غير صالح تماماً - إزالة الصورة
+          return '';
+        } catch (e) {
+          console.error('[sanitizeImageUrls] Error processing image:', e);
+          return match;
         }
-
-        // إذا كان URL غير صالح، نحاول إصلاحه
-        if (cleanSrc && cleanSrc.length > 5) {
-          cleanSrc = 'https://' + cleanSrc.replace(/^\/+/, '');
-          const cleanBefore = before.replace(
-            /[\u0000-\u001F\u007F-\u009F]/g,
-            ''
-          );
-          const cleanAfter = after.replace(/[\u0000-\u001F\u007F-\u009F]/g, '');
-          return `<img${cleanBefore}src="${cleanSrc}"${cleanAfter}>`;
-        }
-
-        // URL غير صالح تماماً - إزالة الصورة
-        return '';
-      } catch (e) {
-        console.error('[sanitizeImageUrls] Error processing image:', e);
-        return match;
       }
-    }
-  );
+    );
 
-  // 2. إزالة الصور التي تحتوي على URLs فارغة أو غير صالحة
-  sanitized = sanitized.replace(/<img[^>]*src=""[^>]*>/gi, '');
-  sanitized = sanitized.replace(/<img[^>]*src="undefined"[^>]*>/gi, '');
-  sanitized = sanitized.replace(/<img[^>]*src="null"[^>]*>/gi, '');
+    // 2. إزالة الصور التي تحتوي على URLs فارغة أو غير صالحة
+    sanitized = sanitized.replace(/<img[^>]*src=""[^>]*>/gi, '');
+    sanitized = sanitized.replace(/<img[^>]*src="undefined"[^>]*>/gi, '');
+    sanitized = sanitized.replace(/<img[^>]*src="null"[^>]*>/gi, '');
 
-  // 3. إصلاح علامات img غير المغلقة
-  sanitized = sanitized.replace(/<img([^>]*[^\/])>(?!<\/img>)/gi, '<img$1 />');
+    // 3. إصلاح علامات img غير المغلقة
+    sanitized = sanitized.replace(
+      /<img([^>]*[^\/])>(?!<\/img>)/gi,
+      '<img$1 />'
+    );
+
+    // 4. إصلاح الصور المكررة في نفس المكان
+    sanitized = sanitized.replace(
+      /(<img[^>]*src="([^"]*)"[^>]*>)\s*\1/gi,
+      '$1'
+    );
+  } catch (error) {
+    console.error('[sanitizeImageUrls] General error:', error);
+    // في حالة الخطأ، نعيد المحتوى الأصلي
+    return content;
+  }
 
   return sanitized;
 }
 
 /**
- * التحقق من صحة المحتوى قبل الحفظ
+ * التحقق من صحة المحتوى قبل الحفظ - نسخة محسنة
  */
 function validateContent(content: string): {
   valid: boolean;
@@ -137,35 +144,127 @@ function validateContent(content: string): {
     return { valid: true, sanitized: '' };
   }
 
-  // تنظيف المحتوى
-  let sanitized = sanitizeImageUrls(content);
+  try {
+    // تنظيف المحتوى
+    let sanitized = sanitizeImageUrls(content);
 
-  // إصلاح HTML المكسور
-  sanitized = fixBrokenHtml(sanitized);
+    // إصلاح HTML المكسور
+    sanitized = fixBrokenHtml(sanitized);
 
-  // التحقق من وجود أحرف غير صالحة
-  const invalidChars = sanitized.match(
-    /[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g
-  );
-  if (invalidChars) {
-    // إزالة الأحرف غير الصالحة
-    sanitized = sanitized.replace(
-      /[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g,
-      ''
+    // التحقق من وجود أحرف غير صالحة
+    const invalidChars = sanitized.match(
+      /[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g
     );
-  }
+    if (invalidChars) {
+      // إزالة الأحرف غير الصالحة
+      sanitized = sanitized.replace(
+        /[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g,
+        ''
+      );
+    }
 
-  // التحقق من حجم المحتوى
-  if (sanitized.length > 10000000) {
-    // 10MB
+    // التحقق من حجم المحتوى
+    if (sanitized.length > 10000000) {
+      // 10MB
+      return {
+        valid: false,
+        error: 'حجم المحتوى كبير جداً (أكثر من 10MB)',
+        sanitized,
+      };
+    }
+
+    // التحقق من صحة HTML للصور
+    const imageValidation = validateImageHtml(sanitized);
+    if (!imageValidation.valid) {
+      return {
+        valid: false,
+        error: imageValidation.error,
+        sanitized: imageValidation.sanitized,
+      };
+    }
+
+    return { valid: true, sanitized: imageValidation.sanitized };
+  } catch (error) {
+    console.error('[validateContent] Error:', error);
     return {
       valid: false,
-      error: 'حجم المحتوى كبير جداً (أكثر من 10MB)',
-      sanitized,
+      error: 'حدث خطأ أثناء معالجة المحتوى. يرجى المحاولة مرة أخرى.',
+      sanitized: content,
     };
   }
+}
 
-  return { valid: true, sanitized };
+/**
+ * التحقق من صحة HTML الخاص بالصور
+ */
+function validateImageHtml(content: string): {
+  valid: boolean;
+  error?: string;
+  sanitized: string;
+} {
+  try {
+    let sanitized = content;
+
+    // البحث عن الصور المكررة في نفس المكان
+    const imageMatches = content.match(/<img[^>]*>/gi) || [];
+    const imageUrls = new Map<string, number>();
+
+    for (const imgTag of imageMatches) {
+      const srcMatch = imgTag.match(/src="([^"]*)"/i);
+      if (srcMatch) {
+        const url = srcMatch[1];
+        const count = imageUrls.get(url) || 0;
+        imageUrls.set(url, count + 1);
+
+        // إذا كانت نفس الصورة مكررة أكثر من 3 مرات في مكان قريب
+        if (count > 2) {
+          const imgIndex = content.indexOf(imgTag);
+          const surroundingText = content.substring(
+            Math.max(0, imgIndex - 200),
+            Math.min(content.length, imgIndex + imgTag.length + 200)
+          );
+
+          // إذا كانت الصور المكررة في نفس الفقرة أو القسم
+          const duplicateCount = (
+            surroundingText.match(new RegExp(escapeRegExp(url), 'gi')) || []
+          ).length;
+          if (duplicateCount > 2) {
+            return {
+              valid: false,
+              error: `تم العثور على نفس الصورة مكررة ${duplicateCount} مرات في نفس المكان. يرجى إزالة الصور المكررة.`,
+              sanitized: content,
+            };
+          }
+        }
+      }
+    }
+
+    // إصلاح الصور المكسورة في السياق
+    sanitized = sanitized.replace(
+      /(<figure[^>]*>)\s*(<img[^>]*>)\s*(<img[^>]*>)\s*(<\/figure>)/gi,
+      (match, figureStart, img1, img2, figureEnd) => {
+        // إذا كانت نفس الصورة مكررة داخل figure
+        const src1 = img1.match(/src="([^"]*)"/i)?.[1];
+        const src2 = img2.match(/src="([^"]*)"/i)?.[1];
+        if (src1 === src2) {
+          return figureStart + img1 + figureEnd;
+        }
+        return match;
+      }
+    );
+
+    return { valid: true, sanitized };
+  } catch (error) {
+    console.error('[validateImageHtml] Error:', error);
+    return { valid: true, sanitized: content };
+  }
+}
+
+/**
+ * تحويل النص إلى regex آمن
+ */
+function escapeRegExp(string: string): string {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 /**
@@ -245,13 +344,27 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     // تنظيف والتحقق من المحتوى
     if (body.content) {
+      console.log(
+        `[Article Update] Processing content for article ${articleId}`
+      );
+      console.log(
+        `[Article Update] Original content length: ${body.content.length}`
+      );
+
       const validation = validateContent(body.content);
       if (!validation.valid) {
+        console.error(
+          `[Article Update] Content validation failed: ${validation.error}`
+        );
         return NextResponse.json(
           { success: false, error: validation.error },
           { status: 400 }
         );
       }
+
+      console.log(
+        `[Article Update] Content sanitized, new length: ${validation.sanitized.length}`
+      );
       body.content = validation.sanitized;
     }
 
