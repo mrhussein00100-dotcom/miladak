@@ -845,45 +845,63 @@ export default function EnhancedRichTextEditor({
     (newImageUrl?: string) => {
       if (editorRef.current) {
         try {
-          // قراءة المحتوى الحالي من DOM
-          const currentContent = editorRef.current.innerHTML;
-
           console.log('[ImageUpdate] Called with:', {
             hasNewUrl: !!newImageUrl,
-            contentLength: currentContent.length,
             hasSelectedImage: !!selectedImageElement,
           });
 
-          // إذا تم تمرير URL جديد للصورة (من استبدال الصورة)
-          // الصورة تم تحديثها مباشرة في DOM من ImageToolbar
-          // نحتاج فقط لتحديث React state
+          // انتظار قليلاً للتأكد من تحديث DOM
+          setTimeout(() => {
+            if (!editorRef.current) return;
 
-          // قراءة المحتوى الجديد من DOM (بعد تحديث الصورة)
-          const newContent = editorRef.current.innerHTML;
+            // قراءة المحتوى الجديد من DOM (بعد تحديث الصورة)
+            const newContent = editorRef.current.innerHTML;
 
-          console.log('[ImageUpdate] Content updated:', {
-            newLength: newContent.length,
-            hasNewUrl: newImageUrl ? newContent.includes(newImageUrl) : 'N/A',
-          });
+            console.log('[ImageUpdate] Content from DOM:', {
+              newLength: newContent.length,
+              hasNewUrl: newImageUrl ? newContent.includes(newImageUrl) : 'N/A',
+            });
 
-          // تحديث React state
-          onChange(newContent);
+            // التحقق من أن الصورة الجديدة موجودة في المحتوى
+            if (newImageUrl && !newContent.includes(newImageUrl)) {
+              console.warn(
+                '[ImageUpdate] New URL not found in content, forcing update'
+              );
+              // إذا لم تكن الصورة موجودة، قد يكون هناك مشكلة في التزامن
+              // نحاول إعادة قراءة المحتوى
+              const retryContent = editorRef.current.innerHTML;
+              if (retryContent.includes(newImageUrl)) {
+                onChange(retryContent);
+                setHistory((prev) => ({
+                  past: [...prev.past.slice(-50), prev.present],
+                  present: retryContent,
+                  future: [],
+                }));
+              } else {
+                // الصورة لم تُحدث في DOM - نحتاج لتحديثها يدوياً
+                console.error('[ImageUpdate] Image not updated in DOM');
+              }
+            } else {
+              // تحديث React state
+              onChange(newContent);
 
-          // تحديث التاريخ للتراجع
-          setHistory((prev) => ({
-            past: [...prev.past.slice(-50), prev.present],
-            present: newContent,
-            future: [],
-          }));
+              // تحديث التاريخ للتراجع
+              setHistory((prev) => ({
+                past: [...prev.past.slice(-50), prev.present],
+                present: newContent,
+                future: [],
+              }));
+            }
 
-          // إزالة تحديد الصورة
-          if (selectedImageElement) {
-            selectedImageElement.style.outline = '';
-            selectedImageElement.style.outlineOffset = '';
-          }
-          setSelectedImageElement(null);
+            // إزالة تحديد الصورة
+            if (selectedImageElement) {
+              selectedImageElement.style.outline = '';
+              selectedImageElement.style.outlineOffset = '';
+            }
+            setSelectedImageElement(null);
 
-          console.log('[ImageUpdate] Update completed successfully');
+            console.log('[ImageUpdate] Update completed successfully');
+          }, 150); // تأخير أطول للتأكد من تحديث DOM
         } catch (error) {
           console.error('[ImageUpdate] Error:', error);
           alert('حدث خطأ أثناء تحديث الصورة. يرجى المحاولة مرة أخرى.');

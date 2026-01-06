@@ -352,13 +352,23 @@ export default function ImageToolbar({
               newSrc: newUrl?.substring(0, 50),
             });
 
-            // تحديث الصورة في DOM مباشرة قبل إغلاق Modal
+            // تحديث الصورة في DOM مباشرة
             imageElement.src = newUrl;
 
+            // التأكد من تحديث الصورة
+            console.log(
+              '[ImageToolbar] Image src after update:',
+              imageElement.src?.substring(0, 50)
+            );
+
+            // إغلاق Modal أولاً
             setShowReplaceModal(false);
 
-            // تمرير كلا الـ URLs للمحرر
-            onUpdate(newUrl);
+            // تأخير أطول قبل استدعاء onUpdate للتأكد من تحديث DOM
+            setTimeout(() => {
+              console.log('[ImageToolbar] Calling onUpdate after delay');
+              onUpdate(newUrl);
+            }, 200);
           }}
           onClose={() => setShowReplaceModal(false)}
         />
