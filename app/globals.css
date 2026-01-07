@@ -594,6 +594,41 @@
     text-wrap: balance;
   }
 
+  /* ===== RTL Text Justify - ضبط محاذاة النص العربي ===== */
+  .text-justify {
+    text-align: justify !important;
+    text-align-last: right !important;
+  }
+
+  /* تنسيق الفقرات في المقالات */
+  .prose p,
+  .article-content p {
+    text-align: justify !important;
+    text-align-last: right !important;
+  }
+
+  /* تنسيق عناصر القوائم */
+  .prose li,
+  .article-content li {
+    text-align: justify !important;
+    text-align-last: right !important;
+  }
+
+  /* تنسيق الاقتباسات */
+  .prose blockquote,
+  .article-content blockquote {
+    text-align: justify !important;
+    text-align-last: right !important;
+  }
+
+  /* RTL specific styles */
+  [dir='rtl'] p,
+  [dir='rtl'] li,
+  [dir='rtl'] blockquote {
+    text-align: justify !important;
+    text-align-last: right !important;
+  }
+
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
