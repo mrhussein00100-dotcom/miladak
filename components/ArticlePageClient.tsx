@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
@@ -63,9 +63,9 @@ export default function ArticlePageClient({ article, relatedArticles }: Props) {
     <main className="min-h-screen py-8 px-4">
       <div className="max-w-4xl mx-auto">
         <nav className="flex items-center gap-2 text-sm text-gray-500 mb-8">
-          <Link href="/">الرئيسية</Link>
+          <Link href="/">????????</Link>
           <ArrowRight size={14} />
-          <Link href="/articles">المقالات</Link>
+          <Link href="/articles">????????</Link>
           <ArrowRight size={14} />
           <span className="truncate max-w-[200px]">{article.title}</span>
         </nav>
@@ -91,7 +91,7 @@ export default function ArticlePageClient({ article, relatedArticles }: Props) {
             </span>
             <span className="flex items-center gap-1">
               <Clock size={16} />
-              {formatArabicNumber(article.read_time)} دقائق
+              {formatArabicNumber(article.read_time)} ?????
             </span>
             <span className="flex items-center gap-1">
               <Eye size={16} />
@@ -114,7 +114,7 @@ export default function ArticlePageClient({ article, relatedArticles }: Props) {
 
         <article className="glass rounded-2xl p-6 md:p-10 mb-8">
           <div
-            className="prose prose-lg dark:prose-invert max-w-none"
+            className="prose prose-lg dark:prose-invert max-w-none article-content" dir="rtl"
             dangerouslySetInnerHTML={{ __html: article.content }}
           />
         </article>
@@ -123,7 +123,7 @@ export default function ArticlePageClient({ article, relatedArticles }: Props) {
           <div className="mb-8">
             <div className="flex items-center gap-2 mb-4">
               <Tag size={20} />
-              <h3 className="font-semibold">الكلمات المفتاحية</h3>
+              <h3 className="font-semibold">??????? ?????????</h3>
             </div>
             <div className="flex flex-wrap gap-2">
               {article.tags.split(',').map((tag, i) => (
@@ -142,7 +142,7 @@ export default function ArticlePageClient({ article, relatedArticles }: Props) {
           <section className="mb-8">
             <div className="flex items-center gap-2 mb-6">
               <BookOpen size={24} />
-              <h2 className="text-2xl font-bold">مقالات ذات صلة</h2>
+              <h2 className="text-2xl font-bold">?????? ??? ???</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {relatedArticles.map((r) => (
@@ -177,18 +177,18 @@ export default function ArticlePageClient({ article, relatedArticles }: Props) {
 
         <div className="text-center glass rounded-2xl p-8">
           <h3 className="text-2xl font-bold mb-4 gradient-text">
-            احسب عمرك الآن
+            ???? ???? ????
           </h3>
           <p className="text-gray-600 mb-6">
-            استخدم حاسبة العمر المتقدمة لدينا
+            ?????? ????? ????? ???????? ?????
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/">
-              <Button size="lg">احسب عمرك</Button>
+              <Button size="lg">???? ????</Button>
             </Link>
             <Link href="/articles">
               <Button variant="outline" size="lg">
-                المزيد من المقالات
+                ?????? ?? ????????
               </Button>
             </Link>
           </div>
