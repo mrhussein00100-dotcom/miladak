@@ -230,8 +230,14 @@ ${keywordsText}
 المتطلبات:
 - اكتب ${wordCount.min} كلمة على الأقل
 - ابدأ بعنوان رئيسي جذاب في السطر الأول (بدون HTML)
-- ثم اكتب المحتوى بتنسيق HTML
-- استخدم: <p>, <h2>, <h3>, <ul>, <ol>, <li>, <strong>, <em>
+- ثم اكتب المحتوى بتنسيق HTML مع دعم RTL للعربية
+- استخدم: <p class="text-right leading-relaxed mb-4" dir="rtl">
+- استخدم: <h2 class="text-2xl font-bold mt-8 mb-4 text-right" dir="rtl">
+- استخدم: <h3 class="text-xl font-semibold mt-6 mb-3 text-right" dir="rtl">
+- استخدم: <ul class="list-disc list-inside space-y-2 my-4 text-right" dir="rtl">
+- استخدم: <ol class="list-decimal list-inside space-y-2 my-4 text-right" dir="rtl">
+- استخدم: <li class="text-right leading-relaxed">
+- استخدم: <strong>, <em>
 - اكتب مقدمة شاملة
 - 6-8 أقسام رئيسية بعناوين <h2>
 - خاتمة شاملة

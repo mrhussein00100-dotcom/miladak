@@ -134,67 +134,97 @@ ${keywordsText}
   }
 }
 
-// توليد محتوى قالب كـ fallback
+// توليد محتوى قالب كـ fallback مع دعم RTL للعربية
 function generateTemplateContent(
   topic: string,
   category?: string,
   keywords?: string[]
 ): string {
   const keywordsSection = keywords?.length
-    ? `\n\n## الكلمات المفتاحية\n\nيتناول هذا المقال: ${keywords.join('، ')}.`
+    ? `\n\n<h2 class="text-2xl font-bold mt-8 mb-4 text-right" dir="rtl">الكلمات المفتاحية</h2>\n\n<p class="text-right leading-relaxed mb-4" dir="rtl">يتناول هذا المقال: ${keywords.join(
+        '، '
+      )}.</p>`
     : '';
 
-  return `# ${topic}
+  return `<h1 class="text-3xl font-bold mb-6 text-right" dir="rtl">${topic}</h1>
 
-## مقدمة
+<h2 class="text-2xl font-bold mt-8 mb-4 text-right" dir="rtl">مقدمة</h2>
 
-يعتبر موضوع ${topic} من المواضيع المهمة التي تستحق الاهتمام والدراسة. في هذا المقال، سنتناول أهم جوانب هذا الموضوع بشكل مفصل وشامل.
+<p class="text-right leading-relaxed mb-4" dir="rtl">يعتبر موضوع ${topic} من المواضيع المهمة التي تستحق الاهتمام والدراسة. في هذا المقال، سنتناول أهم جوانب هذا الموضوع بشكل مفصل وشامل.</p>
 
-## أهمية الموضوع
+<h2 class="text-2xl font-bold mt-8 mb-4 text-right" dir="rtl">أهمية الموضوع</h2>
 
-يحظى ${topic} بأهمية كبيرة في حياتنا اليومية لعدة أسباب:
+<p class="text-right leading-relaxed mb-4" dir="rtl">يحظى ${topic} بأهمية كبيرة في حياتنا اليومية لعدة أسباب:</p>
 
-- يؤثر بشكل مباشر على جودة حياتنا
-- له جوانب متعددة ومثيرة للاهتمام
-- يستحق المزيد من البحث والاستكشاف
-- يرتبط بالعديد من المجالات الأخرى
+<ul class="list-disc list-inside space-y-2 my-4 text-right" dir="rtl">
+<li class="text-right leading-relaxed">يؤثر بشكل مباشر على جودة حياتنا</li>
+<li class="text-right leading-relaxed">له جوانب متعددة ومثيرة للاهتمام</li>
+<li class="text-right leading-relaxed">يستحق المزيد من البحث والاستكشاف</li>
+<li class="text-right leading-relaxed">يرتبط بالعديد من المجالات الأخرى</li>
+</ul>
 
-## معلومات مفيدة
+<h2 class="text-2xl font-bold mt-8 mb-4 text-right" dir="rtl">معلومات مفيدة</h2>
 
-هناك العديد من المعلومات المفيدة حول ${topic} التي يجب معرفتها:
+<p class="text-right leading-relaxed mb-4" dir="rtl">هناك العديد من المعلومات المفيدة حول ${topic} التي يجب معرفتها:</p>
 
-1. **المعلومة الأولى**: تتعلق بالجوانب الأساسية للموضوع
-2. **المعلومة الثانية**: تتناول التطبيقات العملية
-3. **المعلومة الثالثة**: تشرح الفوائد والمميزات
+<ol class="list-decimal list-inside space-y-2 my-4 text-right" dir="rtl">
+<li class="text-right leading-relaxed"><strong>المعلومة الأولى</strong>: تتعلق بالجوانب الأساسية للموضوع</li>
+<li class="text-right leading-relaxed"><strong>المعلومة الثانية</strong>: تتناول التطبيقات العملية</li>
+<li class="text-right leading-relaxed"><strong>المعلومة الثالثة</strong>: تشرح الفوائد والمميزات</li>
+</ol>
 
-## نصائح وإرشادات
+<h2 class="text-2xl font-bold mt-8 mb-4 text-right" dir="rtl">نصائح وإرشادات</h2>
 
-للاستفادة القصوى من ${topic}، ننصح بما يلي:
+<p class="text-right leading-relaxed mb-4" dir="rtl">للاستفادة القصوى من ${topic}، ننصح بما يلي:</p>
 
-- الاطلاع على المصادر الموثوقة
-- التطبيق العملي للمعلومات
-- مشاركة المعرفة مع الآخرين
+<ul class="list-disc list-inside space-y-2 my-4 text-right" dir="rtl">
+<li class="text-right leading-relaxed">الاطلاع على المصادر الموثوقة</li>
+<li class="text-right leading-relaxed">التطبيق العملي للمعلومات</li>
+<li class="text-right leading-relaxed">مشاركة المعرفة مع الآخرين</li>
+</ul>
 ${keywordsSection}
 
-## خاتمة
+<h2 class="text-2xl font-bold mt-8 mb-4 text-right" dir="rtl">خاتمة</h2>
 
-في الختام، ${topic} موضوع غني بالمعلومات والفوائد. نأمل أن يكون هذا المقال قد قدم لكم معلومات مفيدة وقيمة حول هذا الموضوع المهم.`;
+<p class="text-right leading-relaxed mb-4" dir="rtl">في الختام، ${topic} موضوع غني بالمعلومات والفوائد. نأمل أن يكون هذا المقال قد قدم لكم معلومات مفيدة وقيمة حول هذا الموضوع المهم.</p>`;
 }
 
-// تحويل Markdown إلى HTML
+// تحويل Markdown إلى HTML مع دعم RTL للعربية
 function formatAsHtml(content: string): string {
   return content
-    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
-    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-    .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+    .replace(
+      /^### (.+)$/gm,
+      '<h3 class="text-xl font-semibold mt-6 mb-3 text-right" dir="rtl">$1</h3>'
+    )
+    .replace(
+      /^## (.+)$/gm,
+      '<h2 class="text-2xl font-bold mt-8 mb-4 text-right" dir="rtl">$1</h2>'
+    )
+    .replace(
+      /^# (.+)$/gm,
+      '<h1 class="text-3xl font-bold mb-6 text-right" dir="rtl">$1</h1>'
+    )
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
-    .replace(/^\d+\.\s+(.+)$/gm, '<li>$1</li>')
-    .replace(/^- (.+)$/gm, '<li>$1</li>')
-    .replace(/(<li>.*<\/li>\n?)+/g, (match) => `<ul>${match}</ul>`)
-    .replace(/\n\n/g, '</p><p>')
-    .replace(/^(?!<[hpul])(.+)$/gm, '<p>$1</p>')
-    .replace(/<p><\/p>/g, '');
+    .replace(
+      /^\d+\.\s+(.+)$/gm,
+      '<li class="text-right leading-relaxed">$1</li>'
+    )
+    .replace(/^- (.+)$/gm, '<li class="text-right leading-relaxed">$1</li>')
+    .replace(
+      /(<li[^>]*>.*<\/li>\n?)+/g,
+      (match) =>
+        `<ul class="list-disc list-inside space-y-2 my-4 text-right" dir="rtl">${match}</ul>`
+    )
+    .replace(
+      /\n\n/g,
+      '</p><p class="text-right leading-relaxed mb-4" dir="rtl">'
+    )
+    .replace(
+      /^(?!<[hpul])(.+)$/gm,
+      '<p class="text-right leading-relaxed mb-4" dir="rtl">$1</p>'
+    )
+    .replace(/<p[^>]*><\/p>/g, '');
 }
 
 // إعادة صياغة محتوى

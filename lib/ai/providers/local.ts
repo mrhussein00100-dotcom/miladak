@@ -143,21 +143,21 @@ const greetings = [
   'أجمل التهاني بمناسبة عيد ميلادك',
 ];
 
-// فقرات إضافية للمقالات الطويلة
+// فقرات إضافية للمقالات الطويلة مع دعم RTL للعربية
 const additionalParagraphs = {
   birthday: [
-    `<h2>أهمية الاحتفال بعيد الميلاد</h2>
-<p>يعتبر عيد الميلاد مناسبة خاصة للاحتفال بالحياة والتأمل في الإنجازات. إنه يوم للتقدير والامتنان لكل ما حققناه خلال العام الماضي.</p>`,
-    `<h2>تقاليد الاحتفال بعيد الميلاد</h2>
-<p>تختلف تقاليد الاحتفال بعيد الميلاد من ثقافة لأخرى، لكنها جميعاً تشترك في روح الفرح والاحتفال. من الكيك والشموع إلى الهدايا والتمنيات الطيبة.</p>`,
-    `<h2>نصائح لعيد ميلاد مميز</h2>
-<p>لجعل عيد ميلادك مميزاً، احرص على قضاء الوقت مع أحبائك، وتذكر أن تقدر كل لحظة. اجعل هذا اليوم فرصة للتفكير في أهدافك وأحلامك للعام القادم.</p>`,
+    `<h2 class="text-2xl font-bold mt-8 mb-4 text-right" dir="rtl">أهمية الاحتفال بعيد الميلاد</h2>
+<p class="text-right leading-relaxed mb-4" dir="rtl">يعتبر عيد الميلاد مناسبة خاصة للاحتفال بالحياة والتأمل في الإنجازات. إنه يوم للتقدير والامتنان لكل ما حققناه خلال العام الماضي.</p>`,
+    `<h2 class="text-2xl font-bold mt-8 mb-4 text-right" dir="rtl">تقاليد الاحتفال بعيد الميلاد</h2>
+<p class="text-right leading-relaxed mb-4" dir="rtl">تختلف تقاليد الاحتفال بعيد الميلاد من ثقافة لأخرى، لكنها جميعاً تشترك في روح الفرح والاحتفال. من الكيك والشموع إلى الهدايا والتمنيات الطيبة.</p>`,
+    `<h2 class="text-2xl font-bold mt-8 mb-4 text-right" dir="rtl">نصائح لعيد ميلاد مميز</h2>
+<p class="text-right leading-relaxed mb-4" dir="rtl">لجعل عيد ميلادك مميزاً، احرص على قضاء الوقت مع أحبائك، وتذكر أن تقدر كل لحظة. اجعل هذا اليوم فرصة للتفكير في أهدافك وأحلامك للعام القادم.</p>`,
   ],
   zodiac: [
-    `<h2>التوافق في العلاقات</h2>
-<p>يلعب البرج دوراً مهماً في فهم التوافق بين الأشخاص. معرفة خصائص برجك يساعدك على فهم نفسك وعلاقاتك بشكل أفضل.</p>`,
-    `<h2>تأثير الكواكب</h2>
-<p>تؤثر حركة الكواكب على طاقة كل برج بطريقة مختلفة. فهم هذه التأثيرات يساعدك على اتخاذ قرارات أفضل في حياتك.</p>`,
+    `<h2 class="text-2xl font-bold mt-8 mb-4 text-right" dir="rtl">التوافق في العلاقات</h2>
+<p class="text-right leading-relaxed mb-4" dir="rtl">يلعب البرج دوراً مهماً في فهم التوافق بين الأشخاص. معرفة خصائص برجك يساعدك على فهم نفسك وعلاقاتك بشكل أفضل.</p>`,
+    `<h2 class="text-2xl font-bold mt-8 mb-4 text-right" dir="rtl">تأثير الكواكب</h2>
+<p class="text-right leading-relaxed mb-4" dir="rtl">تؤثر حركة الكواكب على طاقة كل برج بطريقة مختلفة. فهم هذه التأثيرات يساعدك على اتخاذ قرارات أفضل في حياتك.</p>`,
   ],
 };
 
@@ -381,7 +381,7 @@ function prepareVariables(
   };
 }
 
-// توليد مقال افتراضي عند عدم وجود قوالب
+// توليد مقال افتراضي عند عدم وجود قوالب مع دعم RTL للعربية
 function generateDefaultArticle(
   request: LocalGenerationRequest,
   startTime: number
@@ -389,26 +389,26 @@ function generateDefaultArticle(
   const variables = prepareVariables(request.variables || {}, request.topic);
 
   const content = `
-<h1>${request.topic}</h1>
+<h1 class="text-3xl font-bold mb-6 text-right" dir="rtl">${request.topic}</h1>
 
-<h2>مقدمة</h2>
-<p>${variables.greeting}! نقدم لكم اليوم مقالاً شاملاً عن ${request.topic}. هذا الموضوع يهم الكثيرين ونأمل أن تجدوا فيه ما يفيدكم.</p>
+<h2 class="text-2xl font-bold mt-8 mb-4 text-right" dir="rtl">مقدمة</h2>
+<p class="text-right leading-relaxed mb-4" dir="rtl">${variables.greeting}! نقدم لكم اليوم مقالاً شاملاً عن ${request.topic}. هذا الموضوع يهم الكثيرين ونأمل أن تجدوا فيه ما يفيدكم.</p>
 
-<h2>معلومات أساسية</h2>
-<p>يعتبر هذا الموضوع من المواضيع المهمة التي تستحق الاهتمام. سنتناول في هذا المقال جوانب متعددة تساعدكم على فهم أعمق.</p>
+<h2 class="text-2xl font-bold mt-8 mb-4 text-right" dir="rtl">معلومات أساسية</h2>
+<p class="text-right leading-relaxed mb-4" dir="rtl">يعتبر هذا الموضوع من المواضيع المهمة التي تستحق الاهتمام. سنتناول في هذا المقال جوانب متعددة تساعدكم على فهم أعمق.</p>
 
-<h2>تفاصيل مهمة</h2>
-<p>هناك العديد من النقاط التي يجب مراعاتها عند التعامل مع هذا الموضوع. من أهمها الفهم الصحيح والتطبيق العملي.</p>
+<h2 class="text-2xl font-bold mt-8 mb-4 text-right" dir="rtl">تفاصيل مهمة</h2>
+<p class="text-right leading-relaxed mb-4" dir="rtl">هناك العديد من النقاط التي يجب مراعاتها عند التعامل مع هذا الموضوع. من أهمها الفهم الصحيح والتطبيق العملي.</p>
 
-<h2>نصائح وإرشادات</h2>
-<ul>
-<li>احرص على الاستفادة من المعلومات المقدمة</li>
-<li>شارك هذا المقال مع من يهمه الأمر</li>
-<li>تابعنا للمزيد من المقالات المفيدة</li>
+<h2 class="text-2xl font-bold mt-8 mb-4 text-right" dir="rtl">نصائح وإرشادات</h2>
+<ul class="list-disc list-inside space-y-2 my-4 text-right" dir="rtl">
+<li class="text-right leading-relaxed">احرص على الاستفادة من المعلومات المقدمة</li>
+<li class="text-right leading-relaxed">شارك هذا المقال مع من يهمه الأمر</li>
+<li class="text-right leading-relaxed">تابعنا للمزيد من المقالات المفيدة</li>
 </ul>
 
-<h2>خاتمة</h2>
-<p>نتمنى أن يكون هذا المقال قد أفادكم. لا تترددوا في ترك تعليقاتكم وأسئلتكم.</p>
+<h2 class="text-2xl font-bold mt-8 mb-4 text-right" dir="rtl">خاتمة</h2>
+<p class="text-right leading-relaxed mb-4" dir="rtl">نتمنى أن يكون هذا المقال قد أفادكم. لا تترددوا في ترك تعليقاتكم وأسئلتكم.</p>
 `;
 
   const title = request.topic;

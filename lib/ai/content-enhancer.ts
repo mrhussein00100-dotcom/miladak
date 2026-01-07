@@ -225,7 +225,7 @@ export function generateDiverseSEOTitle(
 }
 
 /**
- * تنسيق الفقرات
+ * تنسيق الفقرات مع دعم كامل للعربية RTL
  */
 export function formatParagraphs(content: string): string {
   let result = content;
@@ -244,39 +244,78 @@ export function formatParagraphs(content: string): string {
 
         // تقسيم عند نهاية الجملة إذا تجاوزنا 80 كلمة
         if (currentParagraph.length >= 80 && /[.!؟،]$/.test(word)) {
-          paragraphs.push(`<p>${currentParagraph.join(' ')}</p>`);
+          paragraphs.push(
+            `<p class="text-right leading-relaxed mb-4" dir="rtl">${currentParagraph.join(
+              ' '
+            )}</p>`
+          );
           currentParagraph = [];
         }
       }
 
       if (currentParagraph.length > 0) {
-        paragraphs.push(`<p>${currentParagraph.join(' ')}</p>`);
+        paragraphs.push(
+          `<p class="text-right leading-relaxed mb-4" dir="rtl">${currentParagraph.join(
+            ' '
+          )}</p>`
+        );
       }
 
       return paragraphs.join('\n');
     }
 
-    return match;
+    // إضافة تنسيق RTL للفقرات العادية
+    return `<p class="text-right leading-relaxed mb-4" dir="rtl">${text.trim()}</p>`;
   });
 
-  // إضافة تباعد بين الفقرات
-  result = result.replace(/<\/p>\s*<p>/g, '</p>\n\n<p>');
+  // تنسيق الفقرات التي لا تحتوي على class
+  result = result.replace(
+    /<p>([^<]*)<\/p>/g,
+    '<p class="text-right leading-relaxed mb-4" dir="rtl">$1</p>'
+  );
 
-  // تنسيق القوائم
+  // إضافة تباعد بين الفقرات
+  result = result.replace(/<\/p>\s*<p/g, '</p>\n\n<p');
+
+  // تنسيق القوائم مع دعم RTL
   result = result.replace(
     /<ul>\s*/g,
-    '<ul class="list-disc list-inside space-y-2 my-4">\n'
+    '<ul class="list-disc list-inside space-y-2 my-4 text-right" dir="rtl">\n'
   );
   result = result.replace(
     /<ol>\s*/g,
-    '<ol class="list-decimal list-inside space-y-2 my-4">\n'
+    '<ol class="list-decimal list-inside space-y-2 my-4 text-right" dir="rtl">\n'
   );
 
-  // تنسيق العناوين
-  result = result.replace(/<h2>/g, '<h2 class="text-2xl font-bold mt-8 mb-4">');
+  // تنسيق عناصر القوائم
+  result = result.replace(/<li>/g, '<li class="text-right leading-relaxed">');
+
+  // تنسيق العناوين مع دعم RTL
+  result = result.replace(
+    /<h2>/g,
+    '<h2 class="text-2xl font-bold mt-8 mb-4 text-right" dir="rtl">'
+  );
+  result = result.replace(/<h2 class="/g, '<h2 class="text-right ');
   result = result.replace(
     /<h3>/g,
-    '<h3 class="text-xl font-semibold mt-6 mb-3">'
+    '<h3 class="text-xl font-semibold mt-6 mb-3 text-right" dir="rtl">'
+  );
+  result = result.replace(/<h3 class="/g, '<h3 class="text-right ');
+
+  // تنسيق العناوين الرئيسية
+  result = result.replace(
+    /<h1>/g,
+    '<h1 class="text-3xl font-bold mb-6 text-right" dir="rtl">'
+  );
+  result = result.replace(/<h1 class="/g, '<h1 class="text-right ');
+
+  // إضافة dir="rtl" للعناصر التي لا تحتويه
+  result = result.replace(
+    /<(p|h1|h2|h3|ul|ol|li)([^>]*?)(?<!dir="rtl")>/gi,
+    (match, tag, attrs) => {
+      if (attrs.includes('dir=')) return match;
+      return `<${tag}${attrs} dir="rtl">`;
+    }
   );
 
   return result;
@@ -364,18 +403,18 @@ export function fixTruncatedArticle(content: string, topic: string): string {
 }
 
 /**
- * توليد خاتمة
+ * توليد خاتمة مع تنسيق RTL
  */
 function generateConclusion(topic: string): string {
   const conclusions = [
-    `<h2>الخاتمة</h2>
-<p>في الختام، نأمل أن يكون هذا المقال قد أفادكم وقدم لكم معلومات قيمة عن ${topic}. شاركوا المقال مع أصدقائكم وتابعونا للمزيد من المقالات المفيدة!</p>`,
+    `<h2 class="text-2xl font-bold mt-8 mb-4 text-right" dir="rtl">الخاتمة</h2>
+<p class="text-right leading-relaxed mb-4" dir="rtl">في الختام، نأمل أن يكون هذا المقال قد أفادكم وقدم لكم معلومات قيمة عن ${topic}. شاركوا المقال مع أصدقائكم وتابعونا للمزيد من المقالات المفيدة!</p>`,
 
-    `<h2>الخلاصة</h2>
-<p>نتمنى أن تكونوا قد استفدتم من هذا الدليل الشامل عن ${topic}. لا تترددوا في ترك تعليقاتكم وأسئلتكم، ونحن سعداء بمساعدتكم!</p>`,
+    `<h2 class="text-2xl font-bold mt-8 mb-4 text-right" dir="rtl">الخلاصة</h2>
+<p class="text-right leading-relaxed mb-4" dir="rtl">نتمنى أن تكونوا قد استفدتم من هذا الدليل الشامل عن ${topic}. لا تترددوا في ترك تعليقاتكم وأسئلتكم، ونحن سعداء بمساعدتكم!</p>`,
 
-    `<h2>ختاماً</h2>
-<p>هكذا نكون قد استعرضنا معكم كل ما يتعلق بـ${topic}. نأمل أن تكون المعلومات مفيدة لكم. شاركونا آراءكم في التعليقات!</p>`,
+    `<h2 class="text-2xl font-bold mt-8 mb-4 text-right" dir="rtl">ختاماً</h2>
+<p class="text-right leading-relaxed mb-4" dir="rtl">هكذا نكون قد استعرضنا معكم كل ما يتعلق بـ${topic}. نأمل أن تكون المعلومات مفيدة لكم. شاركونا آراءكم في التعليقات!</p>`,
   ];
 
   return conclusions[Math.floor(Math.random() * conclusions.length)];

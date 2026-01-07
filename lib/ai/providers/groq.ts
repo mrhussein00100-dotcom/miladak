@@ -144,7 +144,15 @@ ${sectionsList}
 
 خاتمة شاملة
 
-التنسيق: HTML فقط (<p>, <h2>, <h3>, <ul>, <ol>, <li>, <strong>)
+التنسيق: HTML فقط مع دعم RTL للعربية
+- استخدم: <p class="text-right leading-relaxed mb-4" dir="rtl">
+- استخدم: <h2 class="text-2xl font-bold mt-8 mb-4 text-right" dir="rtl">
+- استخدم: <h3 class="text-xl font-semibold mt-6 mb-3 text-right" dir="rtl">
+- استخدم: <ul class="list-disc list-inside space-y-2 my-4 text-right" dir="rtl">
+- استخدم: <ol class="list-decimal list-inside space-y-2 my-4 text-right" dir="rtl">
+- استخدم: <li class="text-right leading-relaxed">
+- استخدم: <strong>
+
 كل فقرة: 4-5 جمل على الأقل
 
 متطلبات العنوان للـ SEO:
@@ -154,7 +162,7 @@ ${sectionsList}
 - مثال: "دليلك الشامل لـ [الموضوع]: كل ما تحتاج معرفته في 2025"
 
 أرجع JSON:
-{"title":"عنوان طويل ووصفي للـ SEO (50-70 حرف)","content":"<p>المحتوى...</p>","excerpt":"ملخص","metaDescription":"وصف ميتا 150-160 حرف","metaKeywords":"كلمات","focusKeyword":"كلمة"}`;
+{"title":"عنوان طويل ووصفي للـ SEO (50-70 حرف)","content":"<p class=\\"text-right leading-relaxed mb-4\\" dir=\\"rtl\\">المحتوى...</p>","excerpt":"ملخص","metaDescription":"وصف ميتا 150-160 حرف","metaKeywords":"كلمات","focusKeyword":"كلمة"}`;
 
   try {
     console.log('📡 Groq: إرسال الطلب إلى API...');
@@ -178,7 +186,14 @@ ${sectionsList}
 - الحد الأدنى: ${wordConfig.min} كلمة
 - كل قسم: 4-6 فقرات
 - كل فقرة: 4-5 جمل
-- استخدم HTML: <p>, <h2>, <h3>, <ul>, <ol>, <li>, <strong>
+- استخدم HTML مع تنسيق RTL للعربية:
+  * <p class="text-right leading-relaxed mb-4" dir="rtl">
+  * <h2 class="text-2xl font-bold mt-8 mb-4 text-right" dir="rtl">
+  * <h3 class="text-xl font-semibold mt-6 mb-3 text-right" dir="rtl">
+  * <ul class="list-disc list-inside space-y-2 my-4 text-right" dir="rtl">
+  * <ol class="list-decimal list-inside space-y-2 my-4 text-right" dir="rtl">
+  * <li class="text-right leading-relaxed">
+  * <strong>
 - أرجع JSON صحيح فقط
 
 قواعد العنوان للـ SEO (مهم جداً):

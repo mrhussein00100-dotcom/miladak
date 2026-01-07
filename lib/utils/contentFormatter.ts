@@ -91,7 +91,7 @@ export function addHeadingIds(content: string): string {
 }
 
 /**
- * تحويل النص العادي إلى HTML منسق مع عناوين
+ * تحويل النص العادي إلى HTML منسق مع عناوين ودعم RTL للعربية
  */
 export function convertPlainTextToHTML(content: string): string {
   // إذا كان المحتوى يحتوي على HTML بالفعل
@@ -124,37 +124,48 @@ export function convertPlainTextToHTML(content: string): string {
         html += `</${listType}>\n`;
         inList = false;
       }
-      html += `<h4>${line.slice(4)}</h4>\n`;
+      html += `<h4 class="text-lg font-semibold mt-5 mb-2 text-right" dir="rtl">${line.slice(
+        4
+      )}</h4>\n`;
     } else if (line.startsWith('## ')) {
       if (inList) {
         html += `</${listType}>\n`;
         inList = false;
       }
-      html += `<h3>${line.slice(3)}</h3>\n`;
+      html += `<h3 class="text-xl font-semibold mt-6 mb-3 text-right" dir="rtl">${line.slice(
+        3
+      )}</h3>\n`;
     } else if (line.startsWith('# ')) {
       if (inList) {
         html += `</${listType}>\n`;
         inList = false;
       }
-      html += `<h2>${line.slice(2)}</h2>\n`;
+      html += `<h2 class="text-2xl font-bold mt-8 mb-4 text-right" dir="rtl">${line.slice(
+        2
+      )}</h2>\n`;
     }
     // تحويل القوائم
     else if (line.startsWith('- ') || line.startsWith('* ')) {
       if (!inList || listType !== 'ul') {
         if (inList) html += `</${listType}>\n`;
-        html += '<ul>\n';
+        html +=
+          '<ul class="list-disc list-inside space-y-2 my-4 text-right" dir="rtl">\n';
         inList = true;
         listType = 'ul';
       }
-      html += `<li>${line.slice(2)}</li>\n`;
+      html += `<li class="text-right leading-relaxed">${line.slice(2)}</li>\n`;
     } else if (/^\d+\.\s/.test(line)) {
       if (!inList || listType !== 'ol') {
         if (inList) html += `</${listType}>\n`;
-        html += '<ol>\n';
+        html +=
+          '<ol class="list-decimal list-inside space-y-2 my-4 text-right" dir="rtl">\n';
         inList = true;
         listType = 'ol';
       }
-      html += `<li>${line.replace(/^\d+\.\s/, '')}</li>\n`;
+      html += `<li class="text-right leading-relaxed">${line.replace(
+        /^\d+\.\s/,
+        ''
+      )}</li>\n`;
     }
     // فقرة عادية
     else {
@@ -162,7 +173,7 @@ export function convertPlainTextToHTML(content: string): string {
         html += `</${listType}>\n`;
         inList = false;
       }
-      html += `<p>${line}</p>\n`;
+      html += `<p class="text-right leading-relaxed mb-4" dir="rtl">${line}</p>\n`;
     }
   }
 

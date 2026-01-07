@@ -80,6 +80,13 @@ ${keywordsText}
 4. معلومات مفيدة
 5. خاتمة
 
+التنسيق: استخدم HTML مع دعم RTL للعربية:
+- <p class="text-right leading-relaxed mb-4" dir="rtl">
+- <h2 class="text-2xl font-bold mt-8 mb-4 text-right" dir="rtl">
+- <h3 class="text-xl font-semibold mt-6 mb-3 text-right" dir="rtl">
+- <ul class="list-disc list-inside space-y-2 my-4 text-right" dir="rtl">
+- <li class="text-right leading-relaxed">
+
 اكتب المقال مباشرة بدون أي تعليقات:`;
 
   try {
@@ -152,19 +159,37 @@ ${keywordsText}
   }
 }
 
-// تحويل Markdown إلى HTML بسيط
+// تحويل Markdown إلى HTML بسيط مع دعم RTL للعربية
 function formatAsHtml(content: string): string {
   return content
-    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
-    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-    .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+    .replace(
+      /^### (.+)$/gm,
+      '<h3 class="text-xl font-semibold mt-6 mb-3 text-right" dir="rtl">$1</h3>'
+    )
+    .replace(
+      /^## (.+)$/gm,
+      '<h2 class="text-2xl font-bold mt-8 mb-4 text-right" dir="rtl">$1</h2>'
+    )
+    .replace(
+      /^# (.+)$/gm,
+      '<h1 class="text-3xl font-bold mb-6 text-right" dir="rtl">$1</h1>'
+    )
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
-    .replace(/^- (.+)$/gm, '<li>$1</li>')
-    .replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>')
-    .replace(/\n\n/g, '</p><p>')
-    .replace(/^(?!<[hpul])(.+)$/gm, '<p>$1</p>')
-    .replace(/<p><\/p>/g, '');
+    .replace(/^- (.+)$/gm, '<li class="text-right leading-relaxed">$1</li>')
+    .replace(
+      /(<li[^>]*>.*<\/li>\n?)+/g,
+      '<ul class="list-disc list-inside space-y-2 my-4 text-right" dir="rtl">$&</ul>'
+    )
+    .replace(
+      /\n\n/g,
+      '</p><p class="text-right leading-relaxed mb-4" dir="rtl">'
+    )
+    .replace(
+      /^(?!<[hpul])(.+)$/gm,
+      '<p class="text-right leading-relaxed mb-4" dir="rtl">$1</p>'
+    )
+    .replace(/<p[^>]*><\/p>/g, '');
 }
 
 // إعادة صياغة محتوى
