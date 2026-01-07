@@ -55,41 +55,53 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 }
 
 /**
- * تحويل صور base64 إلى placeholder أو إزالتها لتقليل حجم المحتوى
- * صور base64 تسبب مشاكل كبيرة في الحفظ والأداء
+ * إزالة صور base64 الكبيرة فقط لتقليل حجم المحتوى
+ * صور base64 الكبيرة تسبب مشاكل في الحفظ والأداء
+ * لا نستبدل الصور بـ placeholder - نزيلها فقط إذا كانت كبيرة جداً
  */
 function removeBase64Images(content: string): string {
   if (!content) return content;
 
   let result = content;
-  let base64Count = 0;
+  let removedCount = 0;
+  let keptCount = 0;
 
-  // البحث عن صور base64 واستبدالها بصورة placeholder أو إزالتها
+  // البحث عن صور base64 وإزالة الكبيرة منها فقط (أكثر من 100KB)
   result = result.replace(
-    /<img([^>]*?)src="data:image\/[^"]*"([^>]*?)>/gi,
-    (match, before, after) => {
-      base64Count++;
-      console.log(`[removeBase64Images] Found base64 image #${base64Count}`);
+    /<img([^>]*?)src="(data:image\/[^"]*)"([^>]*?)>/gi,
+    (match, before, src, after) => {
+      // حساب حجم الصورة base64 (تقريبي)
+      const base64Size = src.length * 0.75; // تحويل من base64 إلى bytes تقريبي
+      const sizeKB = base64Size / 1024;
 
-      // استخراج alt إذا وجد
-      const altMatch = match.match(/alt="([^"]*)"/i);
-      const alt = altMatch ? altMatch[1] : 'صورة';
+      // إذا كانت الصورة صغيرة (أقل من 100KB)، نحتفظ بها
+      if (sizeKB < 100) {
+        keptCount++;
+        console.log(
+          `[removeBase64Images] Keeping small base64 image (${sizeKB.toFixed(
+            1
+          )}KB)`
+        );
+        return match;
+      }
 
-      // إزالة الصورة base64 تماماً - يمكن للمستخدم إضافة صورة جديدة
-      // أو استبدالها بصورة placeholder
-      const placeholderUrl =
-        'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=800';
+      // إذا كانت الصورة كبيرة، نزيلها تماماً (لا نستبدلها بـ placeholder)
+      removedCount++;
+      console.log(
+        `[removeBase64Images] Removing large base64 image (${sizeKB.toFixed(
+          1
+        )}KB)`
+      );
 
-      // تنظيف before و after
-      const cleanBefore = before.replace(/[\u0000-\u001F\u007F]/g, '');
-      const cleanAfter = after.replace(/[\u0000-\u001F\u007F]/g, '');
-
-      return `<img${cleanBefore}src="${placeholderUrl}" alt="${alt}"${cleanAfter}>`;
+      // إزالة الصورة الكبيرة تماماً
+      return '';
     }
   );
 
-  if (base64Count > 0) {
-    console.log(`[removeBase64Images] Replaced ${base64Count} base64 images`);
+  if (removedCount > 0 || keptCount > 0) {
+    console.log(
+      `[removeBase64Images] Kept ${keptCount} small images, removed ${removedCount} large images`
+    );
   }
 
   return result;

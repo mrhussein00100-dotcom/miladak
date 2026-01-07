@@ -86,30 +86,39 @@ export default function EditArticlePage({
           setTitle(article.title);
           setSlug(article.slug);
 
-          // تنظيف صور base64 من المحتوى لتحسين الأداء
+          // تحميل المحتوى كما هو - لا نستبدل الصور بـ placeholder
+          // فقط نزيل صور base64 الكبيرة جداً (أكثر من 100KB) لتحسين الأداء
           let cleanContent = article.content || '';
-          const base64Regex = /<img([^>]*?)src="data:image\/[^"]*"([^>]*?)>/gi;
-          const base64Count = (cleanContent.match(base64Regex) || []).length;
+          const base64Regex =
+            /<img([^>]*?)src="(data:image\/[^"]*)"([^>]*?)>/gi;
 
-          if (base64Count > 0) {
-            console.log(
-              `[EditArticle] Found ${base64Count} base64 images, cleaning...`
-            );
-            // استبدال صور base64 بصورة placeholder
-            cleanContent = cleanContent.replace(
-              base64Regex,
-              (match: string, before: string, after: string) => {
-                const altMatch = match.match(/alt="([^"]*)"/i);
-                const alt = altMatch ? altMatch[1] : 'صورة';
-                const placeholder =
-                  'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=800';
-                return `<img${before}src="${placeholder}" alt="${alt}"${after}>`;
+          // إزالة صور base64 الكبيرة فقط
+          cleanContent = cleanContent.replace(
+            base64Regex,
+            (match: string, before: string, src: string, after: string) => {
+              // حساب حجم الصورة base64 (تقريبي)
+              const base64Size = src.length * 0.75;
+              const sizeKB = base64Size / 1024;
+
+              // إذا كانت الصورة صغيرة (أقل من 100KB)، نحتفظ بها
+              if (sizeKB < 100) {
+                console.log(
+                  `[EditArticle] Keeping small base64 image (${sizeKB.toFixed(
+                    1
+                  )}KB)`
+                );
+                return match;
               }
-            );
-            console.log(
-              `[EditArticle] Content cleaned. Old size: ${article.content?.length}, New size: ${cleanContent.length}`
-            );
-          }
+
+              // إزالة الصور الكبيرة فقط
+              console.log(
+                `[EditArticle] Removing large base64 image (${sizeKB.toFixed(
+                  1
+                )}KB)`
+              );
+              return '';
+            }
+          );
 
           setContent(cleanContent);
           setExcerpt(article.excerpt || '');
