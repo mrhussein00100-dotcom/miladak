@@ -14,6 +14,14 @@ export const BIRTHDAY_SYSTEM_PROMPT = `أنت كاتب محتوى متخصص ف�
 - كل تهنئة يجب أن تكون مختلفة عن الأخرى
 - الحد الأدنى للمقال: 1500 كلمة
 
+⚠️ قواعد التنسيق RTL (إلزامية):
+- استخدم: <p class="text-right leading-relaxed mb-4" dir="rtl">
+- استخدم: <h2 class="text-2xl font-bold mt-8 mb-4 text-right" dir="rtl">
+- استخدم: <h3 class="text-xl font-semibold mt-6 mb-3 text-right" dir="rtl">
+- استخدم: <ul class="list-disc list-inside space-y-2 my-4 text-right" dir="rtl">
+- استخدم: <li class="text-right leading-relaxed">
+- استخدم: <blockquote class="text-right" dir="rtl">
+
 ⚠️ تحذير مهم جداً:
 - لا تكتب أي كلمات برمجية أو كودية في المحتوى المرئي
 - لا تكتب كلمات مثل: JSON, HTML, CSS, JavaScript, code, script
@@ -75,11 +83,12 @@ export function generateBirthdayPrompt(
 9. أفكار للديكور والزينة
 10. خاتمة دافئة ومؤثرة (2-3 فقرات)
 
-قواعد التنسيق:
-- استخدم <h2> للعناوين الرئيسية
-- استخدم <p> لكل فقرة
-- استخدم <ul> و <li> للقوائم
-- استخدم <blockquote> للتهاني المميزة
+⚠️ قواعد التنسيق RTL (إلزامية):
+- استخدم: <p class="text-right leading-relaxed mb-4" dir="rtl">
+- استخدم: <h2 class="text-2xl font-bold mt-8 mb-4 text-right" dir="rtl">
+- استخدم: <ul class="list-disc list-inside space-y-2 my-4 text-right" dir="rtl">
+- استخدم: <li class="text-right leading-relaxed">
+- استخدم: <blockquote class="text-right border-r-4 border-primary pr-4" dir="rtl">
 - لا تستخدم \\n - استخدم HTML فقط
 
 ⚠️ تحذير: لا تكتب أي كلمات برمجية أو تقنية في المحتوى!
@@ -87,7 +96,7 @@ export function generateBirthdayPrompt(
 أرجع JSON:
 {
   "title": "عنوان جذاب يتضمن العمر",
-  "content": "<p>المحتوى بHTML</p>",
+  "content": "<p class=\\"text-right leading-relaxed mb-4\\" dir=\\"rtl\\">المحتوى بHTML</p>",
   "metaDescription": "وصف 160 حرف",
   "keywords": ["عيد ميلاد", "تهنئة", "كلمة1"]
 }`;

@@ -14,6 +14,13 @@ export const ZODIAC_SYSTEM_PROMPT = `أنت خبير في الأبراج وال�
 - لا تكرر نفس المعلومة بصياغات مختلفة
 - الحد الأدنى للمقال: 1500 كلمة
 
+⚠️ قواعد التنسيق RTL (إلزامية):
+- استخدم: <p class="text-right leading-relaxed mb-4" dir="rtl">
+- استخدم: <h2 class="text-2xl font-bold mt-8 mb-4 text-right" dir="rtl">
+- استخدم: <h3 class="text-xl font-semibold mt-6 mb-3 text-right" dir="rtl">
+- استخدم: <ul class="list-disc list-inside space-y-2 my-4 text-right" dir="rtl">
+- استخدم: <li class="text-right leading-relaxed">
+
 ⚠️ تحذير مهم جداً:
 - لا تكتب أي كلمات برمجية أو كودية في المحتوى المرئي
 - لا تكتب كلمات مثل: JSON, HTML, CSS, JavaScript, code, script
@@ -121,11 +128,12 @@ export function generateZodiacPrompt(sign: string, topic?: string): string {
 9. نصائح للتعامل مع مواليد هذا البرج (10 نصائح)
 10. خاتمة شاملة (2-3 فقرات)
 
-قواعد التنسيق:
-- استخدم <h2> للعناوين الرئيسية
-- استخدم <p> لكل فقرة
-- استخدم <ul> و <li> للقوائم
-- استخدم <strong> للتأكيد
+⚠️ قواعد التنسيق RTL (إلزامية):
+- استخدم: <p class="text-right leading-relaxed mb-4" dir="rtl">
+- استخدم: <h2 class="text-2xl font-bold mt-8 mb-4 text-right" dir="rtl">
+- استخدم: <ul class="list-disc list-inside space-y-2 my-4 text-right" dir="rtl">
+- استخدم: <li class="text-right leading-relaxed">
+- استخدم: <strong>
 - لا تستخدم \\n - استخدم HTML فقط
 
 ⚠️ تحذير: لا تكتب أي كلمات برمجية أو تقنية في المحتوى!
@@ -133,7 +141,7 @@ export function generateZodiacPrompt(sign: string, topic?: string): string {
 أرجع JSON:
 {
   "title": "عنوان جذاب",
-  "content": "<p>المحتوى بHTML</p>",
+  "content": "<p class=\\"text-right leading-relaxed mb-4\\" dir=\\"rtl\\">المحتوى بHTML</p>",
   "metaDescription": "وصف 160 حرف",
   "keywords": ["كلمة1", "كلمة2"]
 }`;

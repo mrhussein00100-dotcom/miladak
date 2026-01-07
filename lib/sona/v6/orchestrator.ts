@@ -215,7 +215,9 @@ function parseAIResponse(response: string): {
     if (jsonMatch) {
       const parsed = JSON.parse(jsonMatch[0]);
       // تنظيف المحتوى من الكلمات الكودية
-      const cleanedContent = cleanCodeWords(parsed.content || cleaned);
+      let cleanedContent = cleanCodeWords(parsed.content || cleaned);
+      // تطبيق تنسيق RTL
+      cleanedContent = applyRTLFormatting(cleanedContent);
       return {
         content: cleanedContent,
         title: parsed.title,
@@ -227,7 +229,91 @@ function parseAIResponse(response: string): {
     // ليس JSON، استخدم كمحتوى مباشر
   }
 
-  return { content: cleanCodeWords(cleaned) };
+  let content = cleanCodeWords(cleaned);
+  content = applyRTLFormatting(content);
+  return { content };
+}
+
+/**
+ * تطبيق تنسيق RTL على المحتوى
+ */
+function applyRTLFormatting(content: string): string {
+  if (!content) return content;
+
+  let result = content;
+
+  // تنسيق الفقرات - إضافة RTL classes
+  result = result.replace(
+    /<p(?![^>]*class=)>/gi,
+    '<p class="text-right leading-relaxed mb-4" dir="rtl">'
+  );
+  result = result.replace(
+    /<p class="([^"]*)"(?![^>]*dir=)>/gi,
+    '<p class="$1 text-right" dir="rtl">'
+  );
+
+  // تنسيق العناوين h2
+  result = result.replace(
+    /<h2(?![^>]*class=)>/gi,
+    '<h2 class="text-2xl font-bold mt-8 mb-4 text-right" dir="rtl">'
+  );
+  result = result.replace(
+    /<h2 class="([^"]*)"(?![^>]*dir=)>/gi,
+    '<h2 class="$1 text-right" dir="rtl">'
+  );
+
+  // تنسيق العناوين h3
+  result = result.replace(
+    /<h3(?![^>]*class=)>/gi,
+    '<h3 class="text-xl font-semibold mt-6 mb-3 text-right" dir="rtl">'
+  );
+  result = result.replace(
+    /<h3 class="([^"]*)"(?![^>]*dir=)>/gi,
+    '<h3 class="$1 text-right" dir="rtl">'
+  );
+
+  // تنسيق القوائم ul
+  result = result.replace(
+    /<ul(?![^>]*class=)>/gi,
+    '<ul class="list-disc list-inside space-y-2 my-4 text-right" dir="rtl">'
+  );
+  result = result.replace(
+    /<ul class="([^"]*)"(?![^>]*dir=)>/gi,
+    '<ul class="$1 text-right" dir="rtl">'
+  );
+
+  // تنسيق القوائم ol
+  result = result.replace(
+    /<ol(?![^>]*class=)>/gi,
+    '<ol class="list-decimal list-inside space-y-2 my-4 text-right" dir="rtl">'
+  );
+  result = result.replace(
+    /<ol class="([^"]*)"(?![^>]*dir=)>/gi,
+    '<ol class="$1 text-right" dir="rtl">'
+  );
+
+  // تنسيق عناصر القوائم li
+  result = result.replace(
+    /<li(?![^>]*class=)>/gi,
+    '<li class="text-right leading-relaxed">'
+  );
+
+  // تنسيق blockquote
+  result = result.replace(
+    /<blockquote(?![^>]*class=)>/gi,
+    '<blockquote class="text-right border-r-4 border-primary pr-4 my-4" dir="rtl">'
+  );
+
+  // إضافة dir="rtl" للعناصر التي لا تحتويه
+  result = result.replace(
+    /<(p|h1|h2|h3|h4|ul|ol|blockquote)([^>]*)(?<!dir="rtl")>/gi,
+    (match, tag, attrs) => {
+      if (attrs.includes('dir=')) return match;
+      return `<${tag}${attrs} dir="rtl">`;
+    }
+  );
+
+  return result;
 }
 
 /**

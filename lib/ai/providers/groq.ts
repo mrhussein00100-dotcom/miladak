@@ -270,6 +270,9 @@ ${sectionsList}
     );
     console.log('⏱️ Groq: الوقت المستغرق:', Date.now() - startTime, 'ms');
 
+    // تطبيق تنسيق RTL على المحتوى
+    const formattedContent = applyRTLFormatting(result.content || '');
+
     // تحذير إذا كان عدد الكلمات أقل من الحد الأدنى المطلق
     // إعادة المحاولة إذا كان المحتوى قصيراً جداً
     if (actualWordCount < wordConfig.absoluteMin) {
@@ -309,7 +312,7 @@ ${sectionsList}
     }
 
     return {
-      content: result.content || '',
+      content: formattedContent,
       title: result.title || request.topic,
       metaTitle: result.metaTitle || result.title || request.topic,
       metaDescription:
@@ -413,6 +416,86 @@ export default {
   generateArticle,
   rewriteContent,
 };
+
+// دالة لتطبيق تنسيق RTL على المحتوى
+function applyRTLFormatting(content: string): string {
+  if (!content) return content;
+
+  let result = content;
+
+  // تنسيق الفقرات - إضافة RTL classes
+  result = result.replace(
+    /<p(?![^>]*class=)>/gi,
+    '<p class="text-right leading-relaxed mb-4" dir="rtl">'
+  );
+  result = result.replace(
+    /<p class="([^"]*)"(?![^>]*dir=)>/gi,
+    '<p class="$1 text-right" dir="rtl">'
+  );
+
+  // تنسيق العناوين h2
+  result = result.replace(
+    /<h2(?![^>]*class=)>/gi,
+    '<h2 class="text-2xl font-bold mt-8 mb-4 text-right" dir="rtl">'
+  );
+  result = result.replace(
+    /<h2 class="([^"]*)"(?![^>]*dir=)>/gi,
+    '<h2 class="$1 text-right" dir="rtl">'
+  );
+
+  // تنسيق العناوين h3
+  result = result.replace(
+    /<h3(?![^>]*class=)>/gi,
+    '<h3 class="text-xl font-semibold mt-6 mb-3 text-right" dir="rtl">'
+  );
+  result = result.replace(
+    /<h3 class="([^"]*)"(?![^>]*dir=)>/gi,
+    '<h3 class="$1 text-right" dir="rtl">'
+  );
+
+  // تنسيق القوائم ul
+  result = result.replace(
+    /<ul(?![^>]*class=)>/gi,
+    '<ul class="list-disc list-inside space-y-2 my-4 text-right" dir="rtl">'
+  );
+  result = result.replace(
+    /<ul class="([^"]*)"(?![^>]*dir=)>/gi,
+    '<ul class="$1 text-right" dir="rtl">'
+  );
+
+  // تنسيق القوائم ol
+  result = result.replace(
+    /<ol(?![^>]*class=)>/gi,
+    '<ol class="list-decimal list-inside space-y-2 my-4 text-right" dir="rtl">'
+  );
+  result = result.replace(
+    /<ol class="([^"]*)"(?![^>]*dir=)>/gi,
+    '<ol class="$1 text-right" dir="rtl">'
+  );
+
+  // تنسيق عناصر القوائم li
+  result = result.replace(
+    /<li(?![^>]*class=)>/gi,
+    '<li class="text-right leading-relaxed">'
+  );
+
+  // تنسيق blockquote
+  result = result.replace(
+    /<blockquote(?![^>]*class=)>/gi,
+    '<blockquote class="text-right border-r-4 border-primary pr-4 my-4" dir="rtl">'
+  );
+
+  // إضافة dir="rtl" للعناصر التي لا تحتويه
+  result = result.replace(
+    /<(p|h1|h2|h3|h4|ul|ol|blockquote)([^>]*)(?<!dir="rtl")>/gi,
+    (match, tag, attrs) => {
+      if (attrs.includes('dir=')) return match;
+      return `<${tag}${attrs} dir="rtl">`;
+    }
+  );
+
+  return result;
+}
 
 // دالة مساعدة لإعادة المحاولة مع توسيع المحتوى
 async function retryWithExtendedContent(

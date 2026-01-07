@@ -83,8 +83,16 @@ function getGeneralPrompt(topic: string): PromptResult {
 - محتوى فريد وغير مكرر
 - معلومات دقيقة ومفيدة
 - لغة عربية سليمة
-- تنسيق HTML نظيف
+- تنسيق HTML نظيف مع دعم RTL للعربية
 - الحد الأدنى للمقال: 1500 كلمة
+
+⚠️ قواعد التنسيق RTL (مهم جداً):
+- استخدم: <p class="text-right leading-relaxed mb-4" dir="rtl">
+- استخدم: <h2 class="text-2xl font-bold mt-8 mb-4 text-right" dir="rtl">
+- استخدم: <h3 class="text-xl font-semibold mt-6 mb-3 text-right" dir="rtl">
+- استخدم: <ul class="list-disc list-inside space-y-2 my-4 text-right" dir="rtl">
+- استخدم: <ol class="list-decimal list-inside space-y-2 my-4 text-right" dir="rtl">
+- استخدم: <li class="text-right leading-relaxed">
 
 ⚠️ تحذير مهم جداً:
 - لا تكتب أي كلمات برمجية أو كودية في المحتوى المرئي
@@ -102,10 +110,12 @@ function getGeneralPrompt(topic: string): PromptResult {
 4. أمثلة وتفاصيل عملية
 5. خاتمة شاملة (2-3 فقرات)
 
-قواعد التنسيق:
-- استخدم <h2> للعناوين
-- استخدم <p> للفقرات
-- استخدم <ul> و <li> للقوائم
+⚠️ قواعد التنسيق RTL (إلزامية):
+- استخدم: <p class="text-right leading-relaxed mb-4" dir="rtl">
+- استخدم: <h2 class="text-2xl font-bold mt-8 mb-4 text-right" dir="rtl">
+- استخدم: <h3 class="text-xl font-semibold mt-6 mb-3 text-right" dir="rtl">
+- استخدم: <ul class="list-disc list-inside space-y-2 my-4 text-right" dir="rtl">
+- استخدم: <li class="text-right leading-relaxed">
 - لا تستخدم \\n
 
 ⚠️ تحذير: لا تكتب أي كلمات برمجية أو تقنية في المحتوى!
@@ -113,7 +123,7 @@ function getGeneralPrompt(topic: string): PromptResult {
 أرجع JSON:
 {
   "title": "عنوان جذاب",
-  "content": "<p>المحتوى بHTML</p>",
+  "content": "<p class=\\"text-right leading-relaxed mb-4\\" dir=\\"rtl\\">المحتوى بHTML</p>",
   "metaDescription": "وصف 160 حرف",
   "keywords": ["كلمة1", "كلمة2"]
 }`,

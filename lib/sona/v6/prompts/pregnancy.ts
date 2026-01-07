@@ -14,6 +14,14 @@ export const PREGNANCY_SYSTEM_PROMPT = `أنت طبيب متخصص في صحة �
 - استخدم لغة واضحة ومفهومة للأم
 - الحد الأدنى للمقال: 1500 كلمة
 
+⚠️ قواعد التنسيق RTL (إلزامية):
+- استخدم: <p class="text-right leading-relaxed mb-4" dir="rtl">
+- استخدم: <h2 class="text-2xl font-bold mt-8 mb-4 text-right" dir="rtl">
+- استخدم: <h3 class="text-xl font-semibold mt-6 mb-3 text-right" dir="rtl">
+- استخدم: <ul class="list-disc list-inside space-y-2 my-4 text-right" dir="rtl">
+- استخدم: <li class="text-right leading-relaxed">
+- استخدم: <div class="warning bg-yellow-50 p-4 rounded text-right" dir="rtl">
+
 ⚠️ تحذير مهم جداً:
 - لا تكتب أي كلمات برمجية أو كودية في المحتوى المرئي
 - لا تكتب كلمات مثل: JSON, HTML, CSS, JavaScript, code, script
@@ -101,12 +109,13 @@ export function generatePregnancyWeekPrompt(week: number): string {
 10. أسئلة شائعة وإجاباتها
 11. خاتمة تشجيعية (2-3 فقرات)
 
-قواعد التنسيق:
-- استخدم <h2> للعناوين الرئيسية
-- استخدم <h3> للعناوين الفرعية
-- استخدم <p> لكل فقرة
-- استخدم <ul> و <li> للقوائم
-- استخدم <div class="warning"> للتنبيهات المهمة
+⚠️ قواعد التنسيق RTL (إلزامية):
+- استخدم: <p class="text-right leading-relaxed mb-4" dir="rtl">
+- استخدم: <h2 class="text-2xl font-bold mt-8 mb-4 text-right" dir="rtl">
+- استخدم: <h3 class="text-xl font-semibold mt-6 mb-3 text-right" dir="rtl">
+- استخدم: <ul class="list-disc list-inside space-y-2 my-4 text-right" dir="rtl">
+- استخدم: <li class="text-right leading-relaxed">
+- استخدم: <div class="warning bg-yellow-50 p-4 rounded text-right" dir="rtl">
 - لا تستخدم \\n - استخدم HTML فقط
 
 ⚠️ تحذير: لا تكتب أي كلمات برمجية أو تقنية في المحتوى!
@@ -114,7 +123,7 @@ export function generatePregnancyWeekPrompt(week: number): string {
 أرجع JSON:
 {
   "title": "الأسبوع ${week} من الحمل: دليل شامل",
-  "content": "<p>المحتوى بHTML</p>",
+  "content": "<p class=\\"text-right leading-relaxed mb-4\\" dir=\\"rtl\\">المحتوى بHTML</p>",
   "metaDescription": "وصف 160 حرف",
   "keywords": ["الأسبوع ${week}", "الحمل", "تطور الجنين"]
 }`;
