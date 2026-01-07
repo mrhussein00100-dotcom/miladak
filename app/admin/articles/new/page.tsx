@@ -37,6 +37,7 @@ export default function NewArticlePage() {
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [showAIPanel, setShowAIPanel] = useState(showAI);
   const [showImagePicker, setShowImagePicker] = useState(false);
@@ -308,7 +309,7 @@ export default function NewArticlePage() {
       return;
     }
 
-    setLoading(true);
+    setSaving(true);
     try {
       // تنسيق المحتوى قبل الحفظ إذا كان الخيار مفعلاً
       let finalContent = content;
@@ -348,7 +349,7 @@ export default function NewArticlePage() {
       console.error('Save error:', error);
       alert('حدث خطأ أثناء الحفظ');
     }
-    setLoading(false);
+    setSaving(false);
   };
 
   // عدد العناوين للمعاينة
@@ -835,6 +836,27 @@ export default function NewArticlePage() {
             )}
           </div>
         </div>
+      </div>
+
+      {/* زر الحفظ العائم */}
+      <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50">
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {saving ? (
+            <>
+              <RefreshCw className="w-5 h-5 animate-spin" />
+              <span className="font-medium">جاري الحفظ...</span>
+            </>
+          ) : (
+            <>
+              <Save className="w-5 h-5" />
+              <span className="font-medium">حفظ المقال</span>
+            </>
+          )}
+        </button>
       </div>
     </div>
   );
