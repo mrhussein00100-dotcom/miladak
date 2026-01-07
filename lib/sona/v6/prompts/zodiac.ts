@@ -14,12 +14,12 @@ export const ZODIAC_SYSTEM_PROMPT = `أنت خبير في الأبراج وال�
 - لا تكرر نفس المعلومة بصياغات مختلفة
 - الحد الأدنى للمقال: 1500 كلمة
 
-⚠️ قواعد التنسيق RTL (إلزامية):
-- استخدم: <p class="text-right leading-relaxed mb-4" dir="rtl">
-- استخدم: <h2 class="text-2xl font-bold mt-8 mb-4 text-right" dir="rtl">
-- استخدم: <h3 class="text-xl font-semibold mt-6 mb-3 text-right" dir="rtl">
-- استخدم: <ul class="list-disc list-inside space-y-2 my-4 text-right" dir="rtl">
-- استخدم: <li class="text-right leading-relaxed">
+⚠️ قواعد التنسيق RTL مع ضبط المحاذاة (إلزامية):
+- استخدم للفقرات: <p class="text-justify leading-relaxed mb-4" dir="rtl" style="text-align-last: right;">
+- استخدم للعناوين: <h2 class="text-2xl font-bold mt-8 mb-4 text-right" dir="rtl">
+- استخدم للعناوين الفرعية: <h3 class="text-xl font-semibold mt-6 mb-3 text-right" dir="rtl">
+- استخدم للقوائم: <ul class="list-disc list-inside space-y-2 my-4 text-right" dir="rtl">
+- استخدم لعناصر القوائم: <li class="text-justify leading-relaxed" style="text-align-last: right;">
 
 ⚠️ تحذير مهم جداً:
 - لا تكتب أي كلمات برمجية أو كودية في المحتوى المرئي
@@ -128,11 +128,11 @@ export function generateZodiacPrompt(sign: string, topic?: string): string {
 9. نصائح للتعامل مع مواليد هذا البرج (10 نصائح)
 10. خاتمة شاملة (2-3 فقرات)
 
-⚠️ قواعد التنسيق RTL (إلزامية):
-- استخدم: <p class="text-right leading-relaxed mb-4" dir="rtl">
-- استخدم: <h2 class="text-2xl font-bold mt-8 mb-4 text-right" dir="rtl">
-- استخدم: <ul class="list-disc list-inside space-y-2 my-4 text-right" dir="rtl">
-- استخدم: <li class="text-right leading-relaxed">
+⚠️ قواعد التنسيق RTL مع ضبط المحاذاة (إلزامية):
+- استخدم للفقرات: <p class="text-justify leading-relaxed mb-4" dir="rtl" style="text-align-last: right;">
+- استخدم للعناوين: <h2 class="text-2xl font-bold mt-8 mb-4 text-right" dir="rtl">
+- استخدم للقوائم: <ul class="list-disc list-inside space-y-2 my-4 text-right" dir="rtl">
+- استخدم لعناصر القوائم: <li class="text-justify leading-relaxed" style="text-align-last: right;">
 - استخدم: <strong>
 - لا تستخدم \\n - استخدم HTML فقط
 
@@ -141,7 +141,7 @@ export function generateZodiacPrompt(sign: string, topic?: string): string {
 أرجع JSON:
 {
   "title": "عنوان جذاب",
-  "content": "<p class=\\"text-right leading-relaxed mb-4\\" dir=\\"rtl\\">المحتوى بHTML</p>",
+  "content": "<p class=\\"text-justify leading-relaxed mb-4\\" dir=\\"rtl\\" style=\\"text-align-last: right;\\">المحتوى بHTML</p>",
   "metaDescription": "وصف 160 حرف",
   "keywords": ["كلمة1", "كلمة2"]
 }`;

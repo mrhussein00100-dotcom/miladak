@@ -14,13 +14,13 @@ export const BIRTHDAY_SYSTEM_PROMPT = `أنت كاتب محتوى متخصص ف�
 - كل تهنئة يجب أن تكون مختلفة عن الأخرى
 - الحد الأدنى للمقال: 1500 كلمة
 
-⚠️ قواعد التنسيق RTL (إلزامية):
-- استخدم: <p class="text-right leading-relaxed mb-4" dir="rtl">
-- استخدم: <h2 class="text-2xl font-bold mt-8 mb-4 text-right" dir="rtl">
-- استخدم: <h3 class="text-xl font-semibold mt-6 mb-3 text-right" dir="rtl">
-- استخدم: <ul class="list-disc list-inside space-y-2 my-4 text-right" dir="rtl">
-- استخدم: <li class="text-right leading-relaxed">
-- استخدم: <blockquote class="text-right" dir="rtl">
+⚠️ قواعد التنسيق RTL مع ضبط المحاذاة (إلزامية):
+- استخدم للفقرات: <p class="text-justify leading-relaxed mb-4" dir="rtl" style="text-align-last: right;">
+- استخدم للعناوين: <h2 class="text-2xl font-bold mt-8 mb-4 text-right" dir="rtl">
+- استخدم للعناوين الفرعية: <h3 class="text-xl font-semibold mt-6 mb-3 text-right" dir="rtl">
+- استخدم للقوائم: <ul class="list-disc list-inside space-y-2 my-4 text-right" dir="rtl">
+- استخدم لعناصر القوائم: <li class="text-justify leading-relaxed" style="text-align-last: right;">
+- استخدم للاقتباسات: <blockquote class="text-justify border-r-4 border-primary pr-4" dir="rtl" style="text-align-last: right;">
 
 ⚠️ تحذير مهم جداً:
 - لا تكتب أي كلمات برمجية أو كودية في المحتوى المرئي
@@ -83,12 +83,12 @@ export function generateBirthdayPrompt(
 9. أفكار للديكور والزينة
 10. خاتمة دافئة ومؤثرة (2-3 فقرات)
 
-⚠️ قواعد التنسيق RTL (إلزامية):
-- استخدم: <p class="text-right leading-relaxed mb-4" dir="rtl">
-- استخدم: <h2 class="text-2xl font-bold mt-8 mb-4 text-right" dir="rtl">
-- استخدم: <ul class="list-disc list-inside space-y-2 my-4 text-right" dir="rtl">
-- استخدم: <li class="text-right leading-relaxed">
-- استخدم: <blockquote class="text-right border-r-4 border-primary pr-4" dir="rtl">
+⚠️ قواعد التنسيق RTL مع ضبط المحاذاة (إلزامية):
+- استخدم للفقرات: <p class="text-justify leading-relaxed mb-4" dir="rtl" style="text-align-last: right;">
+- استخدم للعناوين: <h2 class="text-2xl font-bold mt-8 mb-4 text-right" dir="rtl">
+- استخدم للقوائم: <ul class="list-disc list-inside space-y-2 my-4 text-right" dir="rtl">
+- استخدم لعناصر القوائم: <li class="text-justify leading-relaxed" style="text-align-last: right;">
+- استخدم للاقتباسات: <blockquote class="text-justify border-r-4 border-primary pr-4" dir="rtl" style="text-align-last: right;">
 - لا تستخدم \\n - استخدم HTML فقط
 
 ⚠️ تحذير: لا تكتب أي كلمات برمجية أو تقنية في المحتوى!
@@ -96,7 +96,7 @@ export function generateBirthdayPrompt(
 أرجع JSON:
 {
   "title": "عنوان جذاب يتضمن العمر",
-  "content": "<p class=\\"text-right leading-relaxed mb-4\\" dir=\\"rtl\\">المحتوى بHTML</p>",
+  "content": "<p class=\\"text-justify leading-relaxed mb-4\\" dir=\\"rtl\\" style=\\"text-align-last: right;\\">المحتوى بHTML</p>",
   "metaDescription": "وصف 160 حرف",
   "keywords": ["عيد ميلاد", "تهنئة", "كلمة1"]
 }`;

@@ -235,24 +235,24 @@ function parseAIResponse(response: string): {
 }
 
 /**
- * تطبيق تنسيق RTL على المحتوى
+ * تطبيق تنسيق RTL على المحتوى مع ضبط المحاذاة (justify)
  */
 function applyRTLFormatting(content: string): string {
   if (!content) return content;
 
   let result = content;
 
-  // تنسيق الفقرات - إضافة RTL classes
+  // تنسيق الفقرات - إضافة RTL classes مع text-justify لضبط المحاذاة
   result = result.replace(
     /<p(?![^>]*class=)>/gi,
-    '<p class="text-right leading-relaxed mb-4" dir="rtl">'
+    '<p class="text-justify leading-relaxed mb-4" dir="rtl" style="text-align-last: right;">'
   );
   result = result.replace(
     /<p class="([^"]*)"(?![^>]*dir=)>/gi,
-    '<p class="$1 text-right" dir="rtl">'
+    '<p class="$1 text-justify" dir="rtl" style="text-align-last: right;">'
   );
 
-  // تنسيق العناوين h2
+  // تنسيق العناوين h2 - تبقى text-right
   result = result.replace(
     /<h2(?![^>]*class=)>/gi,
     '<h2 class="text-2xl font-bold mt-8 mb-4 text-right" dir="rtl">'
@@ -262,7 +262,7 @@ function applyRTLFormatting(content: string): string {
     '<h2 class="$1 text-right" dir="rtl">'
   );
 
-  // تنسيق العناوين h3
+  // تنسيق العناوين h3 - تبقى text-right
   result = result.replace(
     /<h3(?![^>]*class=)>/gi,
     '<h3 class="text-xl font-semibold mt-6 mb-3 text-right" dir="rtl">'
@@ -272,7 +272,7 @@ function applyRTLFormatting(content: string): string {
     '<h3 class="$1 text-right" dir="rtl">'
   );
 
-  // تنسيق القوائم ul
+  // تنسيق القوائم ul - text-justify للنص
   result = result.replace(
     /<ul(?![^>]*class=)>/gi,
     '<ul class="list-disc list-inside space-y-2 my-4 text-right" dir="rtl">'
@@ -292,16 +292,16 @@ function applyRTLFormatting(content: string): string {
     '<ol class="$1 text-right" dir="rtl">'
   );
 
-  // تنسيق عناصر القوائم li
+  // تنسيق عناصر القوائم li - text-justify
   result = result.replace(
     /<li(?![^>]*class=)>/gi,
-    '<li class="text-right leading-relaxed">'
+    '<li class="text-justify leading-relaxed" style="text-align-last: right;">'
   );
 
-  // تنسيق blockquote
+  // تنسيق blockquote - text-justify
   result = result.replace(
     /<blockquote(?![^>]*class=)>/gi,
-    '<blockquote class="text-right border-r-4 border-primary pr-4 my-4" dir="rtl">'
+    '<blockquote class="text-justify border-r-4 border-primary pr-4 my-4" dir="rtl" style="text-align-last: right;">'
   );
 
   // إضافة dir="rtl" للعناصر التي لا تحتويه
