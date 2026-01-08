@@ -13,6 +13,31 @@ import { execute, query, queryOne } from '@/lib/db/database';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
+// دالة موحدة لإصلاح ترميز النص العربي
+function fixArabicEncoding(text: string | null | undefined): string {
+  if (!text) return '';
+
+  // إذا كان النص يحتوي على أحرف عربية صحيحة، أعده كما هو
+  if (/[\u0600-\u06FF]/.test(text)) {
+    return text;
+  }
+
+  // إذا كان النص يحتوي على علامات استفهام متتالية، حاول إصلاحه
+  if (text.includes('??????') || text.includes('????')) {
+    try {
+      // محاولة فك الترميز من latin1 إلى utf8
+      const decoded = Buffer.from(text, 'latin1').toString('utf8');
+      if (/[\u0600-\u06FF]/.test(decoded)) {
+        return decoded;
+      }
+    } catch {
+      // تجاهل الخطأ
+    }
+  }
+
+  return text;
+}
+
 interface ArticlePageProps {
   params: Promise<{ slug: string }>;
 }
@@ -109,24 +134,26 @@ export async function generateMetadata({
   }
 
   const featuredImage = article.featured_image || article.image;
+  const cleanTitle = fixArabicEncoding(article.title);
+  const cleanExcerpt = fixArabicEncoding(article.excerpt);
 
   return {
-    title: `${article.title} - ميلادك`,
-    description: article.excerpt,
+    title: `${cleanTitle} - ميلادك`,
+    description: cleanExcerpt,
     keywords: article.meta_keywords || '',
     openGraph: {
-      title: article.title,
-      description: article.excerpt || '',
+      title: cleanTitle,
+      description: cleanExcerpt,
       type: 'article',
       publishedTime: article.created_at,
       modifiedTime: article.updated_at,
       authors: [article.author || 'فريق ميلادك'],
-      images: featuredImage ? [{ url: featuredImage, alt: article.title }] : [],
+      images: featuredImage ? [{ url: featuredImage, alt: cleanTitle }] : [],
     },
     twitter: {
       card: 'summary_large_image',
-      title: article.title,
-      description: article.excerpt || '',
+      title: cleanTitle,
+      description: cleanExcerpt,
       images: featuredImage ? [featuredImage] : [],
     },
   };
@@ -137,17 +164,6 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   // Decode the slug in case it's URL encoded (Arabic characters)
   const decodedSlug = decodeURIComponent(slug);
   const article = await getArticle(decodedSlug);
-
-  // Server-side debug logging
-  console.log('=== SERVER DEBUG ===');
-  console.log('Slug:', decodedSlug);
-  console.log('Article found:', !!article);
-  if (article) {
-    console.log('Article ID:', article.id);
-    console.log('Article featured_image:', article.featured_image);
-    console.log('Article image:', article.image);
-  }
-  console.log('====================');
 
   if (!article) {
     notFound();
@@ -161,8 +177,8 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
   // Generate Article JSON-LD schema
   const articleSchema = generateArticleSchema({
-    title: article.title,
-    description: article.excerpt || '',
+    title: fixArabicEncoding(article.title),
+    description: fixArabicEncoding(article.excerpt),
     slug: article.slug,
     image: article.featured_image || article.image,
     datePublished: article.created_at,
@@ -177,7 +193,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   const breadcrumbSchema = generateBreadcrumbSchema([
     { name: 'الرئيسية', url: 'https://miladak.com' },
     { name: 'المقالات', url: 'https://miladak.com/articles' },
-    { name: article.title },
+    { name: fixArabicEncoding(article.title) },
   ]);
 
   return (
@@ -186,16 +202,20 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       <ArticlePageClient
         article={{
           ...article,
+          title: fixArabicEncoding(article.title),
+          content: fixArabicEncoding(article.content),
+          excerpt: fixArabicEncoding(article.excerpt),
           image: article.image ?? undefined,
           featured_image: article.featured_image ?? undefined,
           category_id: article.category_id ?? 0,
           category_name: article.category_name ?? 'عام',
+          author: article.author || 'فريق ميلادك',
         }}
         relatedArticles={relatedArticlesResult.map((a) => ({
           id: a.id,
-          title: a.title,
+          title: fixArabicEncoding(a.title),
           slug: a.slug,
-          excerpt: a.excerpt,
+          excerpt: fixArabicEncoding(a.excerpt),
           image: (a.featured_image || a.image) ?? undefined,
           read_time: a.read_time,
         }))}

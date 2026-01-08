@@ -89,6 +89,11 @@ class PostgreSQLManager {
         connectionTimeoutMillis: 10000,
       });
 
+      // ضبط ترميز UTF-8 للنصوص العربية
+      this.pool.on('connect', (client) => {
+        client.query("SET client_encoding = 'UTF8'");
+      });
+
       // اختبار الاتصال
       const client = await this.pool.connect();
       await client.query('SELECT NOW()');

@@ -205,6 +205,8 @@ export default function RootLayout({
       className={cairo.variable}
     >
       <head>
+        {/* ضبط ترميز UTF-8 للنصوص العربية */}
+        <meta charSet="utf-8" />
         {/* Script لمنع CLS - يطبق الثيم قبل تحميل الصفحة */}
         <script
           dangerouslySetInnerHTML={{
