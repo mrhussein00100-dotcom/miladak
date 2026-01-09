@@ -652,6 +652,63 @@ export function ArticlesPageClient({
           ومفيد.
         </p>
       </motion.section>
+
+      {/* قسم CTA - روابط مفيدة */}
+      <motion.section
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
+        className="bg-gradient-to-r from-purple-600 via-pink-600 to-red-500 rounded-3xl p-8 md:p-12 shadow-2xl"
+      >
+        <div className="text-center max-w-3xl mx-auto">
+          <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
+            🎂 اكتشف المزيد من أدوات ميلادك
+          </h2>
+          <p className="text-white/90 text-lg mb-8">
+            استخدم أدواتنا المتقدمة لحساب عمرك، معرفة برجك، واكتشاف معلومات مثيرة عن يوم ميلادك
+          </p>
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <Link href="/" className="group">
+              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 hover:bg-white/20 transition-all duration-300 border border-white/20">
+                <div className="text-3xl mb-2">🧮</div>
+                <h3 className="text-white font-semibold text-sm">حاسبة العمر</h3>
+              </div>
+            </Link>
+            <Link href="/tools" className="group">
+              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 hover:bg-white/20 transition-all duration-300 border border-white/20">
+                <div className="text-3xl mb-2">🛠️</div>
+                <h3 className="text-white font-semibold text-sm">جميع الأدوات</h3>
+              </div>
+            </Link>
+            <Link href="/historical-events" className="group">
+              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 hover:bg-white/20 transition-all duration-300 border border-white/20">
+                <div className="text-3xl mb-2">📅</div>
+                <h3 className="text-white font-semibold text-sm">أحداث تاريخية</h3>
+              </div>
+            </Link>
+            <Link href="/celebrities" className="group">
+              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 hover:bg-white/20 transition-all duration-300 border border-white/20">
+                <div className="text-3xl mb-2">⭐</div>
+                <h3 className="text-white font-semibold text-sm">مشاهير مواليدك</h3>
+              </div>
+            </Link>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link href="/">
+              <button className="px-8 py-3 bg-white text-purple-700 font-bold rounded-xl hover:bg-gray-100 hover:scale-105 transition-all duration-300 shadow-lg text-lg min-w-[200px]">
+                احسب عمرك الآن
+              </button>
+            </Link>
+            <Link href="/categories">
+              <button className="px-8 py-3 bg-transparent border-2 border-white text-white font-bold rounded-xl hover:bg-white hover:text-purple-700 hover:scale-105 transition-all duration-300 text-lg min-w-[200px]">
+                تصفح التصنيفات
+              </button>
+            </Link>
+          </div>
+        </div>
+      </motion.section>
     </div>
   );
 }
