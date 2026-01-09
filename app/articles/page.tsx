@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import { query } from '@/lib/db/database';
 import { ArticlesPageClient } from '@/components/ArticlesPageClient';
 import { StructuredData } from '@/components/SEO/StructuredData';
-import { InContentAd, FooterAd } from '@/components/AdSense/AdSenseSlot';
+import { FooterAd } from '@/components/AdSense/AdSenseSlot';
 import type { Article, ArticleCategory } from '@/types';
 
 // جعل الصفحة ديناميكية لجلب البيانات في كل طلب
@@ -222,72 +222,6 @@ export default async function ArticlesPage() {
             categories={categories}
             totalArticles={totalArticles}
           />
-
-          {/* إعلان بين المقالات والمحتوى */}
-          <InContentAd className="my-8" />
-
-          {/* SEO Content Section */}
-          <section className="mt-20 glass rounded-3xl p-8 md:p-12">
-            <h2 className="text-3xl font-bold text-center mb-8 gradient-text">
-              محتوى صحي موثوق
-            </h2>
-
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-              <div className="text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-red-400 to-rose-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <span className="text-3xl">❤️</span>
-                </div>
-                <h3 className="text-xl font-bold mb-2">الصحة والعافية</h3>
-                <p className="text-gray-600 dark:text-gray-400">
-                  مقالات شاملة عن الصحة الجسدية والنفسية وكيفية الحفاظ عليها
-                </p>
-              </div>
-
-              <div className="text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <span className="text-3xl">🥗</span>
-                </div>
-                <h3 className="text-xl font-bold mb-2">التغذية السليمة</h3>
-                <p className="text-gray-600 dark:text-gray-400">
-                  نصائح غذائية علمية لكل الأعمار والاحتياجات الصحية
-                </p>
-              </div>
-
-              <div className="text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-400 to-cyan-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <span className="text-3xl">🏃</span>
-                </div>
-                <h3 className="text-xl font-bold mb-2">اللياقة البدنية</h3>
-                <p className="text-gray-600 dark:text-gray-400">
-                  تمارين ونصائح للحفاظ على لياقتك في كل مرحلة عمرية
-                </p>
-              </div>
-            </div>
-
-            <div className="prose prose-lg dark:prose-invert max-w-none">
-              <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-4">
-                لماذا تقرأ مقالات ميلادك؟
-              </h3>
-              <p className="text-gray-600 dark:text-gray-300 leading-relaxed mb-6">
-                نحرص في ميلادك على تقديم محتوى صحي موثوق ومبني على أسس علمية.
-                مقالاتنا تغطي مواضيع متنوعة تشمل الصحة العامة، التغذية السليمة،
-                اللياقة البدنية، الصحة النفسية، ونصائح للحياة الصحية في كل مرحلة
-                عمرية.
-              </p>
-
-              <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-4">
-                مواضيع متنوعة تهمك
-              </h3>
-              <ul className="list-disc list-inside text-gray-600 dark:text-gray-300 space-y-2">
-                <li>كيفية حساب العمر بدقة وأهميته الصحية</li>
-                <li>نصائح للحفاظ على الوزن المثالي</li>
-                <li>أهمية التغذية السليمة في كل مرحلة عمرية</li>
-                <li>تمارين مناسبة لكل فئة عمرية</li>
-                <li>الصحة النفسية وعلاقتها بالعمر</li>
-                <li>نصائح للأمهات الحوامل والأطفال</li>
-              </ul>
-            </div>
-          </section>
 
           {/* إعلان أسفل الصفحة */}
           <FooterAd className="mt-8" />

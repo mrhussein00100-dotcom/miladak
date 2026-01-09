@@ -653,42 +653,45 @@ export function ArticlesPageClient({
         </p>
       </motion.section>
 
-      {/* قسم CTA - روابط مفيدة */}
+      {/* قسم CTA - روابط مفيدة - محسن للوضع الليلي */}
       <motion.section
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
-        className="bg-gradient-to-r from-purple-600 via-pink-600 to-red-500 rounded-3xl p-8 md:p-12 shadow-2xl"
+        className="bg-gradient-to-r from-purple-700 via-indigo-600 to-blue-700 dark:from-purple-900 dark:via-indigo-800 dark:to-blue-900 rounded-3xl p-8 md:p-12 shadow-2xl border border-purple-500/20 dark:border-purple-400/10"
       >
         <div className="text-center max-w-3xl mx-auto">
+          <div className="inline-block px-4 py-1.5 bg-white/20 dark:bg-white/10 rounded-full text-white/90 text-sm font-medium mb-4">
+            ميلادك
+          </div>
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
-            🎂 اكتشف المزيد من أدوات ميلادك
+            اكتشف المزيد من أدوات ميلادك
           </h2>
-          <p className="text-white/90 text-lg mb-8">
+          <p className="text-white/80 dark:text-white/70 text-lg mb-8">
             استخدم أدواتنا المتقدمة لحساب عمرك، معرفة برجك، واكتشاف معلومات مثيرة عن يوم ميلادك
           </p>
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             <Link href="/" className="group">
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 hover:bg-white/20 transition-all duration-300 border border-white/20">
+              <div className="bg-white/15 dark:bg-white/10 backdrop-blur-sm rounded-2xl p-4 hover:bg-white/25 dark:hover:bg-white/15 transition-all duration-300 border border-white/20 dark:border-white/10">
                 <div className="text-3xl mb-2">🧮</div>
                 <h3 className="text-white font-semibold text-sm">حاسبة العمر</h3>
               </div>
             </Link>
             <Link href="/tools" className="group">
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 hover:bg-white/20 transition-all duration-300 border border-white/20">
+              <div className="bg-white/15 dark:bg-white/10 backdrop-blur-sm rounded-2xl p-4 hover:bg-white/25 dark:hover:bg-white/15 transition-all duration-300 border border-white/20 dark:border-white/10">
                 <div className="text-3xl mb-2">🛠️</div>
                 <h3 className="text-white font-semibold text-sm">جميع الأدوات</h3>
               </div>
             </Link>
             <Link href="/historical-events" className="group">
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 hover:bg-white/20 transition-all duration-300 border border-white/20">
+              <div className="bg-white/15 dark:bg-white/10 backdrop-blur-sm rounded-2xl p-4 hover:bg-white/25 dark:hover:bg-white/15 transition-all duration-300 border border-white/20 dark:border-white/10">
                 <div className="text-3xl mb-2">📅</div>
                 <h3 className="text-white font-semibold text-sm">أحداث تاريخية</h3>
               </div>
             </Link>
             <Link href="/celebrities" className="group">
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 hover:bg-white/20 transition-all duration-300 border border-white/20">
+              <div className="bg-white/15 dark:bg-white/10 backdrop-blur-sm rounded-2xl p-4 hover:bg-white/25 dark:hover:bg-white/15 transition-all duration-300 border border-white/20 dark:border-white/10">
                 <div className="text-3xl mb-2">⭐</div>
                 <h3 className="text-white font-semibold text-sm">مشاهير مواليدك</h3>
               </div>
@@ -697,12 +700,12 @@ export function ArticlesPageClient({
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/">
-              <button className="px-8 py-3 bg-white text-purple-700 font-bold rounded-xl hover:bg-gray-100 hover:scale-105 transition-all duration-300 shadow-lg text-lg min-w-[200px]">
+              <button className="px-8 py-3 bg-white dark:bg-gray-100 text-purple-700 dark:text-purple-800 font-bold rounded-xl hover:bg-gray-100 dark:hover:bg-white hover:scale-105 transition-all duration-300 shadow-lg text-lg min-w-[200px]">
                 احسب عمرك الآن
               </button>
             </Link>
             <Link href="/categories">
-              <button className="px-8 py-3 bg-transparent border-2 border-white text-white font-bold rounded-xl hover:bg-white hover:text-purple-700 hover:scale-105 transition-all duration-300 text-lg min-w-[200px]">
+              <button className="px-8 py-3 bg-white/10 dark:bg-white/5 border-2 border-white/50 dark:border-white/30 text-white font-bold rounded-xl hover:bg-white hover:text-purple-700 dark:hover:bg-white dark:hover:text-purple-800 hover:scale-105 transition-all duration-300 text-lg min-w-[200px]">
                 تصفح التصنيفات
               </button>
             </Link>
