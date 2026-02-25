@@ -1,0 +1,110 @@
+{
+  "category": "birthday",
+  "templates": [
+    {
+      "id": "intro_bday_1",
+      "template": "عيد الميلاد مناسبة خاصة تستحق الاحتفال! في هذا المقال، نقدم لكم كل ما تحتاجون معرفته عن {topic}.",
+      "variables": ["topic"],
+      "tone": "celebratory",
+      "length": "short"
+    },
+    {
+      "id": "intro_bday_2",
+      "template": "هل تبحثون عن أفكار مميزة لـ{topic}؟ جمعنا لكم أجمل الأفكار والنصائح لجعل هذه المناسبة لا تُنسى!",
+      "variables": ["topic"],
+      "tone": "exciting",
+      "length": "short"
+    },
+    {
+      "id": "intro_bday_3",
+      "template": "الاحتفال بعيد الميلاد تقليد جميل يجمع الأحباء. اكتشفوا معنا أسرار {topic} وكيف تجعلونه مميزاً.",
+      "variables": ["topic"],
+      "tone": "warm",
+      "length": "medium"
+    },
+    {
+      "id": "intro_bday_4",
+      "template": "كل عام وأنتم بخير! في هذا المقال الخاص، نتحدث عن {topic} ونقدم لكم أفكاراً إبداعية للاحتفال.",
+      "variables": ["topic"],
+      "tone": "celebratory",
+      "length": "short"
+    },
+    {
+      "id": "intro_bday_5",
+      "template": "عيد الميلاد ليس مجرد يوم عادي، إنه احتفال بالحياة! تعرفوا معنا على {topic} واجعلوا هذا اليوم استثنائياً.",
+      "variables": ["topic"],
+      "tone": "inspiring",
+      "length": "medium"
+    },
+    {
+      "id": "intro_bday_6",
+      "template": "هل تريدون جعل {topic} مناسبة لا تُنسى؟ نقدم لكم دليلاً شاملاً مليئاً بالأفكار والإلهام!",
+      "variables": ["topic"],
+      "tone": "exciting",
+      "length": "short"
+    },
+    {
+      "id": "intro_bday_7",
+      "template": "من أجمل اللحظات في الحياة الاحتفال بأعياد الميلاد. اكتشفوا كيف تجعلون {topic} تجربة فريدة.",
+      "variables": ["topic"],
+      "tone": "warm",
+      "length": "short"
+    },
+    {
+      "id": "intro_bday_8",
+      "template": "أعياد الميلاد مناسبات تستحق التخطيط الجيد. في هذا المقال، نساعدكم في {topic} بأفكار عملية ومبتكرة.",
+      "variables": ["topic"],
+      "tone": "practical",
+      "length": "medium"
+    },
+    {
+      "id": "intro_bday_9",
+      "template": "نحتفل معكم بهذه المناسبة السعيدة! إليكم كل ما تحتاجون معرفته عن {topic} لإسعاد من تحبون.",
+      "variables": ["topic"],
+      "tone": "celebratory",
+      "length": "short"
+    },
+    {
+      "id": "intro_bday_10",
+      "template": "الذكريات الجميلة تُصنع في أعياد الميلاد. دعونا نساعدكم في {topic} لخلق لحظات لا تُنسى!",
+      "variables": ["topic"],
+      "tone": "warm",
+      "length": "short"
+    },
+    {
+      "id": "intro_bday_11",
+      "template": "هل تخططون لـ{topic}؟ أنتم في المكان الصحيح! نقدم لكم أفضل الأفكار والنصائح للاحتفال المثالي.",
+      "variables": ["topic"],
+      "tone": "helpful",
+      "length": "short"
+    },
+    {
+      "id": "intro_bday_12",
+      "template": "عيد الميلاد فرصة للتعبير عن الحب والتقدير. اكتشفوا معنا كيف تجعلون {topic} مميزاً ومؤثراً.",
+      "variables": ["topic"],
+      "tone": "emotional",
+      "length": "medium"
+    },
+    {
+      "id": "intro_bday_13",
+      "template": "من موقع ميلادك، نقدم لكم دليلاً متكاملاً عن {topic}. اجعلوا كل عيد ميلاد ذكرى جميلة!",
+      "variables": ["topic"],
+      "tone": "friendly",
+      "length": "short"
+    },
+    {
+      "id": "intro_bday_14",
+      "template": "الاحتفال بعيد الميلاد فن له أصوله! تعلموا معنا أسرار {topic} واصنعوا لحظات سعيدة.",
+      "variables": ["topic"],
+      "tone": "educational",
+      "length": "short"
+    },
+    {
+      "id": "intro_bday_15",
+      "template": "كل سنة وأنتم طيبون! في هذا المقال الخاص بـ{topic}، نشارككم أجمل الأفكار للاحتفال.",
+      "variables": ["topic"],
+      "tone": "celebratory",
+      "length": "short"
+    }
+  ]
+}

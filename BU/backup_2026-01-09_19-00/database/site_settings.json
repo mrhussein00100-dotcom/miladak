@@ -1,0 +1,178 @@
+[
+  {
+    "id": 133,
+    "key": "siteName",
+    "value": "عيد ميلادي",
+    "description": null,
+    "created_at": "2025-12-17T10:38:10.286Z",
+    "updated_at": "2025-12-17T10:38:10.286Z"
+  },
+  {
+    "id": 134,
+    "key": "siteDescription",
+    "value": "احسب عمرك بالتفصيل واعرف معلومات مثيرة عن حياتك",
+    "description": null,
+    "created_at": "2025-12-17T10:38:10.717Z",
+    "updated_at": "2025-12-17T10:38:10.717Z"
+  },
+  {
+    "id": 135,
+    "key": "siteUrl",
+    "value": "https://eidmwlady.com",
+    "description": null,
+    "created_at": "2025-12-17T10:38:11.890Z",
+    "updated_at": "2025-12-17T10:38:11.890Z"
+  },
+  {
+    "id": 136,
+    "key": "email",
+    "value": "info@eid-mwlady.com",
+    "description": null,
+    "created_at": "2025-12-17T10:38:12.076Z",
+    "updated_at": "2025-12-17T10:38:12.076Z"
+  },
+  {
+    "id": 137,
+    "key": "phone",
+    "value": "+966 50 000 0000",
+    "description": null,
+    "created_at": "2025-12-17T10:38:12.275Z",
+    "updated_at": "2025-12-17T10:38:12.275Z"
+  },
+  {
+    "id": 138,
+    "key": "address",
+    "value": "الرياض، المملكة العربية السعودية",
+    "description": null,
+    "created_at": "2025-12-17T10:38:12.681Z",
+    "updated_at": "2025-12-17T10:38:12.681Z"
+  },
+  {
+    "id": 139,
+    "key": "facebook",
+    "value": "https://facebook.com/eidmwlady",
+    "description": null,
+    "created_at": "2025-12-17T10:38:12.856Z",
+    "updated_at": "2025-12-17T10:38:12.856Z"
+  },
+  {
+    "id": 140,
+    "key": "twitter",
+    "value": "https://twitter.com/eidmwlady",
+    "description": null,
+    "created_at": "2025-12-17T10:38:13.220Z",
+    "updated_at": "2025-12-17T10:38:13.220Z"
+  },
+  {
+    "id": 141,
+    "key": "instagram",
+    "value": "https://instagram.com/eidmwlady",
+    "description": null,
+    "created_at": "2025-12-17T10:38:13.455Z",
+    "updated_at": "2025-12-17T10:38:13.455Z"
+  },
+  {
+    "id": 142,
+    "key": "youtube",
+    "value": "https://youtube.com/@eidmwlady",
+    "description": null,
+    "created_at": "2025-12-17T10:38:13.738Z",
+    "updated_at": "2025-12-17T10:38:13.738Z"
+  },
+  {
+    "id": 143,
+    "key": "metaTitle",
+    "value": "عيد ميلادي - احسب عمرك بالتفصيل",
+    "description": null,
+    "created_at": "2025-12-17T10:38:15.562Z",
+    "updated_at": "2025-12-17T10:38:15.562Z"
+  },
+  {
+    "id": 144,
+    "key": "metaDescription",
+    "value": "احسب عمرك بالسنوات والأشهر والأيام والساعات والدقائق والثواني. اكتشف معلومات مثيرة عن حياتك",
+    "description": null,
+    "created_at": "2025-12-17T10:38:16.050Z",
+    "updated_at": "2025-12-17T10:38:16.050Z"
+  },
+  {
+    "id": 145,
+    "key": "metaKeywords",
+    "value": "حساب العمر، عيد ميلاد، عمري، احسب عمرك، تاريخ الميلاد",
+    "description": null,
+    "created_at": "2025-12-17T10:38:16.805Z",
+    "updated_at": "2025-12-17T10:38:16.805Z"
+  },
+  {
+    "id": 146,
+    "key": "googleAnalytics",
+    "value": "G-XXXXXXXXXX",
+    "description": null,
+    "created_at": "2025-12-17T10:38:17.013Z",
+    "updated_at": "2025-12-17T10:38:17.013Z"
+  },
+  {
+    "id": 147,
+    "key": "facebookPixel",
+    "value": "",
+    "description": null,
+    "created_at": "2025-12-17T10:38:17.581Z",
+    "updated_at": "2025-12-17T10:38:17.581Z"
+  },
+  {
+    "id": 148,
+    "key": "maintenanceMode",
+    "value": "false",
+    "description": null,
+    "created_at": "2025-12-17T10:38:18.897Z",
+    "updated_at": "2025-12-17T10:38:18.897Z"
+  },
+  {
+    "id": 149,
+    "key": "content_footer",
+    "value": "{\"about\":{\"title\":\"ميلادك\",\"description\":\"منصة ذكية لحساب العمر بدقة واكتشاف إحصاءات ممتعة عن حياتك. اكتشف كم عشت من الأيام والساعات والدقائق!\"},\"quickLinks\":[{\"href\":\"/\",\"label\":\"الرئيسية\"},{\"href\":\"/#calculator\",\"label\":\"احسب عمرك\"},{\"href\":\"/articles\",\"label\":\"المقالات\"},{\"href\":\"/contact\",\"label\":\"اتصل بنا\"}],\"legalLinks\":[{\"href\":\"/about\",\"label\":\"عن الموقع\"},{\"href\":\"/privacy\",\"label\":\"سياسة الخصوصية\"},{\"href\":\"/terms\",\"label\":\"الشروط والأحكام\"},{\"href\":\"/sitemap.xml\",\"label\":\"خريطة الموقع\"}],\"contact\":{\"email\":\"info@miladak.com\",\"phone\":\"+20 123 456 7890\",\"address\":\"القاهرة، مصر\"},\"social\":{\"facebook\":\"#\",\"twitter\":\"#\",\"instagram\":\"#\",\"youtube\":\"#\"},\"copyright\":\"© {year} ميلادك. جميع الحقوق محفوظة. صُنع بـ ❤️ في مصر - تطوير ميديابايت\"}",
+    "description": "محتوى footer",
+    "created_at": "2025-12-17T10:38:19.066Z",
+    "updated_at": "2025-12-17T10:38:19.066Z"
+  },
+  {
+    "id": 150,
+    "key": "content_hero",
+    "value": "{\"title\":\"اكتشف عمرك وميلادك\",\"subtitle\":\"بطريقة لم تراها من قبل!\",\"description\":\"احسب عمرك بدقة بالسنوات والأشهر والأيام والساعات، واكتشف ميلادك من خلال إحصاءات مذهلة وممتعة عن حياتك لم تكن تعلمها من قبل!\",\"cta1\":\"احسب عمرك الآن\",\"cta2\":\"اكتشف ميلادك\"}",
+    "description": "محتوى hero",
+    "created_at": "2025-12-17T10:38:19.330Z",
+    "updated_at": "2025-12-17T10:38:19.330Z"
+  },
+  {
+    "id": 151,
+    "key": "content_stats",
+    "value": "[{\"value\":15000,\"label\":\"مستخدم نشط\",\"plus\":true},{\"value\":1000000,\"label\":\"حساب للعمر\",\"plus\":true},{\"value\":50,\"label\":\"إحصائية ممتعة\",\"plus\":true},{\"value\":4.9,\"label\":\"تقييم المستخدمين\",\"plus\":false}]",
+    "description": "محتوى stats",
+    "created_at": "2025-12-17T10:38:20.314Z",
+    "updated_at": "2025-12-17T10:38:20.314Z"
+  },
+  {
+    "id": 152,
+    "key": "content_howitworks",
+    "value": "[{\"title\":\"أدخل تاريخ ميلادك\",\"desc\":\"اختر تاريخ ميلادك بدقة لبدء الحساب\"},{\"title\":\"نحسب كل شيء\",\"desc\":\"نحوّل عمرك إلى سنوات وأشهر وأيام وساعات مع إحصاءات ممتعة\"},{\"title\":\"اطبع وشارك\",\"desc\":\"احفظ النتائج كصورة أو PDF وشاركها مع أصدقائك\"}]",
+    "description": "محتوى howitworks",
+    "created_at": "2025-12-17T10:38:20.500Z",
+    "updated_at": "2025-12-17T10:38:20.500Z"
+  },
+  {
+    "id": 153,
+    "key": "content_faq",
+    "value": "[{\"q\":\"هل تحفظ المنصة أي بيانات شخصية؟\",\"a\":\"لا. جميع الحسابات تتم محلياً في متصفحك ولا نقوم بحفظ بياناتك.\"},{\"q\":\"هل يمكن حفظ النتائج كملف PDF متعدد الصفحات؟\",\"a\":\"نعم. نستخدم html2canvas + jsPDF مع تقسيم المحتوى تلقائياً على صفحات متعددة.\"},{\"q\":\"كيف أشارك بطاقة النتائج؟\",\"a\":\"يمكنك حفظ بطاقة مشاركة كصورة جاهزة للأبعاد الاجتماعية ومشاركتها فوراً.\"},{\"q\":\"كيف أحفظ النتائج كصورة؟\",\"a\":\"من أزرار الإجراءات في قسم النتائج اختر \\\"حفظ الصورة\\\" لتحميل صورة عالية الجودة.\"},{\"q\":\"كيف أحسب لصديقي؟\",\"a\":\"انتقل إلى قسم \\\"احسب لصديقك\\\" في أسفل الصفحة وأدخل الاسم وتاريخ الميلاد.\"},{\"q\":\"كيف أنسخ النتائج بسرعة؟\",\"a\":\"من أزرار النتائج اختر \\\"نسخ\\\" لنسخ البيانات إلى الحافظة ومشاركتها فوراً.\"}]",
+    "description": "محتوى faq",
+    "created_at": "2025-12-17T10:38:20.685Z",
+    "updated_at": "2025-12-17T10:38:20.685Z"
+  },
+  {
+    "id": 154,
+    "key": "content_navbar",
+    "value": "{\"siteName\":\"ميلادك\",\"logo\":\"/logo.png\",\"links\":[{\"href\":\"/\",\"label\":\"الرئيسية\"},{\"href\":\"/#calculator\",\"label\":\"احسب عمرك\"},{\"href\":\"/cards\",\"label\":\"بطاقات التهنئة\"},{\"href\":\"/#friend-calculator\",\"label\":\"احسب لصديقك\"},{\"href\":\"/friends\",\"label\":\"الأصدقاء\"},{\"href\":\"/articles\",\"label\":\"المقالات\"},{\"href\":\"/contact\",\"label\":\"اتصل بنا\"}]}",
+    "description": "محتوى navbar",
+    "created_at": "2025-12-17T10:38:20.941Z",
+    "updated_at": "2025-12-17T10:38:20.941Z"
+  }
+]

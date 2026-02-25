@@ -1,0 +1,9 @@
+{
+  "version": 2,
+  "alias": ["miladak.com"],
+  "build": {
+    "env": {
+      "NEXT_TELEMETRY_DISABLED": "1"
+    }
+  }
+}

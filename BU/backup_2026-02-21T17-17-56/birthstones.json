@@ -1,0 +1,98 @@
+[
+  {
+    "id": 25,
+    "month": 1,
+    "stone_name": "Garnet",
+    "stone_name_ar": "الجارنت",
+    "description": "حجر يناير - يرمز للصداقة والثقة",
+    "created_at": "2025-12-06T06:37:15.000Z"
+  },
+  {
+    "id": 26,
+    "month": 2,
+    "stone_name": "Amethyst",
+    "stone_name_ar": "الجمشت",
+    "description": "حجر فبراير - يرمز للحكمة والروحانية",
+    "created_at": "2025-12-06T06:37:15.000Z"
+  },
+  {
+    "id": 27,
+    "month": 3,
+    "stone_name": "Aquamarine",
+    "stone_name_ar": "الأكوامارين",
+    "description": "حجر مارس - يرمز للشجاعة والهدوء",
+    "created_at": "2025-12-06T06:37:15.000Z"
+  },
+  {
+    "id": 28,
+    "month": 4,
+    "stone_name": "Diamond",
+    "stone_name_ar": "الألماس",
+    "description": "حجر أبريل - يرمز للحب الأبدي والقوة",
+    "created_at": "2025-12-06T06:37:15.000Z"
+  },
+  {
+    "id": 29,
+    "month": 5,
+    "stone_name": "Emerald",
+    "stone_name_ar": "الزمرد",
+    "description": "حجر مايو - يرمز للتجديد والنمو",
+    "created_at": "2025-12-06T06:37:15.000Z"
+  },
+  {
+    "id": 30,
+    "month": 6,
+    "stone_name": "Pearl",
+    "stone_name_ar": "اللؤلؤ",
+    "description": "حجر يونيو - يرمز للنقاء والحكمة",
+    "created_at": "2025-12-06T06:37:15.000Z"
+  },
+  {
+    "id": 31,
+    "month": 7,
+    "stone_name": "Ruby",
+    "stone_name_ar": "الياقوت الأحمر",
+    "description": "حجر يوليو - يرمز للحب والعاطفة",
+    "created_at": "2025-12-06T06:37:15.000Z"
+  },
+  {
+    "id": 32,
+    "month": 8,
+    "stone_name": "Peridot",
+    "stone_name_ar": "الزبرجد",
+    "description": "حجر أغسطس - يرمز للقوة والحماية",
+    "created_at": "2025-12-06T06:37:15.000Z"
+  },
+  {
+    "id": 33,
+    "month": 9,
+    "stone_name": "Sapphire",
+    "stone_name_ar": "الياقوت الأزرق",
+    "description": "حجر سبتمبر - يرمز للحكمة والإخلاص",
+    "created_at": "2025-12-06T06:37:15.000Z"
+  },
+  {
+    "id": 34,
+    "month": 10,
+    "stone_name": "Opal",
+    "stone_name_ar": "الأوبال",
+    "description": "حجر أكتوبر - يرمز للأمل والإبداع",
+    "created_at": "2025-12-06T06:37:15.000Z"
+  },
+  {
+    "id": 35,
+    "month": 11,
+    "stone_name": "Topaz",
+    "stone_name_ar": "التوباز",
+    "description": "حجر نوفمبر - يرمز للصداقة والقوة",
+    "created_at": "2025-12-06T06:37:15.000Z"
+  },
+  {
+    "id": 36,
+    "month": 12,
+    "stone_name": "Turquoise",
+    "stone_name_ar": "الفيروز",
+    "description": "حجر ديسمبر - يرمز للحظ والحماية",
+    "created_at": "2025-12-06T06:37:15.000Z"
+  }
+]

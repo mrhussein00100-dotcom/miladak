@@ -1,0 +1,610 @@
+[
+  {
+    "id": 457,
+    "year": 1950,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:37:53.578Z"
+  },
+  {
+    "id": 458,
+    "year": 1951,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:37:53.769Z"
+  },
+  {
+    "id": 459,
+    "year": 1952,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:37:53.940Z"
+  },
+  {
+    "id": 460,
+    "year": 1953,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:37:54.105Z"
+  },
+  {
+    "id": 461,
+    "year": 1954,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:37:54.270Z"
+  },
+  {
+    "id": 462,
+    "year": 1955,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:37:54.435Z"
+  },
+  {
+    "id": 463,
+    "year": 1956,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:37:54.591Z"
+  },
+  {
+    "id": 464,
+    "year": 1957,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:37:54.780Z"
+  },
+  {
+    "id": 465,
+    "year": 1958,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:37:54.945Z"
+  },
+  {
+    "id": 466,
+    "year": 1959,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:37:55.138Z"
+  },
+  {
+    "id": 467,
+    "year": 1960,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:37:55.296Z"
+  },
+  {
+    "id": 468,
+    "year": 1961,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:37:55.471Z"
+  },
+  {
+    "id": 469,
+    "year": 1962,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:37:55.634Z"
+  },
+  {
+    "id": 470,
+    "year": 1963,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:37:55.797Z"
+  },
+  {
+    "id": 471,
+    "year": 1964,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:37:55.986Z"
+  },
+  {
+    "id": 472,
+    "year": 1965,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:37:56.166Z"
+  },
+  {
+    "id": 473,
+    "year": 1966,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:37:56.338Z"
+  },
+  {
+    "id": 474,
+    "year": 1967,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:37:56.506Z"
+  },
+  {
+    "id": 475,
+    "year": 1968,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:37:56.673Z"
+  },
+  {
+    "id": 476,
+    "year": 1969,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:37:56.838Z"
+  },
+  {
+    "id": 477,
+    "year": 1970,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:37:57.011Z"
+  },
+  {
+    "id": 478,
+    "year": 1971,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:37:57.202Z"
+  },
+  {
+    "id": 479,
+    "year": 1972,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:37:57.418Z"
+  },
+  {
+    "id": 480,
+    "year": 1973,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:37:57.590Z"
+  },
+  {
+    "id": 481,
+    "year": 1974,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:37:57.760Z"
+  },
+  {
+    "id": 482,
+    "year": 1975,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:37:57.920Z"
+  },
+  {
+    "id": 483,
+    "year": 1976,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:37:58.092Z"
+  },
+  {
+    "id": 484,
+    "year": 1977,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:37:58.250Z"
+  },
+  {
+    "id": 485,
+    "year": 1978,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:37:58.415Z"
+  },
+  {
+    "id": 486,
+    "year": 1979,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:37:58.587Z"
+  },
+  {
+    "id": 487,
+    "year": 1980,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:37:58.751Z"
+  },
+  {
+    "id": 488,
+    "year": 1981,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:37:58.919Z"
+  },
+  {
+    "id": 489,
+    "year": 1982,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:37:59.085Z"
+  },
+  {
+    "id": 490,
+    "year": 1983,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:37:59.259Z"
+  },
+  {
+    "id": 491,
+    "year": 1984,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:37:59.431Z"
+  },
+  {
+    "id": 492,
+    "year": 1985,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:37:59.617Z"
+  },
+  {
+    "id": 493,
+    "year": 1986,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:37:59.801Z"
+  },
+  {
+    "id": 494,
+    "year": 1987,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:37:59.976Z"
+  },
+  {
+    "id": 495,
+    "year": 1988,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:38:00.137Z"
+  },
+  {
+    "id": 496,
+    "year": 1989,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:38:00.310Z"
+  },
+  {
+    "id": 497,
+    "year": 1990,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:38:00.476Z"
+  },
+  {
+    "id": 498,
+    "year": 1991,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:38:00.675Z"
+  },
+  {
+    "id": 499,
+    "year": 1992,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:38:00.946Z"
+  },
+  {
+    "id": 500,
+    "year": 1993,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:38:01.133Z"
+  },
+  {
+    "id": 501,
+    "year": 1994,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:38:01.295Z"
+  },
+  {
+    "id": 502,
+    "year": 1995,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:38:01.467Z"
+  },
+  {
+    "id": 503,
+    "year": 1996,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:38:01.636Z"
+  },
+  {
+    "id": 504,
+    "year": 1997,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:38:01.802Z"
+  },
+  {
+    "id": 505,
+    "year": 1998,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:38:01.967Z"
+  },
+  {
+    "id": 506,
+    "year": 1999,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:38:02.146Z"
+  },
+  {
+    "id": 507,
+    "year": 2000,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:38:02.356Z"
+  },
+  {
+    "id": 508,
+    "year": 2001,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:38:02.530Z"
+  },
+  {
+    "id": 509,
+    "year": 2002,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:38:02.695Z"
+  },
+  {
+    "id": 510,
+    "year": 2003,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:38:02.860Z"
+  },
+  {
+    "id": 511,
+    "year": 2004,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:38:03.045Z"
+  },
+  {
+    "id": 512,
+    "year": 2005,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:38:03.214Z"
+  },
+  {
+    "id": 513,
+    "year": 2006,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:38:03.400Z"
+  },
+  {
+    "id": 514,
+    "year": 2007,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:38:03.579Z"
+  },
+  {
+    "id": 515,
+    "year": 2008,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:38:03.805Z"
+  },
+  {
+    "id": 516,
+    "year": 2009,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:38:03.985Z"
+  },
+  {
+    "id": 517,
+    "year": 2010,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:38:04.172Z"
+  },
+  {
+    "id": 518,
+    "year": 2011,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:38:04.431Z"
+  },
+  {
+    "id": 519,
+    "year": 2012,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:38:04.691Z"
+  },
+  {
+    "id": 520,
+    "year": 2013,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:38:04.940Z"
+  },
+  {
+    "id": 521,
+    "year": 2014,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:38:05.295Z"
+  },
+  {
+    "id": 522,
+    "year": 2015,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:38:05.718Z"
+  },
+  {
+    "id": 523,
+    "year": 2016,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:38:06.015Z"
+  },
+  {
+    "id": 524,
+    "year": 2017,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:38:06.229Z"
+  },
+  {
+    "id": 525,
+    "year": 2018,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:38:06.625Z"
+  },
+  {
+    "id": 526,
+    "year": 2019,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:38:07.150Z"
+  },
+  {
+    "id": 527,
+    "year": 2020,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:38:07.486Z"
+  },
+  {
+    "id": 528,
+    "year": 2021,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:38:07.900Z"
+  },
+  {
+    "id": 529,
+    "year": 2022,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:38:08.200Z"
+  },
+  {
+    "id": 530,
+    "year": 2023,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:38:08.440Z"
+  },
+  {
+    "id": 531,
+    "year": 2024,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:38:08.679Z"
+  },
+  {
+    "id": 532,
+    "year": 2025,
+    "description": null,
+    "events": null,
+    "characteristics": null,
+    "created_at": "2025-12-17T08:38:08.992Z"
+  }
+]

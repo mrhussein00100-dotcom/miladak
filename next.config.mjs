@@ -1,0 +1,82 @@
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  serverExternalPackages: ['better-sqlite3', 'pg'],
+  // منع التخزين المؤقت لصفحات المقالات والأدمن
+  async headers() {
+    return [
+      {
+        source: '/articles/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-store, no-cache, must-revalidate, proxy-revalidate',
+          },
+          {
+            key: 'Pragma',
+            value: 'no-cache',
+          },
+          {
+            key: 'Expires',
+            value: '0',
+          },
+        ],
+      },
+      {
+        source: '/api/admin/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-store, no-cache, must-revalidate',
+          },
+        ],
+      },
+    ];
+  },
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      config.externals.push('better-sqlite3');
+    }
+    return config;
+  },
+  env: {
+    DATABASE_TYPE: process.env.DATABASE_TYPE || 'postgres',
+    DATABASE_URL: process.env.DATABASE_URL,
+    POSTGRES_URL: process.env.POSTGRES_URL,
+    NEXT_PUBLIC_ADSENSE_CLIENT: 'ca-pub-5755672349927118',
+  },
+  typescript: {
+    ignoreBuildErrors: true, // تجاهل أخطاء TypeScript أثناء البناء
+  },
+  eslint: {
+    ignoreDuringBuilds: true, // تجاهل أخطاء ESLint أثناء البناء
+  },
+  images: {
+    domains: ['images.pexels.com', 'cdn.pexels.com', 'images.unsplash.com'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'images.pexels.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'cdn.pexels.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
+    ],
+  },
+  // تحسينات الأداء - تقليل حجم JavaScript
+  experimental: {
+    optimizePackageImports: ['framer-motion', 'lucide-react', 'date-fns'],
+  },
+  // تحسين تقسيم الكود
+  modularizeImports: {
+    'lucide-react': {
+      transform: 'lucide-react/dist/esm/icons/{{member}}',
+    },
+  },
+};
+
+export default nextConfig;

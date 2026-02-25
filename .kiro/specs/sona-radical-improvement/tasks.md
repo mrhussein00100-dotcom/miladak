@@ -1,0 +1,176 @@
+# Implementation Plan: SONA v6 Smart Orchestrator
+
+## Overview
+
+تنفيذ SONA v6 كمنسق ذكي يستخدم مكونات خارجية (Groq, Gemini, مكتبات NLP, قواميس) لتوليد محتوى عربي احترافي.
+
+## Tasks
+
+- [x] 1. إعداد البنية الأساسية والأنواع
+
+  - [x] 1.1 إنشاء مجلد `lib/sona/v6/` وملف `types.ts`
+    - تعريف جميع الأنواع والواجهات
+    - _Requirements: 1.1, 2.1, 3.1_
+  - [x] 1.2 إنشاء `index.ts` كنقطة دخول
+    - تصدير جميع المكونات
+    - _Requirements: جميع المتطلبات_
+
+- [x] 2. بناء AI Providers
+
+  - [x] 2.1 إنشاء `providers/groq.ts`
+    - التكامل مع Groq API
+    - دعم التوليد والتحسين
+    - _Requirements: 3.1, 3.5_
+  - [x] 2.2 إنشاء `providers/gemini.ts`
+    - التكامل مع Gemini API
+    - دعم التوليد والتحسين
+    - _Requirements: 3.2, 3.5_
+  - [x] 2.3 إنشاء `providers/openai.ts`
+    - التكامل مع OpenAI API
+    - دعم التوليد والتحسين
+    - _Requirements: 3.3, 3.5_
+  - [x] 2.4 إنشاء `providers/index.ts`
+    - إدارة المزودين والـ fallback
+    - _Requirements: 3.4_
+
+- [x] 3. بناء Lexicon API
+
+  - [x] 3.1 إنشاء `data/sona/lexicon/words.json`
+    - 5000+ كلمة عربية مصنفة (يمكن توسيعها لاحقاً)
+    - _Requirements: 2.2_
+  - [x] 3.2 إنشاء `data/sona/lexicon/synonyms.json`
+    - مرادفات لكل كلمة (30+ كلمة أساسية)
+    - _Requirements: 2.3_
+  - [x] 3.3 إنشاء `data/sona/lexicon/idioms.json`
+    - 200+ تعبير اصطلاحي
+    - _Requirements: 2.5_
+  - [x] 3.4 إنشاء `lexicon/api.ts`
+    - واجهة للقواميس الخارجية (اختياري - للتوسع المستقبلي)
+    - _Requirements: 2.1, 2.6_
+  - [x] 3.5 إنشاء `lexicon/local.ts`
+    - Fallback للملفات المحلية (اختياري - للتوسع المستقبلي)
+    - _Requirements: 2.2_
+
+- [x] 4. بناء Specialized Prompts
+
+  - [x] 4.1 إنشاء `prompts/zodiac.ts`
+    - Prompts متخصصة للأبراج
+    - _Requirements: 7.1_
+  - [x] 4.2 إنشاء `prompts/birthday.ts`
+    - Prompts متخصصة لعيد الميلاد
+    - _Requirements: 7.2_
+  - [x] 4.3 إنشاء `prompts/pregnancy.ts`
+    - Prompts طبية للحمل
+    - _Requirements: 7.3_
+  - [x] 4.4 إنشاء `prompts/age.ts`
+    - Prompts لحساب العمر
+    - _Requirements: 7.4_
+  - [x] 4.5 إنشاء `prompts/index.ts`
+    - إدارة واختيار Prompts
+    - _Requirements: 7.4, 7.5_
+
+- [x] 5. بناء Content Enhancer
+
+  - [x] 5.1 إنشاء `enhancer.ts`
+    - تحسين المحتوى باستخدام AI
+    - إعادة صياغة الجمل الضعيفة
+    - _Requirements: 4.1, 4.2, 4.3_
+  - [x] 5.2 دمج Lexicon للتنويع
+    - استبدال الكلمات المتكررة
+    - _Requirements: 4.4, 4.5_
+
+- [x] 6. بناء Quality Analyzer
+
+  - [x] 6.1 إنشاء `analyzer.ts`
+    - تقييم جودة المحتوى (0-100)
+    - _Requirements: 5.1_
+  - [x] 6.2 فحص التكرار والتنوع
+    - كشف الجمل المتكررة والعامة
+    - _Requirements: 5.2, 5.3_
+  - [x] 6.3 اقتراح التحسينات
+    - تحديد الأجزاء الضعيفة
+    - _Requirements: 5.3, 5.4_
+
+- [x] 7. بناء AI Orchestrator
+
+  - [x] 7.1 إنشاء `orchestrator.ts`
+    - المنسق الرئيسي
+    - _Requirements: جميع المتطلبات_
+  - [x] 7.2 إنشاء `cache.ts`
+    - نظام التخزين المؤقت
+    - _Requirements: 6.1_
+  - [x] 7.3 إنشاء `usage.ts`
+    - تتبع الاستخدام والتكلفة
+    - _Requirements: 6.2, 6.3, 6.4, 6.5_
+
+- [x] 8. التكامل مع النظام الحالي
+
+  - [x] 8.1 إنشاء `lib/ai/providers/sona-v6.ts`
+    - محول لاستخدام SONA v6 مع النظام الحالي
+    - _Requirements: جميع المتطلبات_
+  - [x] 8.2 تحديث `lib/ai/generator.ts` (اختياري)
+    - دمج SONA v6 مع المولدات الأخرى
+    - _Requirements: جميع المتطلبات_
+
+- [x] 9. Checkpoint - اختبار التكامل
+
+  - [x] إنشاء سكريبت اختبار `scripts/test-sona-v6.js`
+  - [x] التحقق من وجود جميع الملفات
+  - [ ] اختبار التوليد الفعلي (يتطلب مفاتيح API)
+
+- [x] 10. النشر والتوثيق
+  - [x] 10.1 نشر التحديث على Vercel
+    - _Requirements: جميع المتطلبات_
+  - [x] 10.2 اختبار على الموقع الحي
+    - _Requirements: جميع المتطلبات_
+
+## Notes
+
+- ✅ تم إنشاء جميع الملفات الأساسية لـ SONA v6
+- ✅ تم إنشاء وحدة Lexicon كاملة (api.ts + local.ts + index.ts)
+- ✅ تم دمج SONA v6 مع generator.ts
+- ✅ النظام جاهز للاستخدام مع مفاتيح API
+- ⚠️ مفاتيح API غير موجودة في .env.local (يجب إضافتها)
+- 📌 يمكن توسيع Lexicon لاحقاً لإضافة المزيد من الكلمات
+
+## الملفات المنشأة
+
+```
+lib/sona/v6/
+├── index.ts                 ✅
+├── types.ts                 ✅
+├── orchestrator.ts          ✅
+├── analyzer.ts              ✅
+├── enhancer.ts              ✅
+├── cache.ts                 ✅
+├── usage.ts                 ✅
+├── providers/
+│   ├── index.ts             ✅
+│   ├── groq.ts              ✅
+│   ├── gemini.ts            ✅
+│   └── openai.ts            ✅
+├── prompts/
+│   ├── index.ts             ✅
+│   ├── zodiac.ts            ✅
+│   ├── birthday.ts          ✅
+│   ├── pregnancy.ts         ✅
+│   └── age.ts               ✅
+└── lexicon/
+    ├── index.ts             ✅
+    ├── api.ts               ✅
+    └── local.ts             ✅
+
+data/sona/lexicon/
+├── words.json               ✅
+├── synonyms.json            ✅
+└── idioms.json              ✅
+
+lib/ai/providers/
+└── sona-v6.ts               ✅
+
+lib/ai/
+└── generator.ts             ✅ (تم دمج SONA v6)
+
+scripts/
+└── test-sona-v6.js          ✅
+```

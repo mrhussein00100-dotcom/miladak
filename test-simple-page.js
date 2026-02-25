@@ -1,0 +1,51 @@
+#!/usr/bin/env node
+
+const https = require('https');
+
+const urls = [
+  'https://miladak-v2-3e9x918te-miladaks-projects.vercel.app',
+  'https://miladak-v2-3e9x918te-miladaks-projects.vercel.app/test-simple',
+  'https://miladak-v2.vercel.app',
+  'https://miladak-v2.vercel.app/test-simple',
+];
+
+async function testUrl(url) {
+  return new Promise((resolve) => {
+    const req = https.get(url, { timeout: 15000 }, (res) => {
+      let data = '';
+      res.on('data', (chunk) => (data += chunk));
+      res.on('end', () => {
+        resolve({
+          url,
+          status: res.statusCode,
+          ok: res.statusCode >= 200 && res.statusCode < 400,
+          size: data.length,
+        });
+      });
+    });
+
+    req.on('error', (err) => {
+      resolve({ url, status: 0, ok: false, error: err.message });
+    });
+
+    req.on('timeout', () => {
+      req.destroy();
+      resolve({ url, status: 0, ok: false, error: 'Timeout' });
+    });
+  });
+}
+
+async function main() {
+  console.log('🧪 اختبار الموقع المنشور...\n');
+
+  for (const url of urls) {
+    const result = await testUrl(url);
+    const icon = result.ok ? '✅' : '❌';
+    console.log(`${icon} ${url}`);
+    console.log(`   Status: ${result.status}`);
+    if (result.error) console.log(`   Error: ${result.error}`);
+    console.log('');
+  }
+}
+
+main();

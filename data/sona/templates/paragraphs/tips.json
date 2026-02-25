@@ -1,0 +1,65 @@
+{
+  "category": "tips",
+  "templates": [
+    {
+      "id": "tips_1",
+      "template": "<h2>نصائح ذهبية لـ{topic}</h2>\n<p>إليكم مجموعة من النصائح العملية التي ستساعدكم:</p>\n<ul>\n{tips_list}\n</ul>",
+      "variables": ["topic", "tips_list"],
+      "type": "list"
+    },
+    {
+      "id": "tips_2",
+      "template": "<h2>أفضل النصائح حول {topic}</h2>\n<p>جمعنا لكم أفضل النصائح من الخبراء:</p>\n{tips_list}",
+      "variables": ["topic", "tips_list"],
+      "type": "list"
+    },
+    {
+      "id": "tips_3",
+      "template": "<h2>نصائح عملية لـ{topic}</h2>\n<p>طبقوا هذه النصائح واستمتعوا بالنتائج:</p>\n<ol>\n{tips_list}\n</ol>",
+      "variables": ["topic", "tips_list"],
+      "type": "numbered_list"
+    },
+    {
+      "id": "tips_4",
+      "template": "<h2>إرشادات مهمة عن {topic}</h2>\n<p>اتبعوا هذه الإرشادات لتحقيق أفضل النتائج:</p>\n<ul>\n{tips_list}\n</ul>",
+      "variables": ["topic", "tips_list"],
+      "type": "list"
+    },
+    {
+      "id": "tips_5",
+      "template": "<h2>كيف تستفيدون من {topic}؟</h2>\n<p>إليكم نصائح قيمة للاستفادة القصوى:</p>\n{tips_list}",
+      "variables": ["topic", "tips_list"],
+      "type": "list"
+    },
+    {
+      "id": "tips_6",
+      "template": "<h2>نصائح الخبراء في {topic}</h2>\n<p>استفيدوا من خبرة المتخصصين:</p>\n<ol>\n{tips_list}\n</ol>",
+      "variables": ["topic", "tips_list"],
+      "type": "numbered_list"
+    },
+    {
+      "id": "tips_7",
+      "template": "<h2>أسرار النجاح في {topic}</h2>\n<p>نكشف لكم أسرار النجاح:</p>\n<ul>\n{tips_list}\n</ul>",
+      "variables": ["topic", "tips_list"],
+      "type": "list"
+    },
+    {
+      "id": "tips_8",
+      "template": "<h2>نصائح لا غنى عنها لـ{topic}</h2>\n<p>هذه النصائح ستغير نظرتكم:</p>\n{tips_list}",
+      "variables": ["topic", "tips_list"],
+      "type": "list"
+    },
+    {
+      "id": "tips_9",
+      "template": "<h2>دليلكم العملي لـ{topic}</h2>\n<p>اتبعوا هذه الخطوات البسيطة:</p>\n<ol>\n{tips_list}\n</ol>",
+      "variables": ["topic", "tips_list"],
+      "type": "numbered_list"
+    },
+    {
+      "id": "tips_10",
+      "template": "<h2>توصيات مهمة حول {topic}</h2>\n<p>نوصيكم بالآتي:</p>\n<ul>\n{tips_list}\n</ul>",
+      "variables": ["topic", "tips_list"],
+      "type": "list"
+    }
+  ]
+}

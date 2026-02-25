@@ -1,0 +1,116 @@
+warning: in the working copy of 'app/globals.css', LF will be replaced by CRLF the next time Git touches it
+[1mdiff --git a/app/globals.css b/app/globals.css[m
+[1mindex 0e6981d..61a7b74 100644[m
+[1m--- a/app/globals.css[m
+[1m+++ b/app/globals.css[m
+[36m@@ -435,85 +435,7 @@[m
+   --stone-900: 250 250 249;[m
+   --stone-950: 255 255 255;[m
+ [m
+[31m-  --blue-50: var(--slate-50); --blue-100: var(--slate-100); --blue-200: var(--slate-200);[m
+[31m-  --blue-300: var(--slate-300); --blue-400: var(--slate-400); --blue-500: var(--slate-500);[m
+[31m-  --blue-600: var(--slate-600); --blue-700: var(--slate-700); --blue-800: var(--slate-800);[m
+[31m-  --blue-900: var(--slate-900); --blue-950: var(--slate-950);[m
+[31m-[m
+[31m-  --indigo-50: var(--slate-50); --indigo-100: var(--slate-100); --indigo-200: var(--slate-200);[m
+[31m-  --indigo-300: var(--slate-300); --indigo-400: var(--slate-400); --indigo-500: var(--slate-500);[m
+[31m-  --indigo-600: var(--slate-600); --indigo-700: var(--slate-700); --indigo-800: var(--slate-800);[m
+[31m-  --indigo-900: var(--slate-900); --indigo-950: var(--slate-950);[m
+[31m-[m
+[31m-  --purple-50: var(--slate-50); --purple-100: var(--slate-100); --purple-200: var(--slate-200);[m
+[31m-  --purple-300: var(--slate-300); --purple-400: var(--slate-400); --purple-500: var(--slate-500);[m
+[31m-  --purple-600: var(--slate-600); --purple-700: var(--slate-700); --purple-800: var(--slate-800);[m
+[31m-  --purple-900: var(--slate-900); --purple-950: var(--slate-950);[m
+[31m-[m
+[31m-  --pink-50: var(--slate-50); --pink-100: var(--slate-100); --pink-200: var(--slate-200);[m
+[31m-  --pink-300: var(--slate-300); --pink-400: var(--slate-400); --pink-500: var(--slate-500);[m
+[31m-  --pink-600: var(--slate-600); --pink-700: var(--slate-700); --pink-800: var(--slate-800);[m
+[31m-  --pink-900: var(--slate-900); --pink-950: var(--slate-950);[m
+[31m-[m
+[31m-  --red-50: var(--slate-50); --red-100: var(--slate-100); --red-200: var(--slate-200);[m
+[31m-  --red-300: var(--slate-300); --red-400: var(--slate-400); --red-500: var(--slate-500);[m
+[31m-  --red-600: var(--slate-600); --red-700: var(--slate-700); --red-800: var(--slate-800);[m
+[31m-  --red-900: var(--slate-900); --red-950: var(--slate-950);[m
+[31m-[m
+[31m-  --orange-50: var(--slate-50); --orange-100: var(--slate-100); --orange-200: var(--slate-200);[m
+[31m-  --orange-300: var(--slate-300); --orange-400: var(--slate-400); --orange-500: var(--slate-500);[m
+[31m-  --orange-600: var(--slate-600); --orange-700: var(--slate-700); --orange-800: var(--slate-800);[m
+[31m-  --orange-900: var(--slate-900); --orange-950: var(--slate-950);[m
+[31m-[m
+[31m-  --amber-50: var(--slate-50); --amber-100: var(--slate-100); --amber-200: var(--slate-200);[m
+[31m-  --amber-300: var(--slate-300); --amber-400: var(--slate-400); --amber-500: var(--slate-500);[m
+[31m-  --amber-600: var(--slate-600); --amber-700: var(--slate-700); --amber-800: var(--slate-800);[m
+[31m-  --amber-900: var(--slate-900); --amber-950: var(--slate-950);[m
+[31m-[m
+[31m-  --yellow-50: var(--slate-50); --yellow-100: var(--slate-100); --yellow-200: var(--slate-200);[m
+[31m-  --yellow-300: var(--slate-300); --yellow-400: var(--slate-400); --yellow-500: var(--slate-500);[m
+[31m-  --yellow-600: var(--slate-600); --yellow-700: var(--slate-700); --yellow-800: var(--slate-800);[m
+[31m-  --yellow-900: var(--slate-900); --yellow-950: var(--slate-950);[m
+[31m-[m
+[31m-  --lime-50: var(--slate-50); --lime-100: var(--slate-100); --lime-200: var(--slate-200);[m
+[31m-  --lime-300: var(--slate-300); --lime-400: var(--slate-400); --lime-500: var(--slate-500);[m
+[31m-  --lime-600: var(--slate-600); --lime-700: var(--slate-700); --lime-800: var(--slate-800);[m
+[31m-  --lime-900: var(--slate-900); --lime-950: var(--slate-950);[m
+[31m-[m
+[31m-  --green-50: var(--slate-50); --green-100: var(--slate-100); --green-200: var(--slate-200);[m
+[31m-  --green-300: var(--slate-300); --green-400: var(--slate-400); --green-500: var(--slate-500);[m
+[31m-  --green-600: var(--slate-600); --green-700: var(--slate-700); --green-800: var(--slate-800);[m
+[31m-  --green-900: var(--slate-900); --green-950: var(--slate-950);[m
+[31m-[m
+[31m-  --emerald-50: var(--slate-50); --emerald-100: var(--slate-100); --emerald-200: var(--slate-200);[m
+[31m-  --emerald-300: var(--slate-300); --emerald-400: var(--slate-400); --emerald-500: var(--slate-500);[m
+[31m-  --emerald-600: var(--slate-600); --emerald-700: var(--slate-700); --emerald-800: var(--slate-800);[m
+[31m-  --emerald-900: var(--slate-900); --emerald-950: var(--slate-950);[m
+[31m-[m
+[31m-  --teal-50: var(--slate-50); --teal-100: var(--slate-100); --teal-200: var(--slate-200);[m
+[31m-  --teal-300: var(--slate-300); --teal-400: var(--slate-400); --teal-500: var(--slate-500);[m
+[31m-  --teal-600: var(--slate-600); --teal-700: var(--slate-700); --teal-800: var(--slate-800);[m
+[31m-  --teal-900: var(--slate-900); --teal-950: var(--slate-950);[m
+[31m-[m
+[31m-  --cyan-50: var(--slate-50); --cyan-100: var(--slate-100); --cyan-200: var(--slate-200);[m
+[31m-  --cyan-300: var(--slate-300); --cyan-400: var(--slate-400); --cyan-500: var(--slate-500);[m
+[31m-  --cyan-600: var(--slate-600); --cyan-700: var(--slate-700); --cyan-800: var(--slate-800);[m
+[31m-  --cyan-900: var(--slate-900); --cyan-950: var(--slate-950);[m
+[31m-[m
+[31m-  --sky-50: var(--slate-50); --sky-100: var(--slate-100); --sky-200: var(--slate-200);[m
+[31m-  --sky-300: var(--slate-300); --sky-400: var(--slate-400); --sky-500: var(--slate-500);[m
+[31m-  --sky-600: var(--slate-600); --sky-700: var(--slate-700); --sky-800: var(--slate-800);[m
+[31m-  --sky-900: var(--slate-900); --sky-950: var(--slate-950);[m
+[31m-[m
+[31m-  --fuchsia-50: var(--slate-50); --fuchsia-100: var(--slate-100); --fuchsia-200: var(--slate-200);[m
+[31m-  --fuchsia-300: var(--slate-300); --fuchsia-400: var(--slate-400); --fuchsia-500: var(--slate-500);[m
+[31m-  --fuchsia-600: var(--slate-600); --fuchsia-700: var(--slate-700); --fuchsia-800: var(--slate-800);[m
+[31m-  --fuchsia-900: var(--slate-900); --fuchsia-950: var(--slate-950);[m
+[31m-[m
+[31m-  --rose-50: var(--slate-50); --rose-100: var(--slate-100); --rose-200: var(--slate-200);[m
+[31m-  --rose-300: var(--slate-300); --rose-400: var(--slate-400); --rose-500: var(--slate-500);[m
+[31m-  --rose-600: var(--slate-600); --rose-700: var(--slate-700); --rose-800: var(--slate-800);[m
+[31m-  --rose-900: var(--slate-900); --rose-950: var(--slate-950);[m
+[32m+[m
+ [m
+   /* Shadows - Dark */[m
+   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);[m
+[36m@@ -561,6 +483,34 @@[m
+   --input: 76 29 149;[m
+   --input-border: 109 40 217;[m
+   --input-focus: 244 114 182;[m
+[32m+[m[32m  --slate-50: 46 16 101;[m
+[32m+[m[32m  --slate-100: 76 29 149;[m
+[32m+[m[32m  --slate-200: 91 33 182;[m
+[32m+[m[32m  --slate-300: 109 40 217;[m
+[32m+[m[32m  --slate-400: 124 58 237;[m
+[32m+[m[32m  --slate-500: 139 92 246;[m
+[32m+[m[32m  --slate-600: 167 139 250;[m
+[32m+[m[32m  --slate-700: 196 181 253;[m
+[32m+[m[32m  --slate-800: 221 214 254;[m
+[32m+[m[32m  --slate-900: 237 233 254;[m
+[32m+[m[32m  --slate-950: 245 243 255;[m
+[32m+[m[32m  --gray-50: var(--slate-50); --gray-100: var(--slate-100); --gray-200: var(--slate-200);[m
+[32m+[m[32m  --gray-300: var(--slate-300); --gray-400: var(--slate-400); --gray-500: var(--slate-500);[m
+[32m+[m[32m  --gray-600: var(--slate-600); --gray-700: var(--slate-700); --gray-800: var(--slate-800);[m
+[32m+[m[32m  --gray-900: var(--slate-900); --gray-950: var(--slate-950);[m
+[32m+[m[32m  --zinc-50: var(--slate-50); --zinc-100: var(--slate-100); --zinc-200: var(--slate-200);[m
+[32m+[m[32m  --zinc-300: var(--slate-300); --zinc-400: var(--slate-400); --zinc-500: var(--slate-500);[m
+[32m+[m[32m  --zinc-600: var(--slate-600); --zinc-700: var(--slate-700); --zinc-800: var(--slate-800);[m
+[32m+[m[32m  --zinc-900: var(--slate-900); --zinc-950: var(--slate-950);[m
+[32m+[m[32m  --neutral-50: var(--slate-50); --neutral-100: var(--slat

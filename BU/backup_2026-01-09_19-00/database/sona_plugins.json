@@ -1,0 +1,54 @@
+[
+  {
+    "id": 1,
+    "name": "birthday",
+    "display_name": "أعياد الميلاد",
+    "version": "1.0.0",
+    "description": "محتوى متخصص في أعياد الميلاد",
+    "category": "أعياد الميلاد",
+    "enabled": true,
+    "config": null,
+    "hooks": null,
+    "created_at": "2025-12-27T07:27:57.807Z",
+    "updated_at": "2025-12-27T07:27:57.807Z"
+  },
+  {
+    "id": 2,
+    "name": "zodiac",
+    "display_name": "الأبراج",
+    "version": "1.0.0",
+    "description": "محتوى متخصص في الأبراج",
+    "category": "الأبراج",
+    "enabled": true,
+    "config": null,
+    "hooks": null,
+    "created_at": "2025-12-27T07:27:57.807Z",
+    "updated_at": "2025-12-27T07:27:57.807Z"
+  },
+  {
+    "id": 3,
+    "name": "health",
+    "display_name": "الصحة",
+    "version": "1.0.0",
+    "description": "محتوى متخصص في الصحة",
+    "category": "الصحة",
+    "enabled": true,
+    "config": null,
+    "hooks": null,
+    "created_at": "2025-12-27T07:27:57.807Z",
+    "updated_at": "2025-12-27T07:27:57.807Z"
+  },
+  {
+    "id": 4,
+    "name": "dates",
+    "display_name": "التواريخ",
+    "version": "1.0.0",
+    "description": "محتوى متخصص في التواريخ",
+    "category": "التواريخ",
+    "enabled": true,
+    "config": null,
+    "hooks": null,
+    "created_at": "2025-12-27T07:27:57.807Z",
+    "updated_at": "2025-12-27T07:27:57.807Z"
+  }
+]

@@ -1,0 +1,95 @@
+{
+  "category": "health",
+  "templates": [
+    {
+      "id": "health_para_1",
+      "template": "<h2>أهمية الصحة في حياتنا</h2>\n<p>الصحة هي أغلى ما نملك، والحفاظ عليها يجب أن يكون أولويتنا الأولى.</p>",
+      "variables": [],
+      "type": "importance"
+    },
+    {
+      "id": "health_para_2",
+      "template": "<h2>نصائح للحفاظ على الصحة</h2>\n<p>هناك عادات بسيطة يمكن أن تحسن صحتك بشكل كبير إذا التزمت بها.</p>",
+      "variables": [],
+      "type": "tips"
+    },
+    {
+      "id": "health_para_3",
+      "template": "<h2>التغذية السليمة</h2>\n<p>الغذاء الصحي هو أساس الجسم السليم. تعرف على أهم مبادئ التغذية.</p>",
+      "variables": [],
+      "type": "nutrition"
+    },
+    {
+      "id": "health_para_4",
+      "template": "<h2>أهمية الرياضة</h2>\n<p>ممارسة الرياضة بانتظام تحسن صحتك الجسدية والنفسية.</p>",
+      "variables": [],
+      "type": "exercise"
+    },
+    {
+      "id": "health_para_5",
+      "template": "<h2>الصحة النفسية</h2>\n<p>الصحة النفسية لا تقل أهمية عن الصحة الجسدية. اهتم بها!</p>",
+      "variables": [],
+      "type": "mental_health"
+    },
+    {
+      "id": "health_para_6",
+      "template": "<h2>النوم الصحي</h2>\n<p>النوم الكافي والجيد ضروري لصحة الجسم والعقل.</p>",
+      "variables": [],
+      "type": "sleep"
+    },
+    {
+      "id": "health_para_7",
+      "template": "<h2>شرب الماء</h2>\n<p>الماء ضروري لجميع وظائف الجسم. تأكد من شرب كمية كافية يومياً.</p>",
+      "variables": [],
+      "type": "hydration"
+    },
+    {
+      "id": "health_para_8",
+      "template": "<h2>الفحوصات الدورية</h2>\n<p>الفحوصات الطبية الدورية تساعد في الكشف المبكر عن الأمراض.</p>",
+      "variables": [],
+      "type": "checkups"
+    },
+    {
+      "id": "health_para_9",
+      "template": "<h2>تجنب العادات الضارة</h2>\n<p>بعض العادات تضر بصحتك. تعرف عليها وتجنبها.</p>",
+      "variables": [],
+      "type": "bad_habits"
+    },
+    {
+      "id": "health_para_10",
+      "template": "<h2>الصحة في مراحل العمر المختلفة</h2>\n<p>تختلف احتياجاتنا الصحية باختلاف أعمارنا. تعرف على ما يناسب عمرك.</p>",
+      "variables": [],
+      "type": "age_health"
+    },
+    {
+      "id": "health_para_11",
+      "template": "<h2>صحة {topic}</h2>\n<p>الاهتمام بـ{topic} جزء مهم من الحفاظ على صحتك العامة.</p>",
+      "variables": ["topic"],
+      "type": "specific_health"
+    },
+    {
+      "id": "health_para_12",
+      "template": "<h2>نصائح صحية لـ{topic}</h2>\n<p>إليك نصائح صحية مهمة تتعلق بـ{topic}.</p>",
+      "variables": ["topic"],
+      "type": "health_tips"
+    },
+    {
+      "id": "health_para_13",
+      "template": "<h2>الوقاية خير من العلاج</h2>\n<p>الوقاية من الأمراض أسهل وأفضل من علاجها. اتخذ الإجراءات الوقائية.</p>",
+      "variables": [],
+      "type": "prevention"
+    },
+    {
+      "id": "health_para_14",
+      "template": "<h2>التوازن في الحياة</h2>\n<p>التوازن بين العمل والراحة ضروري للصحة الجسدية والنفسية.</p>",
+      "variables": [],
+      "type": "balance"
+    },
+    {
+      "id": "health_para_15",
+      "template": "<h2>العلاقة بين العمر والصحة</h2>\n<p>مع تقدم العمر، تتغير احتياجاتنا الصحية. تعرف على كيفية التكيف.</p>",
+      "variables": [],
+      "type": "aging"
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+# استهداف متصفحات حديثة جداً لتقليل polyfills
+# ES2022+ features supported
+
+# Chrome 92+ (July 2021)
+Chrome >= 92
+
+# Firefox 91+ (August 2021)
+Firefox >= 91
+
+# Safari 15+ (September 2021)
+Safari >= 15
+
+# Edge 92+ (July 2021)
+Edge >= 92
+
+# iOS Safari 15+
+iOS >= 15
+
+# Samsung Internet 16+
+Samsung >= 16
+
+# استثناء المتصفحات القديمة
+not dead
+not IE 11
+not op_mini all

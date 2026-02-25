@@ -1,0 +1,80 @@
+{
+  "title": "SONA Settings Validation Schema",
+  "type": "object",
+  "properties": {
+    "articleLength": {
+      "type": "string",
+      "enum": ["short", "medium", "long", "comprehensive"],
+      "description": "Default article length"
+    },
+    "wordCountTargets": {
+      "type": "object",
+      "properties": {
+        "short": { "type": "number", "minimum": 100, "maximum": 1000 },
+        "medium": { "type": "number", "minimum": 500, "maximum": 2000 },
+        "long": { "type": "number", "minimum": 1000, "maximum": 4000 },
+        "comprehensive": { "type": "number", "minimum": 2000, "maximum": 6000 }
+      },
+      "required": ["short", "medium", "long", "comprehensive"]
+    },
+    "keywordDensity": {
+      "type": "number",
+      "minimum": 1,
+      "maximum": 5,
+      "description": "Target keyword density percentage"
+    },
+    "minKeywordOccurrences": {
+      "type": "number",
+      "minimum": 1,
+      "maximum": 10
+    },
+    "maxKeywordOccurrences": {
+      "type": "number",
+      "minimum": 3,
+      "maximum": 20
+    },
+    "minQualityScore": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Minimum quality score threshold"
+    },
+    "maxRetries": {
+      "type": "number",
+      "minimum": 1,
+      "maximum": 10,
+      "description": "Maximum regeneration attempts"
+    },
+    "diversityLevel": {
+      "type": "string",
+      "enum": ["low", "medium", "high", "maximum"],
+      "description": "Content diversity level"
+    },
+    "templateRotation": {
+      "type": "boolean",
+      "description": "Enable template rotation for variety"
+    },
+    "excludedTemplates": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Template IDs to exclude"
+    },
+    "preferredTemplates": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Preferred template IDs"
+    },
+    "enableSynonymReplacement": { "type": "boolean" },
+    "enableSentenceVariation": { "type": "boolean" },
+    "enableFAQGeneration": { "type": "boolean" },
+    "enableTipsGeneration": { "type": "boolean" },
+    "enableCTAs": { "type": "boolean" }
+  },
+  "required": [
+    "articleLength",
+    "wordCountTargets",
+    "keywordDensity",
+    "minQualityScore",
+    "diversityLevel"
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "category": "facts",
+  "templates": [
+    {
+      "id": "facts_1",
+      "template": "<h2>حقائق مهمة عن {topic}</h2>\n<p>هناك العديد من الحقائق المثيرة حول {topic} التي قد لا يعرفها الكثيرون:</p>\n<ul>\n{facts_list}\n</ul>",
+      "variables": ["topic", "facts_list"],
+      "type": "list"
+    },
+    {
+      "id": "facts_2",
+      "template": "<h2>معلومات قد تفاجئك عن {topic}</h2>\n<p>دعونا نستكشف بعض المعلومات المدهشة:</p>\n{facts_list}",
+      "variables": ["topic", "facts_list"],
+      "type": "list"
+    },
+    {
+      "id": "facts_3",
+      "template": "<h2>ما لا تعرفه عن {topic}</h2>\n<p>إليكم مجموعة من الحقائق الشيقة التي ستثري معرفتكم:</p>\n<ol>\n{facts_list}\n</ol>",
+      "variables": ["topic", "facts_list"],
+      "type": "numbered_list"
+    },
+    {
+      "id": "facts_4",
+      "template": "<h2>حقائق علمية عن {topic}</h2>\n<p>العلم يكشف لنا الكثير من الحقائق المثيرة:</p>\n{facts_list}",
+      "variables": ["topic", "facts_list"],
+      "type": "list"
+    },
+    {
+      "id": "facts_5",
+      "template": "<h2>أهم المعلومات عن {topic}</h2>\n<p>جمعنا لكم أبرز المعلومات التي يجب أن تعرفوها:</p>\n<ul>\n{facts_list}\n</ul>",
+      "variables": ["topic", "facts_list"],
+      "type": "list"
+    },
+    {
+      "id": "facts_6",
+      "template": "<h2>اكتشفوا حقائق {topic}</h2>\n<p>في هذا القسم، نقدم لكم معلومات موثقة ومفيدة:</p>\n{facts_list}",
+      "variables": ["topic", "facts_list"],
+      "type": "paragraph"
+    },
+    {
+      "id": "facts_7",
+      "template": "<h2>معلومات أساسية عن {topic}</h2>\n<p>لفهم {topic} بشكل أفضل، إليكم هذه المعلومات الأساسية:</p>\n<ul>\n{facts_list}\n</ul>",
+      "variables": ["topic", "facts_list"],
+      "type": "list"
+    },
+    {
+      "id": "facts_8",
+      "template": "<h2>حقائق ممتعة عن {topic}</h2>\n<p>هل كنتم تعلمون هذه الحقائق الممتعة؟</p>\n{facts_list}",
+      "variables": ["topic", "facts_list"],
+      "type": "list"
+    },
+    {
+      "id": "facts_9",
+      "template": "<h2>معلومات قيمة حول {topic}</h2>\n<p>نشارككم معلومات قيمة ستفيدكم:</p>\n<ol>\n{facts_list}\n</ol>",
+      "variables": ["topic", "facts_list"],
+      "type": "numbered_list"
+    },
+    {
+      "id": "facts_10",
+      "template": "<h2>كل ما تريد معرفته عن {topic}</h2>\n<p>إليكم المعلومات الشاملة:</p>\n{facts_list}",
+      "variables": ["topic", "facts_list"],
+      "type": "paragraph"
+    }
+  ]
+}

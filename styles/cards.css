@@ -1,0 +1,327 @@
+/* ===== Card Generator Styles ===== */
+
+/* Card Container */
+.card-generator-container {
+  @apply relative overflow-hidden;
+}
+
+/* Card Preview */
+.card-preview {
+  @apply relative w-full aspect-[3/4] rounded-2xl overflow-hidden;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+}
+
+/* Card Content */
+.card-content {
+  @apply absolute inset-0 p-6 flex flex-col justify-between;
+}
+
+/* Card Header */
+.card-header {
+  @apply text-center space-y-2;
+}
+
+.card-title {
+  @apply text-2xl font-bold text-white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.card-subtitle {
+  @apply text-lg text-white text-opacity-90;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Card Body */
+.card-body {
+  @apply flex-1 flex items-center justify-center;
+}
+
+.card-message {
+  @apply text-center text-white font-medium;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* Card Footer */
+.card-footer {
+  @apply text-center space-y-1;
+}
+
+.card-date {
+  @apply text-white text-opacity-90 font-medium;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.card-signature {
+  @apply text-sm text-white text-opacity-80;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Card Decorations */
+.card-decoration {
+  @apply absolute pointer-events-none;
+}
+
+.card-decoration.balloon {
+  @apply text-2xl;
+  animation: float 3s ease-in-out infinite;
+}
+
+.card-decoration.star {
+  @apply text-xl;
+  animation: twinkle 2s ease-in-out infinite;
+}
+
+.card-decoration.heart {
+  @apply text-lg;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.card-decoration.sparkle {
+  @apply text-sm;
+  animation: sparkle 1.5s ease-in-out infinite;
+}
+
+/* Card Templates */
+.card-template-birthday {
+  background: linear-gradient(135deg, #ff6b8a 0%, #b794f6 100%);
+}
+
+.card-template-wedding {
+  background: linear-gradient(135deg, #ffd700 0%, #ff69b4 100%);
+}
+
+.card-template-graduation {
+  background: linear-gradient(135deg, #4fd1c5 0%, #b794f6 100%);
+}
+
+.card-template-anniversary {
+  background: linear-gradient(135deg, #ff6b8a 0%, #ffd700 100%);
+}
+
+.card-template-congratulations {
+  background: linear-gradient(135deg, #adff2f 0%, #4fd1c5 100%);
+}
+
+/* Card Animations */
+@keyframes card-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes card-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 20px rgba(255, 107, 138, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(255, 107, 138, 0.5);
+  }
+}
+
+.card-animate-float {
+  animation: card-float 3s ease-in-out infinite;
+}
+
+.card-animate-glow {
+  animation: card-glow 2s ease-in-out infinite;
+}
+
+/* Responsive Card Sizes */
+.card-size-small {
+  @apply w-64 h-80;
+}
+
+.card-size-medium {
+  @apply w-80 h-96;
+}
+
+.card-size-large {
+  @apply w-96 h-[28rem];
+}
+
+/* Card Export Styles */
+.card-export {
+  @apply bg-white;
+  width: 600px;
+  height: 800px;
+  font-family: 'Cairo', 'IBM Plex Arabic', sans-serif;
+}
+
+/* Print Styles */
+@media print {
+  .card-export {
+    @apply shadow-none;
+    page-break-inside: avoid;
+  }
+}
+
+/* Dark Mode Adjustments */
+.dark .card-preview {
+  box-shadow: 0 0 30px rgba(255, 107, 138, 0.2);
+}
+
+.miladak .card-preview {
+  box-shadow: 0 0 40px rgba(255, 0, 128, 0.4);
+}
+
+/* Card Controls */
+.card-controls {
+  @apply space-y-4 p-4 bg-card rounded-lg border;
+}
+
+.card-control-group {
+  @apply space-y-2;
+}
+
+.card-control-label {
+  @apply text-sm font-medium text-foreground;
+}
+
+.card-control-input {
+  @apply w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground;
+}
+
+.card-control-input:focus {
+  @apply outline-none ring-2 ring-primary ring-opacity-50 border-primary;
+}
+
+/* Color Picker */
+.color-picker-grid {
+  @apply grid grid-cols-6 gap-2;
+}
+
+.color-picker-item {
+  @apply w-8 h-8 rounded-lg border-2 border-transparent cursor-pointer transition-all;
+}
+
+.color-picker-item:hover {
+  @apply scale-110 border-white shadow-lg;
+}
+
+.color-picker-item.selected {
+  @apply border-white shadow-lg scale-110;
+}
+
+/* Font Selector */
+.font-selector {
+  @apply grid grid-cols-2 gap-2;
+}
+
+.font-option {
+  @apply p-3 rounded-lg border border-border bg-background text-center cursor-pointer transition-all;
+}
+
+.font-option:hover {
+  @apply border-primary bg-primary bg-opacity-5;
+}
+
+.font-option.selected {
+  @apply border-primary bg-primary bg-opacity-10 text-primary;
+}
+
+/* Template Selector */
+.template-grid {
+  @apply grid grid-cols-2 md:grid-cols-3 gap-4;
+}
+
+.template-item {
+  @apply relative aspect-[3/4] rounded-lg overflow-hidden cursor-pointer transition-all;
+}
+
+.template-item:hover {
+  @apply scale-105 shadow-lg;
+}
+
+.template-item.selected {
+  @apply ring-2 ring-primary scale-105;
+}
+
+.template-preview {
+  @apply w-full h-full flex items-center justify-center text-white font-bold;
+}
+
+/* Quick Actions */
+.quick-actions {
+  @apply flex flex-wrap gap-2;
+}
+
+.quick-action-btn {
+  @apply px-3 py-1.5 text-sm rounded-lg bg-muted hover:bg-muted hover:bg-opacity-80 transition-colors;
+}
+
+/* Card Stats */
+.card-stats {
+  @apply grid grid-cols-2 gap-4 p-4 bg-muted bg-opacity-50 rounded-lg;
+}
+
+.card-stat {
+  @apply text-center;
+}
+
+.card-stat-value {
+  @apply text-2xl font-bold text-primary;
+}
+
+.card-stat-label {
+  @apply text-sm text-muted-foreground;
+}
+
+/* Advanced Preview */
+.advanced-preview {
+  @apply relative;
+}
+
+.preview-controls {
+  @apply absolute top-4 right-4 flex gap-2;
+}
+
+.preview-control-btn {
+  @apply w-8 h-8 rounded-lg bg-black bg-opacity-20 text-white flex items-center justify-center hover:bg-black hover:bg-opacity-30 transition-colors;
+}
+
+/* Card Decorations Positioning */
+.decoration-top-left {
+  @apply top-4 left-4;
+}
+
+.decoration-top-right {
+  @apply top-4 right-4;
+}
+
+.decoration-bottom-left {
+  @apply bottom-4 left-4;
+}
+
+.decoration-bottom-right {
+  @apply bottom-4 right-4;
+}
+
+.decoration-center {
+  @apply top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2;
+}
+
+/* Animation Delays for Staggered Effects */
+.decoration-delay-1 {
+  animation-delay: 0.2s;
+}
+
+.decoration-delay-2 {
+  animation-delay: 0.4s;
+}
+
+.decoration-delay-3 {
+  animation-delay: 0.6s;
+}
+
+.decoration-delay-4 {
+  animation-delay: 0.8s;
+}
+
+.decoration-delay-5 {
+  animation-delay: 1s;
+}
