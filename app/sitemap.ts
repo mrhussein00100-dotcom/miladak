@@ -13,6 +13,8 @@ import {
 
 const BASE_URL = SEO_CONFIG.baseUrl;
 
+export const revalidate = 0;
+
 /**
  * جلب المقالات المنشورة من قاعدة البيانات
  */
@@ -55,11 +57,6 @@ async function getActiveTools() {
  * جلب التصنيفات من قاعدة البيانات
  */
 async function getCategories() {
-  // أثناء البناء، أرجع مصفوفة فارغة
-  if (process.env.NODE_ENV === 'production' && !process.env.VERCEL_URL) {
-    return [];
-  }
-
   try {
     // استخدم قاعدة البيانات مباشرة بدلاً من API
     const unifiedDb = (await import('@/lib/db/unified-connection')).default;
@@ -75,6 +72,20 @@ async function getCategories() {
   }
 }
 
+/**
+ * جلب روابط الأيام (366 يوم)
+ */
+function getDayLinks() {
+  const days: { path: string }[] = [];
+  for (let month = 1; month <= 12; month++) {
+    const daysInMonth = new Date(2024, month, 0).getDate(); // 2024 سنة كبيسة لضمان وجود 29 فبراير
+    for (let day = 1; day <= daysInMonth; day++) {
+      days.push({ path: `/date/${month}/${day}` });
+    }
+  }
+  return days;
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
 
@@ -86,9 +97,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: page.priority,
   }));
 
-  if (process.env.NODE_ENV === 'production' && !process.env.VERCEL_URL) {
-    return staticPages;
-  }
+  // 1.5 روابط التواريخ اليومية
+  const dayPages: MetadataRoute.Sitemap = getDayLinks().map((day) => ({
+    url: `${BASE_URL}${day.path}`,
+    lastModified: now,
+    changeFrequency: 'monthly',
+    priority: 0.5,
+  }));
 
   try {
     const [articles, tools, categories] = await Promise.all([
@@ -128,7 +143,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       : [];
 
     // دمج جميع الصفحات
-    return [...staticPages, ...articlePages, ...toolPages, ...categoryPages];
+    return [
+      ...staticPages,
+      ...articlePages,
+      ...toolPages,
+      ...categoryPages,
+      ...dayPages,
+    ];
   } catch (error) {
     console.error('Error generating sitemap:', error);
     // في حالة الخطأ، أرجع الصفحات الثابتة فقط

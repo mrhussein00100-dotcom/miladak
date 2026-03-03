@@ -14,6 +14,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ['/admin/', '/api/', '/_next/', '/test-'],
       },
     ],
-    sitemap: 'https://www.miladak.com/sitemap.xml',
+    sitemap: 'https://miladak.com/sitemap.xml',
   };
 }
