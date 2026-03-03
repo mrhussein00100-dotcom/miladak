@@ -17,7 +17,8 @@ export const revalidate = 0;
 
 function joinUrl(path: string) {
   const cleanedPath = path.replace(/^\/+/, '');
-  return cleanedPath ? `${BASE_URL}/${cleanedPath}` : BASE_URL;
+  const url = cleanedPath ? `${BASE_URL}/${cleanedPath}` : BASE_URL;
+  return url.replace(/[\r\n]+/g, '');
 }
 
 /**
