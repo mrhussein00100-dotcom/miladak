@@ -11,9 +11,14 @@ import {
   STATIC_PAGES,
 } from '@/lib/seo/config';
 
-const BASE_URL = SEO_CONFIG.baseUrl;
+const BASE_URL = SEO_CONFIG.baseUrl.replace(/\/+$/, '');
 
 export const revalidate = 0;
+
+function joinUrl(path: string) {
+  const cleanedPath = path.replace(/^\/+/, '');
+  return cleanedPath ? `${BASE_URL}/${cleanedPath}` : BASE_URL;
+}
 
 /**
  * جلب المقالات المنشورة من قاعدة البيانات
@@ -91,7 +96,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // 1. الصفحات الثابتة
   const staticPages: MetadataRoute.Sitemap = STATIC_PAGES.map((page) => ({
-    url: `${BASE_URL}${page.path}`,
+    url: joinUrl(page.path),
     lastModified: now,
     changeFrequency: page.changeFreq,
     priority: page.priority,
@@ -99,7 +104,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // 1.5 روابط التواريخ اليومية
   const dayPages: MetadataRoute.Sitemap = getDayLinks().map((day) => ({
-    url: `${BASE_URL}${day.path}`,
+    url: joinUrl(day.path),
     lastModified: now,
     changeFrequency: 'monthly',
     priority: 0.5,
@@ -115,7 +120,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // 2. صفحات المقالات من قاعدة البيانات
     const articlePages: MetadataRoute.Sitemap = Array.isArray(articles)
       ? articles.map((article: any) => ({
-          url: `${BASE_URL}/articles/${article.slug}`,
+          url: joinUrl(`/articles/${article.slug}`),
           lastModified: article.updated_at ? new Date(article.updated_at) : now,
           changeFrequency: SITEMAP_CHANGE_FREQ.articlePage,
           priority: SITEMAP_PRIORITY.articlePage,
@@ -125,7 +130,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // 3. صفحات الأدوات من قاعدة البيانات
     const toolPages: MetadataRoute.Sitemap = Array.isArray(tools)
       ? tools.map((tool: any) => ({
-          url: `${BASE_URL}${tool.href}`,
+          url: joinUrl(tool.href),
           lastModified: now,
           changeFrequency: SITEMAP_CHANGE_FREQ.toolPage,
           priority: SITEMAP_PRIORITY.toolPage,
@@ -135,7 +140,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // 4. صفحات التصنيفات
     const categoryPages: MetadataRoute.Sitemap = Array.isArray(categories)
       ? categories.map((category: any) => ({
-          url: `${BASE_URL}/categories/${category.slug}`,
+          url: joinUrl(`/categories/${category.slug}`),
           lastModified: now,
           changeFrequency: SITEMAP_CHANGE_FREQ.categoryPage,
           priority: SITEMAP_PRIORITY.categoryPage,
