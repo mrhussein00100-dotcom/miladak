@@ -11,7 +11,10 @@ import {
   STATIC_PAGES,
 } from '@/lib/seo/config';
 
-const BASE_URL = SEO_CONFIG.baseUrl.replace(/\/+$/, '');
+const BASE_URL = SEO_CONFIG.baseUrl
+  .replace(/[\r\n]+/g, '')
+  .trim()
+  .replace(/\/+$/, '');
 
 export const revalidate = 0;
 
