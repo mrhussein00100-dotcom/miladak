@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useTheme } from './ThemeProvider';
@@ -17,15 +17,14 @@ import {
   Calendar,
   Sparkles,
   BookOpen,
-  Heart,
   Users,
   Palette,
   Home,
   ArrowRight,
-  Layers,
   Monitor
 } from 'lucide-react';
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'framer-motion';
+import type { ArticleCategory } from '@/types';
 
 // --- Navigation Data ---
 const mainNav = [
@@ -64,18 +63,47 @@ const toolsCategories = [
   },
 ];
 
-const articleCategories = [
-  { name: 'الصحة والعافية', href: '/articles?category=health', icon: Heart, color: 'text-destructive', bg: 'bg-destructive/10' },
-  { name: 'تطوير الذات', href: '/articles?category=self-development', icon: Sparkles, color: 'text-accent', bg: 'bg-accent/10' },
-  { name: 'العلاقات', href: '/articles?category=relationships', icon: Users, color: 'text-secondary', bg: 'bg-secondary/10' },
-  { name: 'علم النفس', href: '/articles?category=psychology', icon: Layers, color: 'text-primary', bg: 'bg-primary/10' },
-];
+type NavArticleCategory = {
+  name: string;
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
+  color: string;
+  bg: string;
+};
+
+function getArticleCategoryNavStyle(slug?: string | null) {
+  const normalized = (slug || '').trim().toLowerCase();
+
+  if (
+    normalized.includes('age') ||
+    normalized.includes('birth') ||
+    normalized.includes('birthday')
+  ) {
+    return { icon: Calculator, color: 'text-primary', bg: 'bg-primary/10' };
+  }
+
+  if (normalized.includes('hijri') || normalized.includes('calendar') || normalized.includes('date')) {
+    return { icon: Calendar, color: 'text-primary', bg: 'bg-primary/10' };
+  }
+
+  if (normalized.includes('pregnancy') || normalized.includes('birth')) {
+    return { icon: Users, color: 'text-secondary', bg: 'bg-secondary/10' };
+  }
+
+  if (normalized.includes('astro')) {
+    return { icon: Sparkles, color: 'text-accent', bg: 'bg-accent/10' };
+  }
+
+  return { icon: BookOpen, color: 'text-muted-foreground', bg: 'bg-muted/30' };
+}
 
 export function NavbarV2() {
+  const [mounted, setMounted] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [articleCategories, setArticleCategories] = useState<NavArticleCategory[]>([]);
   
   const { scrollY } = useScroll();
   const lastScrollY = useRef(0);
@@ -103,6 +131,8 @@ export function NavbarV2() {
 
   // Handle click outside
   useEffect(() => {
+    setMounted(true);
+    
     const handleClickOutside = (event: MouseEvent) => {
       if (navRef.current && !navRef.current.contains(event.target as Node)) {
         setActiveDropdown(null);
@@ -111,6 +141,55 @@ export function NavbarV2() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadArticleCategories() {
+      try {
+        const res = await fetch('/api/articles/categories');
+        const json: { success: boolean; data: ArticleCategory[] } = await res.json();
+        if (!json?.success || !Array.isArray(json.data)) return;
+
+        const top = [...json.data]
+          .sort((a, b) => (Number(b.articles_count) || 0) - (Number(a.articles_count) || 0))
+          .slice(0, 8)
+          .map((cat) => {
+            const style = getArticleCategoryNavStyle(cat.slug);
+            return {
+              name: cat.name,
+              href: `/articles?category=${encodeURIComponent(cat.slug || cat.name)}`,
+              icon: style.icon,
+              color: style.color,
+              bg: style.bg,
+            } satisfies NavArticleCategory;
+          });
+
+        if (!cancelled) setArticleCategories(top);
+      } catch {
+        // ignore
+      }
+    }
+
+    loadArticleCategories();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const articleCategoriesForNav = useMemo(() => {
+    if (articleCategories.length > 0) return articleCategories;
+    return [
+      { name: 'حساب العمر', href: '/articles?category=age-calculation', icon: Calculator, color: 'text-primary', bg: 'bg-primary/10' },
+      { name: 'أعياد الميلاد', href: '/articles?category=birthdays', icon: Sparkles, color: 'text-accent', bg: 'bg-accent/10' },
+      { name: 'الصحة والعمر', href: '/articles?category=health-age', icon: BookOpen, color: 'text-muted-foreground', bg: 'bg-muted/30' },
+      { name: 'التقويم الهجري', href: '/articles?category=hijri-calendar', icon: Calendar, color: 'text-primary', bg: 'bg-primary/10' },
+      { name: 'الحمل والولادة', href: '/articles?category=pregnancy-birth', icon: Users, color: 'text-secondary', bg: 'bg-secondary/10' },
+      { name: 'علم الفلك', href: '/articles?category=astronomy', icon: Sparkles, color: 'text-accent', bg: 'bg-accent/10' },
+      { name: 'التواريخ المهمة', href: '/articles?category=important-dates', icon: Calendar, color: 'text-primary', bg: 'bg-primary/10' },
+      { name: 'مقالات', href: '/articles', icon: BookOpen, color: 'text-muted-foreground', bg: 'bg-muted/30' },
+    ] satisfies NavArticleCategory[];
+  }, [articleCategories]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -127,8 +206,8 @@ export function NavbarV2() {
 
   // Cycle through themes: system -> light -> dark -> miladak
   const cycleTheme = () => {
-    const themes: any[] = ['system', 'light', 'dark', 'miladak'];
-    const currentIndex = themes.indexOf(theme);
+    const themes: ThemeMode[] = ['system', 'light', 'dark', 'miladak'];
+    const currentIndex = themes.indexOf(theme as ThemeMode);
     const nextIndex = (currentIndex + 1) % themes.length;
     setTheme(themes[nextIndex]);
   };
@@ -141,6 +220,27 @@ export function NavbarV2() {
       default: return <Monitor className="w-5 h-5" />;
     }
   };
+
+  if (!mounted) {
+    return (
+      <>
+        <div className="h-[72px]" />
+        <nav className="fixed top-0 left-0 right-0 z-50 bg-background border-b border-border/30">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-[72px]">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-primary/10 rounded-lg animate-pulse" />
+                <div className="flex flex-col gap-1">
+                  <div className="w-20 h-4 bg-muted rounded animate-pulse" />
+                  <div className="w-24 h-2 bg-muted rounded animate-pulse" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </nav>
+      </>
+    );
+  }
 
   return (
     <>
@@ -294,10 +394,10 @@ export function NavbarV2() {
                       <div className="p-2">
                         <div className="mb-2 px-2 flex items-center justify-between">
                           <span className="text-xs font-bold text-muted-foreground uppercase">التصنيفات</span>
-                          <Link href="/articles/categories" className="text-[10px] text-primary hover:underline">عرض الكل</Link>
+                          <Link href="/categories" className="text-[10px] text-primary hover:underline">عرض التصنيفات</Link>
                         </div>
                         <div className="grid grid-cols-2 gap-2">
-                          {articleCategories.map((item) => (
+                          {articleCategoriesForNav.map((item) => (
                             <Link
                               key={item.name}
                               href={item.href}
@@ -474,11 +574,14 @@ export function NavbarV2() {
                 {/* Articles Section - Added as requested */}
                 <div className="space-y-3">
                   <div className="flex items-center justify-between px-1">
-                    <p className="text-xs font-bold text-muted-foreground uppercase">تصنيفات المقالات</p>
-                    <Link href="/articles" className="text-xs text-primary font-medium" onClick={() => setIsMobileMenuOpen(false)}>عرض الكل</Link>
+                    <p className="text-xs font-bold text-muted-foreground uppercase">المقالات</p>
+                    <div className="flex items-center gap-3">
+                      <Link href="/articles" className="text-xs text-primary font-medium" onClick={() => setIsMobileMenuOpen(false)}>عرض المقالات</Link>
+                      <Link href="/categories" className="text-xs text-primary font-medium" onClick={() => setIsMobileMenuOpen(false)}>عرض التصنيفات</Link>
+                    </div>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
-                     {articleCategories.map((cat) => (
+                     {articleCategoriesForNav.map((cat) => (
                         <Link
                           key={cat.name}
                           href={cat.href}

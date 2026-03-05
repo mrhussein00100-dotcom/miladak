@@ -184,11 +184,25 @@ export function ArticlesPageClient({
           }
         } else if (categorySlug) {
           // البحث عن التصنيف بالـ slug
+          const normalizedSlug = decodeURIComponent(categorySlug).trim().toLowerCase();
           const category = categories.find(
-            (c) => c.slug === categorySlug || c.name === categorySlug
+            (c) => 
+              (c.slug && c.slug.trim().toLowerCase() === normalizedSlug) || 
+              (c.name && c.name.trim().toLowerCase() === normalizedSlug) ||
+              (c.slug && c.slug.trim().toLowerCase() === normalizedSlug.replace(/-/g, ' ')) ||
+              (c.name && c.name.trim().toLowerCase() === normalizedSlug.replace(/-/g, ' '))
           );
+          
           if (category) {
+            // إذا وجدناه، نستخدم اسمه الفعلي
             url += `&category=${encodeURIComponent(category.name)}`;
+            // وتحديث المعرف المختار في الواجهة إذا لم يكن محدداً
+            if (!selectedCategory) {
+              setSelectedCategory(category.id.toString());
+            }
+          } else {
+            // إذا لم نجد التصنيف في القائمة الحالية، نرسل الـ slug مباشرة للـ API
+            url += `&category=${encodeURIComponent(categorySlug)}`;
           }
         }
 
@@ -207,13 +221,11 @@ export function ArticlesPageClient({
         setLoading(false);
       }
     },
-    [categories]
+    [categories, selectedCategory]
   );
 
   // قراءة التصنيف من الـ URL عند تحميل الصفحة
   useEffect(() => {
-    if (initialCategoryLoaded) return;
-
     const categoryParam = searchParams?.get('category');
     const searchParam = searchParams?.get('search');
 
@@ -221,15 +233,31 @@ export function ArticlesPageClient({
       setSearchQuery(searchParam);
     }
 
-    if (categoryParam && categories.length > 0) {
-      // البحث عن التصنيف بالـ slug أو الاسم
+    if (categoryParam) {
+      const normalizedParam = decodeURIComponent(categoryParam).trim().toLowerCase();
+      
+      // نبحث عن التصنيف في القائمة المحملة
       const category = categories.find(
-        (c) => c.slug === categoryParam || c.name === categoryParam
+        (c) => 
+          (c.slug && c.slug.trim().toLowerCase() === normalizedParam) || 
+          (c.name && c.name.trim().toLowerCase() === normalizedParam) ||
+          (c.slug && c.slug.trim().toLowerCase() === normalizedParam.replace(/-/g, ' ')) ||
+          (c.name && c.name.trim().toLowerCase() === normalizedParam.replace(/-/g, ' '))
       );
+      
       if (category) {
-        setSelectedCategory(category.id.toString());
+        const catId = category.id.toString();
+        setSelectedCategory(catId);
+        fetchCategoryArticles(catId);
+      } else {
+        // إذا لم نجد التصنيف (قد يكون مطوياً أو غير موجود في القائمة الحالية)
+        // نحاول جلب مقالاته مباشرة باستخدام الـ slug
+        setSelectedCategory(null); // نلغي التحديد في الواجهة مؤقتاً
         fetchCategoryArticles(null, categoryParam);
       }
+    } else if (!categoryParam && initialCategoryLoaded) {
+      setSelectedCategory(null);
+      fetchCategoryArticles(null);
     }
     setInitialCategoryLoaded(true);
   }, [searchParams, categories, fetchCategoryArticles, initialCategoryLoaded]);
@@ -409,7 +437,7 @@ export function ArticlesPageClient({
         </div>
 
         {/* Smart Category Filters */}
-        <div className="mt-4 relative" style={{ zIndex: 100 }}>
+        <div className="mt-4">
           <SmartCategoriesFilter
             categories={categories.map((cat) => ({
               id: cat.id,

@@ -22,18 +22,19 @@ interface SmartCategoriesFilterProps {
   totalArticles: number;
 }
 
-// دالة لترتيب التصنيفات حسب عدد المقالات واستبعاد الفارغة
+// دالة لترتيب التصنيفات واستبعاد الفارغة (إلا إذا كان التصنيف مختاراً)
 export function sortAndFilterCategories(
-  categories: CategoryWithCount[]
+  categories: CategoryWithCount[],
+  selectedCategoryId: string | null
 ): CategoryWithCount[] {
   return categories
-    .filter((cat) => cat.articles_count > 0)
+    .filter((cat) => cat.articles_count > 0 || cat.id.toString() === selectedCategoryId)
     .sort((a, b) => b.articles_count - a.articles_count);
 }
 
 // دالة لتحديد عدد التصنيفات المرئية حسب حجم الشاشة
-export function getVisibleCount(isMobile: boolean): number {
-  return isMobile ? 3 : 5;
+export function getVisibleCount(): number {
+  return 8;
 }
 
 export function SmartCategoriesFilter({
@@ -48,12 +49,12 @@ export function SmartCategoriesFilter({
 
   // ترتيب وفلترة التصنيفات
   const sortedCategories = useMemo(
-    () => sortAndFilterCategories(categories),
-    [categories]
+    () => sortAndFilterCategories(categories, selectedCategory),
+    [categories, selectedCategory]
   );
 
   // تحديد عدد التصنيفات المرئية
-  const visibleCount = getVisibleCount(isMobile);
+  const visibleCount = getVisibleCount();
 
   // تقسيم التصنيفات إلى مرئية ومخفية
   const visibleCategories = useMemo(
@@ -73,6 +74,13 @@ export function SmartCategoriesFilter({
     );
   }, [selectedCategory, overflowCategories]);
 
+  // افتح قائمة "المزيد" تلقائياً إذا كان التصنيف المحدد ضمن القائمة المطوية
+  useEffect(() => {
+    if (selectedInOverflow && !isMobile) {
+      setIsDropdownOpen(true);
+    }
+  }, [selectedInOverflow, isMobile]);
+
   // إغلاق القائمة عند النقر خارجها
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -90,7 +98,6 @@ export function SmartCategoriesFilter({
   return (
     <div
       className="flex flex-wrap items-center gap-2 relative"
-      style={{ zIndex: 100 }}
     >
       {/* زر جميع المقالات */}
       <CategoryChip
@@ -114,7 +121,7 @@ export function SmartCategoriesFilter({
       ))}
 
       {/* إذا كان التصنيف المحدد في القائمة المخفية، نعرضه */}
-      {selectedInOverflow && (
+      {selectedInOverflow && !isDropdownOpen && (
         <CategoryChip
           name={selectedInOverflow.name}
           count={selectedInOverflow.articles_count}
@@ -124,9 +131,20 @@ export function SmartCategoriesFilter({
         />
       )}
 
+      {/* إذا لم نجد التصنيف في القائمة المرتبة (ربما لأنه غير موجود في القائمة الأولية)، نعرضه كـ Chip مؤقت */}
+      {!selectedInOverflow && selectedCategory && !visibleCategories.find(c => c.id.toString() === selectedCategory) && (
+        <CategoryChip
+          name="جاري التحميل..."
+          count={0}
+          color="#8B5CF6"
+          isSelected={true}
+          onClick={() => onCategorySelect(null)}
+        />
+      )}
+
       {/* زر المزيد مع القائمة المنسدلة */}
       {overflowCategories.length > 0 && (
-        <div className="relative" ref={dropdownRef} style={{ zIndex: 9999 }}>
+        <div className="relative" ref={dropdownRef}>
           <Button
             variant="outline"
             size="sm"

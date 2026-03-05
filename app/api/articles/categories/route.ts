@@ -17,7 +17,7 @@ export async function GET() {
         ac.color,
         COUNT(a.id) as articles_count
       FROM article_categories ac
-      LEFT JOIN articles a ON ac.id = a.category_id AND CAST(a.published AS TEXT) IN ('1', 'true', 't')
+      LEFT JOIN articles a ON CAST(ac.id AS TEXT) = CAST(a.category_id AS TEXT) AND CAST(a.published AS TEXT) IN ('1', 'true', 't')
       GROUP BY ac.id, ac.name, ac.slug, ac.description, ac.color
       ORDER BY ac.name ASC
     `);

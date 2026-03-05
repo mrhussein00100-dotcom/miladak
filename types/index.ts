@@ -80,6 +80,23 @@ export interface ArticleCategory {
   sort_order?: number;
 }
 
+export interface ApiResponse<T = unknown> {
+  success: boolean;
+  data: T;
+  meta?: {
+    total?: number;
+    totalArticles?: number;
+    hasMore?: boolean;
+    [key: string]: unknown;
+  };
+  error?: {
+    code: string;
+    message: string;
+    messageAr?: string;
+    status: number;
+  };
+}
+
 // Other Types
 export interface Celebrity {
   id: number;

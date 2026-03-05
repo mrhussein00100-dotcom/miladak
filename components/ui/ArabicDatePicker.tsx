@@ -162,6 +162,7 @@ const ArabicDatePicker = React.memo(function ArabicDatePicker({
   maxDate,
   className = '',
 }: ArabicDatePickerProps) {
+  const [mounted, setMounted] = useState(false);
   const [inputMode, setInputMode] = useState<'calendar' | 'simple'>('simple');
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [viewDate, setViewDate] = useState(() => value || new Date());
@@ -172,6 +173,10 @@ const ArabicDatePicker = React.memo(function ArabicDatePicker({
   const containerRef = useRef<HTMLDivElement>(null);
 
   // تم نقل handleClickOutside إلى CalendarPopup
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (value) {
@@ -354,7 +359,7 @@ const ArabicDatePicker = React.memo(function ArabicDatePicker({
       </div>
 
       {/* وضع الإدخال البسيط */}
-      {inputMode === 'simple' && (
+      {inputMode === 'simple' && mounted && (
         <div className="grid grid-cols-3 gap-3">
           <select
             value={simpleDay}
@@ -398,6 +403,14 @@ const ArabicDatePicker = React.memo(function ArabicDatePicker({
               </option>
             ))}
           </select>
+        </div>
+      )}
+
+      {inputMode === 'simple' && !mounted && (
+        <div className="grid grid-cols-3 gap-3">
+          <div className="h-12 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 animate-pulse" />
+          <div className="h-12 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 animate-pulse" />
+          <div className="h-12 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 animate-pulse" />
         </div>
       )}
 
